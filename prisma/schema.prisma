@@ -39,8 +39,8 @@ model event_halls {
   additional_informations String[]
   informations_about_hall String[]
   advantages              String[]
-  price                   Int?
-  rating                  Int?
+  price                   Int[]
+  rating                  String?
   booking                 booking[]
 }
 
@@ -108,7 +108,7 @@ model hosts {
   title                          String?
   image                          String?
   tags                           String[]
-  rating                         Int?
+  rating                         Float?   @db.Real
   status                         String?
   booking                        Int?
   booking_hosts_bookingTobooking booking? @relation("hosts_bookingTobooking", fields: [booking], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -117,4 +117,5 @@ model hosts {
 enum bookingstatus {
   pending
   approved
+  cancelled
 }

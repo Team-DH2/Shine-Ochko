@@ -144,7 +144,7 @@ export const Header = () => {
             {isLoggedIn ? (
               <button
                 onClick={handleLogoutClick}
-                className="bg-red-600 hover:bg-red-700 rounded-md px-3 h-9 text-xs"
+                className="bg-blue-600 hover:bg-blue-700 rounded-md px-3 h-9 text-xs"
               >
                 LogOut
               </button>
@@ -233,7 +233,7 @@ export const Header = () => {
                 </button>
                 <button
                   onClick={confirmLogout}
-                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full"
                 >
                   Log Out
                 </button>
