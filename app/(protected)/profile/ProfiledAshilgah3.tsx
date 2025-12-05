@@ -2,27 +2,16 @@
 
 import RequestCard from "./ProfiledAshiglah2";
 
-interface Request {
-  id: string;
-  userName: string;
-  email: string;
-  role: "Performer" | "Host";
-  submittedAt: Date;
-  message?: string;
-}
-
-interface RequestsListProps {
-  requests: Request[];
-  onActionClick: (requestId: string, action: "accept" | "decline") => void;
-}
-
 export default function RequestsList({
   requests,
   onActionClick,
-}: RequestsListProps) {
+}: {
+  requests: any;
+  onActionClick: any;
+}) {
   return (
     <div className="space-y-3">
-      {requests.map((request) => (
+      {requests.map((request: any) => (
         <RequestCard
           key={request.id}
           request={request}

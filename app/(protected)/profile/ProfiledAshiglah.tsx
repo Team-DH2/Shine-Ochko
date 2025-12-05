@@ -13,6 +13,13 @@ import {
 import { CheckCircle2, XCircle } from "lucide-react";
 
 interface Request {
+  event_halls: {
+    id: string;
+    name: string;
+    location: string;
+  };
+  date: string;
+  starttime: string;
   id: string;
   userName: string;
   email: string;
@@ -47,10 +54,31 @@ export default function ConfirmationModal({
 
   const handleConfirm = async () => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    onConfirm();
-    setIsLoading(false);
+    console.log("Handling confirm for request2:", request);
+    try {
+      const response = await fetch("/api/profileapprove", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          requestId: request.id,
+          status: isAccept ? "approved" : "cancelled",
+        }),
+      });
+
+      if (!response) {
+        throw new Error("Failed to update booking status");
+      }
+
+      // Амжилттай бол parent component руу мэдэгдэл
+      onConfirm();
+    } catch (error) {
+      console.error(error);
+      alert("Status update failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -61,24 +89,29 @@ export default function ConfirmationModal({
             <Icon className={`h-8 w-8 ${iconColor}`} />
           </div>
           <DialogTitle className="text-center">
-            {isAccept ? "Accept Request?" : "Decline Request?"}
-          </DialogTitle>
-          <DialogDescription className="text-center">
             {isAccept
-              ? `Approve ${request.userName} as a ${request.role.toLowerCase()}`
+              ? `Approve ${request.event_halls.name}`
               : `Reject the request from ${request.userName}`}
-          </DialogDescription>
+          </DialogTitle>
+          <DialogDescription className="text-center"></DialogDescription>
         </DialogHeader>
 
         <div className="rounded-lg bg-muted p-4">
           <div className="space-y-2 text-sm">
-            <div>
-              <p className="font-medium text-foreground">{request.userName}</p>
-              <p className="text-muted-foreground">{request.email}</p>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-black">
+                Газрын нэр : {request.event_halls.name}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Байршил : {request.event_halls.location}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Өдөр : {new Date(request.date).toLocaleDateString()}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Эхлэх цаг : {request.starttime}
+              </p>
             </div>
-            <p className="text-xs font-medium text-muted-foreground">
-              Role: {request.role}
-            </p>
           </div>
         </div>
 
