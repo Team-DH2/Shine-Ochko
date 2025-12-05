@@ -80,7 +80,7 @@ export default function SearchFunction({ styleDesktop }: any) {
         <PopoverContent
           onOpenAutoFocus={(e) => e.preventDefault()}
           onCloseAutoFocus={(e) => e.preventDefault()}
-          className="transition-all duration-200"
+          className="w-[300px] bg-neutral-900 border-neutral-800 text-white shadow-lg transition-all duration-200"
         >
           {/* А. Эхний фокус үед гарч ирэх анхны текст */}
           {!searchValue && firstOpen && (
@@ -96,14 +96,14 @@ export default function SearchFunction({ styleDesktop }: any) {
 
           {/* C. Илэрц гарсан үед */}
           {results && !loading && searchValue && (
-            <div className="mt-2 space-y-6 max-h-80 overflow-auto text-black">
+            <div className="mt-2 space-y-4 max-h-80 overflow-auto">
               {/* Event Halls */}
               {results?.halls?.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-bold mb-2 text-black">
+                  <h2 className="text-lg font-bold mb-2 text-blue-400">
                     🏛 Event Halls
                   </h2>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       results.halls.map((hall: any) => (
@@ -111,13 +111,15 @@ export default function SearchFunction({ styleDesktop }: any) {
                           key={hall.id}
                           className="p-3 bg-white rounded shadow cursor-pointer hover:bg-gray-100 transition"
                         >
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center justify-between gap-4">
                             <h3 className="font-semibold">{hall.name}</h3>
                             <Button
                               onClick={() =>
                                 router.push(`/event-halls/${hall.id}`)
                               }
-                              className="bg-white"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
                             >
                               <FaArrowRight color="black" />
                             </Button>
@@ -135,14 +137,16 @@ export default function SearchFunction({ styleDesktop }: any) {
               {/* Performers */}
               {results?.performers?.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-bold mb-2">🎤 Performers</h2>
-                  <div className="space-y-2">
+                  <h2 className="text-lg font-bold mb-2 text-blue-400">
+                    🎤 Performers
+                  </h2>
+                  <div className="space-y-1">
                     {
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       results.performers.map((p: any) => (
                         <div
                           key={p.id}
-                          className="p-3 bg-white rounded shadow hover:bg-gray-100 transition"
+                          className="p-3 bg-neutral-800 rounded-md shadow hover:bg-neutral-700 transition cursor-pointer"
                         >
                           <h3 className="font-semibold">{p.name}</h3>
                           <p className="text-sm text-gray-600">{p.genre}</p>
@@ -156,14 +160,16 @@ export default function SearchFunction({ styleDesktop }: any) {
               {/* Hosts */}
               {results?.hosts?.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-bold mb-2">🎙 Hosts</h2>
-                  <div className="space-y-2">
+                  <h2 className="text-lg font-bold mb-2 text-blue-400">
+                    🎙 Hosts
+                  </h2>
+                  <div className="space-y-1">
                     {
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       results.hosts.map((h: any) => (
                         <div
                           key={h.id}
-                          className="p-3 bg-white rounded shadow hover:bg-gray-100 transition"
+                          className="p-3 bg-neutral-800 rounded-md shadow hover:bg-neutral-700 transition cursor-pointer"
                         >
                           <h3 className="font-semibold">{h.name}</h3>
                           <p className="text-sm text-gray-600">
