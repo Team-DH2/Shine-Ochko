@@ -28,7 +28,7 @@ export const Header = () => {
   const styleDesktop =
     "pl-10 h-10 rounded-[20px] bg-neutral-800 border-none w-full text-sm";
   const styleMobile =
-    "w-full pl-10 h-9 rounded-[20px] bg-neutral-800 border-none text-white text-sm";
+    "w-full pl-10 h-9 rounded-[20px] bg-neutral-800 border-none text-white text-sm justify-center ";
 
   // First effect: mark client as mounted
   // After the component mounts on the client, check for the token.
@@ -70,10 +70,7 @@ export const Header = () => {
         <div className="flex items-center gap-4 font-bold">
           <ButtonOfNav href="/home" text="Home" />
           <ButtonOfNav href="/event-halls" text="Event Halls" />
-          <ButtonOfNav
-            href="/performers/dashboard-to-performers"
-            text="Performers"
-          />
+          <ButtonOfNav href="/performers" text="Performers" />
           <ButtonOfNav href="/hosts" text="Hosts" />
           <ButtonOfNav href="/dashboard" text="Dashboard" />
           <ButtonOfNav href="/contact" text="Contact" />
@@ -120,15 +117,17 @@ export const Header = () => {
         {!isPhoneSearchOpen ? (
           <Logo />
         ) : (
-          <X
-            className="w-6 h-6 text-neutral-300 hover:text-white mr-3"
+          <div
             onClick={() => setIsPhoneSearchOpen(false)}
-          />
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-neutral-900 hover:bg-neutral-800 cursor-pointer transition-colors"
+          >
+            <X className="w-4 h-4 text-neutral-500" />
+          </div>
         )}
 
         <div className="flex-1 mx-4">
           {isPhoneSearchOpen && (
-            <div className="flex items-center">
+            <div className="flex items-center justify-center">
               <Search className="mr-[-36] w-5 z-10 text-neutral-500" />
               <SearchFunction styleDesktop={styleMobile} />
             </div>
@@ -186,7 +185,7 @@ export const Header = () => {
           icon={<Building className="w-5 h-5" />}
         />
         <BottomNavButton
-          href="/performers/dashboard-to-performers"
+          href="/performers"
           label="Performers"
           icon={<Music className="w-5 h-5" />}
         />

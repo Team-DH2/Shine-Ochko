@@ -159,13 +159,13 @@ export default function EventHalls() {
             ))}
 
           {!loading && filteredHalls.length === 0 && (
-            <p className="text-neutral-400 mt-0 lg:hidden  flex">
+            <p className="text-neutral-400 mt-3 lg:hidden  flex">
               No event halls found.
             </p>
           )}
           {!loading && filteredHalls.length === 0 && (
             <div className="md:hidden flex lg:flex">
-              <p className="text-neutral-400   md:flex hidden fixed justify-center left-[50%] top-[8%] -translate-x-[50%] -translate-y-[50%]">
+              <p className="text-neutral-400   md:flex hidden fixed justify-center left-[50%] top-[10%] -translate-x-[50%] -translate-y-[50%]">
                 No event halls found.
               </p>
             </div>

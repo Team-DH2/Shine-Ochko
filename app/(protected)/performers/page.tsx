@@ -1,10 +1,10 @@
+/* eslint-disable react-hooks/immutability */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaStar, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Image from "next/image";
-import { Header } from "@/components/us/Header";
-import { Button } from "@/components/ui/button";
 
 export default function PerformersPage() {
   const router = useRouter();
@@ -20,10 +20,12 @@ export default function PerformersPage() {
   const [sortBy, setSortBy] = useState<string>("popularity");
   const [isGenreOpen, setIsGenreOpen] = useState(false);
   const [bookings, setBookings] = useState([]);
+
   useEffect(() => {
     fetchPerformers();
     fetchGenres();
   }, []);
+
   useEffect(() => {
     fetch("/api/bookings")
       .then((res) => res.json())
@@ -34,8 +36,6 @@ export default function PerformersPage() {
     try {
       const res = await fetch("/api/performers");
       const data = await res.json();
-      console.log("Fetched performers:", data.performers?.length || 0);
-      console.log("First performer:", data.performers?.[0]);
       setPerformers(data.performers || []);
     } catch (error) {
       console.error("Error fetching performers:", error);
@@ -65,27 +65,17 @@ export default function PerformersPage() {
     const priceMatch =
       Number(performer.price) >= minPrice &&
       Number(performer.price) <= maxPrice;
-
     return genreMatch && availabilityMatch && popularityMatch && priceMatch;
   });
 
-  // Sort performers
   const sortedPerformers = [...filteredPerformers].sort((a, b) => {
-    if (sortBy === "popularity") {
+    if (sortBy === "popularity")
       return (b.popularity || 0) - (a.popularity || 0);
-    } else if (sortBy === "price-low") {
-      return Number(a.price) - Number(b.price);
-    } else if (sortBy === "price-high") {
-      return Number(b.price) - Number(a.price);
-    } else if (sortBy === "name") {
-      return a.name.localeCompare(b.name);
-    }
+    if (sortBy === "price-low") return Number(a.price) - Number(b.price);
+    if (sortBy === "price-high") return Number(b.price) - Number(a.price);
+    if (sortBy === "name") return a.name.localeCompare(b.name);
     return 0;
   });
-
-  console.log("Total performers:", performers.length);
-  console.log("Filtered performers:", filteredPerformers.length);
-  console.log("Sorted performers:", sortedPerformers.length);
 
   const getAvailabilityColor = (availability: string) => {
     switch (availability) {
@@ -101,76 +91,63 @@ export default function PerformersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Header />
-      <div className="container mx-auto px-4 py-8 mt-5">
-        <h1 className="text-4xl font-bold mb-8">Уран бүтээлчид хайх</h1>
+    <div className="min-h-screen w-full bg-black text-white px-8 pt-25">
+      <div className="flex gap-8">
+        {/* Sidebar */}
+        <div className="w-80 shrink-0">
+          <div className="bg-gray-900 rounded-lg p-6 flex flex-col h-[calc(100vh-7rem)] sticky top-28">
+            <h2 className="text-xl font-bold text-blue-400 mb-4">
+              Таны захиалсан Event hall
+            </h2>
 
-        {/*sidebar*/}
-        <div className="flex gap-8">
-          <div>
-            <div className="w-64 bg-gray-900 rounded-lg p-6 h-fit sticky top-8">
-              <h2 className="text-xl font-bold text-blue-400 mb-4">
-                Таны захиалсан Event hall
-              </h2>
-              <div className=" mb-10">
-                {bookings.map((b: any) => (
-                  <div
-                    key={b.id}
-                    className="rounded-xl overflow-hidden shadow-lg  bg-gray-900"
-                  >
-                    {/* CONTENT */}
+            {/* Scrollable bookings list */}
+            <div className="flex-1 overflow-y-auto mb-6 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-gray-800 space-y-3">
+              {bookings.map((b: any) => (
+                <div key={b.id} className="rounded-xl bg-gray-900 p-3">
+                  <div className="flex justify-between items-center mb-2">
+                    <h2 className="text-xl font-semibold text-white">
+                      {b.event_halls?.name ?? "Event Hall"}
+                    </h2>
+                    <span
+                      className={`
+                        px-3 py-1 rounded-full text-sm font-medium
+                        ${
+                          b.status === "pending"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : b.status === "approved"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }
+                      `}
+                    >
+                      {b.status}
+                    </span>
+                  </div>
+                  <div className="text-white mb-1">
                     <div>
-                      <div className="flex justify-between">
-                        <h2 className="text-xl font-semibold text-white">
-                          {b.event_halls?.name ?? "Event Hall"}
-                        </h2>
-                        {/* <span
-                          className={`
-                    px-3 py-1rounded-full text-sm font-medium
-                    ${
-                      b.status === "pending"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : b.status === "approved"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }
-                  `}
-                        >
-                          {b.status}
-                        </span> */}
-                      </div>
-
-                      {/* DATE & TIME */}
-                      <div className=" text-white">
-                        <div>
-                          <span className="font-medium">Өдөр:</span>
-                          {new Date(b.date).toLocaleDateString()}
-                        </div>
-                        <div>
-                          <span className="font-medium">Эхлэх цаг:</span>{" "}
-                          {b.starttime}
-                        </div>
-                      </div>
-
-                      {/* DESCRIPTION */}
-                      <p className="text-gray-700 text-sm">
-                        {b.event_description}
-                      </p>
-
-                      {/* STATUS BADGE */}
-
-                      {/* LOCATION */}
-                      <p className="text-gray-500 text-sm truncate">
-                        📍 {b.event_halls?.location}
-                      </p>
+                      <span className="font-medium">Өдөр:</span>{" "}
+                      {new Date(b.date).toLocaleDateString()}
+                    </div>
+                    <div>
+                      <span className="font-medium">Эхлэх цаг:</span>{" "}
+                      {b.starttime}
                     </div>
                   </div>
-                ))}
-              </div>
+                  <p className="text-gray-400 text-sm mb-1">
+                    {b.event_description}
+                  </p>
+                  <p className="text-gray-500 text-sm truncate">
+                    📍 {b.event_halls?.location}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Filters */}
+            <div>
               <h2 className="text-xl font-bold text-blue-400 mb-4">Шүүлтүүр</h2>
 
-              {/* Genre Filter */}
+              {/* Genre */}
               <div className="mb-6">
                 <h3
                   className="font-semibold mb-3 flex items-center gap-2 cursor-pointer hover:text-blue-400 transition-colors"
@@ -194,15 +171,14 @@ export default function PerformersPage() {
                           type="checkbox"
                           checked={selectedGenres.includes(genre)}
                           onChange={(e) => {
-                            if (e.target.checked) {
+                            if (e.target.checked)
                               setSelectedGenres([...selectedGenres, genre]);
-                            } else {
+                            else
                               setSelectedGenres(
                                 selectedGenres.filter((g) => g !== genre)
                               );
-                            }
                           }}
-                          className="w-4 h-4"
+                          className="w-4 h-4 accent-blue-600"
                         />
                         <span>{genre}</span>
                       </label>
@@ -211,7 +187,7 @@ export default function PerformersPage() {
                 )}
               </div>
 
-              {/* Availability Filter */}
+              {/* Availability */}
               <div className="mb-6">
                 <h3 className="font-semibold text-blue-400 mb-3">
                   Боломжтой эсэх
@@ -226,18 +202,17 @@ export default function PerformersPage() {
                         type="checkbox"
                         checked={selectedAvailability.includes(option)}
                         onChange={(e) => {
-                          if (e.target.checked) {
+                          if (e.target.checked)
                             setSelectedAvailability([
                               ...selectedAvailability,
                               option,
                             ]);
-                          } else {
+                          else
                             setSelectedAvailability(
                               selectedAvailability.filter((a) => a !== option)
                             );
-                          }
                         }}
-                        className="w-4 h-4"
+                        className="w-4 h-4 accent-blue-600"
                       />
                       <span>{option}</span>
                     </label>
@@ -245,7 +220,7 @@ export default function PerformersPage() {
                 </div>
               </div>
 
-              {/* Popularity Filter */}
+              {/* Popularity */}
               <div className="mb-6">
                 <h3 className="font-semibold text-blue-400 mb-3">
                   Алдартай байдал
@@ -257,14 +232,14 @@ export default function PerformersPage() {
                   step="5000"
                   value={minPopularity}
                   onChange={(e) => setMinPopularity(parseFloat(e.target.value))}
-                  className="w-full"
+                  className="w-full accent-blue-600"
                 />
                 <div className="text-sm text-gray-400 mt-2">
                   Хамгийн бага: {minPopularity.toLocaleString()}
                 </div>
               </div>
 
-              {/* Price Range Filter */}
+              {/* Price */}
               <div className="mb-6">
                 <h3 className="font-semibold text-blue-400 mb-3">
                   Үнийн хүрээ
@@ -323,91 +298,83 @@ export default function PerformersPage() {
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Performers Grid */}
-          <div className="flex-1">
-            <div className="mb-4 text-gray-400 text-sm">
-              {sortedPerformers.length} уран бүтээлч олдлоо
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedPerformers.map((performer) => (
-                <div
-                  key={performer.id}
-                  className="bg-gray-900 rounded-lg overflow-hidden hover:transform hover:scale-105 transition-transform"
-                >
-                  {/* Performer Image */}
-                  <div className="relative h-90 bg-gray-800">
-                    <Image
-                      src={
-                        performer.image ||
-                        "https://via.placeholder.com/400x300?text=No+Image"
-                      }
-                      alt={performer.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover"
-                    />
-                    <div
-                      className={`absolute top-3 left-3 ${getAvailabilityColor(
-                        performer.availability || "Боломжтой"
-                      )} text-white px-3 py-1 rounded-full text-xs font-semibold`}
+        {/* Performers Grid */}
+        <div className="flex-1 w-full">
+          <h1 className="text-4xl font-bold mb-8">Уран бүтээлчид хайх</h1>
+          <div className="mb-4 text-gray-400 text-sm">
+            {sortedPerformers.length} уран бүтээлч олдлоо
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sortedPerformers.map((performer) => (
+              <div
+                key={performer.id}
+                className="bg-gray-900 rounded-lg overflow-hidden hover:transform hover:scale-[1.02] transition-transform duration-200"
+              >
+                <div className="relative h-90 bg-gray-800">
+                  <Image
+                    src={
+                      performer.image ||
+                      "https://via.placeholder.com/400x300?text=No+Image"
+                    }
+                    alt={performer.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover"
+                  />
+                  <div
+                    className={`absolute top-3 left-3 ${getAvailabilityColor(
+                      performer.availability || "Боломжтой"
+                    )} text-white px-3 py-1 rounded-full text-xs font-semibold`}
+                  >
+                    {performer.availability || "Боломжтой"}
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="text-xl font-bold mb-1">{performer.name}</h3>
+                  <p className="text-gray-400 text-sm mb-3">
+                    {performer.performance_type || performer.genre}
+                  </p>
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FaStar className="text-yellow-400" />
+                      <span className="font-semibold">
+                        {performer.popularity
+                          ? Number(performer.popularity).toLocaleString()
+                          : "N/A"}
+                      </span>
+                      <span className="text-xs text-gray-400">Viberate</span>
+                    </div>
+                    <div className="text-lg font-bold text-blue-400">
+                      {Number(performer.price).toLocaleString()}₮
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => router.push(`/performers/${performer.id}`)}
+                      className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2 rounded-lg transition-colors border border-blue-600"
                     >
-                      {performer.availability || "Боломжтой"}
-                    </div>
-                  </div>
-
-                  {/* Performer Info */}
-                  <div className="p-4">
-                    <h3 className="text-xl font-bold mb-1">{performer.name}</h3>
-                    <p className="text-gray-400 text-sm mb-3">
-                      {performer.performance_type || performer.genre}
-                    </p>
-
-                    {/* Viberate Popularity & Price */}
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FaStar className="text-yellow-400" />
-                        <span className="font-semibold">
-                          {performer.popularity
-                            ? Number(performer.popularity).toLocaleString()
-                            : "N/A"}
-                        </span>
-                        <span className="text-xs text-gray-400">Viberate</span>
-                      </div>
-                      <div className="text-lg font-bold text-blue-400">
-                        {Number(performer.price).toLocaleString()}₮
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() =>
-                          router.push(`/performers/${performer.id}`)
-                        }
-                        className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2 rounded-lg transition-colors border border-blue-600"
-                      >
-                        Профайл үзэх
-                      </button>
-                      <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors">
-                        Захиалах
-                      </button>
-                    </div>
+                      Профайл үзэх
+                    </button>
+                    <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors">
+                      Захиалах
+                    </button>
                   </div>
                 </div>
-              ))}
+              </div>
+            ))}
 
-              {sortedPerformers.length === 0 && (
-                <div className="col-span-3 text-center py-12">
-                  <div className="text-gray-400 text-lg mb-2">
-                    Уучлаарай, уран бүтээлч олдсонгүй
-                  </div>
-                  <div className="text-gray-500 text-sm">
-                    Шүүлтүүрийг өөрчилж дахин оролдоно уу
-                  </div>
+            {sortedPerformers.length === 0 && (
+              <div className="col-span-3 text-center py-12">
+                <div className="text-gray-400 text-lg mb-2">
+                  Уучлаарай, уран бүтээлч олдсонгүй
                 </div>
-              )}
-            </div>
+                <div className="text-gray-500 text-sm">
+                  Шүүлтүүрийг өөрчилж дахин оролдоно уу
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
