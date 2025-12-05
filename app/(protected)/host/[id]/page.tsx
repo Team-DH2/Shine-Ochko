@@ -44,7 +44,7 @@ export default function HostProfilePage() {
   return (
     <div>
       <Header></Header>
-      <div className="min-h-screen bg-[#09090D] text-white px-[80px] py-[60px] flex gap-10">
+      <div className="min-h-screen bg-[#09090D] text-white px-20 py-[60px] flex gap-10">
         {/* LEFT SIDE – IMAGE CARD */}
 
         <div className="bg-[#1E2128] p-6 rounded-xl w-[380px]">
