@@ -64,13 +64,13 @@ export const AuthForm = ({ view, onViewChange }: AuthFormProps) => {
           window.location.reload();
         }
       } catch (e) {
-        setError(`Failed to connect to the server.${e}`);
+        setError(`Failed to connect to the server. Please try again.${e}`);
       }
     });
   };
 
   return (
-    <div className=" w-96 rounded-2xl shadow-lg overflow-hidden bg-transparent">
+    <div className=" w-96 rounded-2xl shadow-lg overflow-hidden bg-black/80">
       <div className="p-8 text-white">
         <h2 className="text-3xl font-bold mb-8 text-center">
           {isLoginView ? "Welcome Back" : "Create Account"}
@@ -169,7 +169,7 @@ export const AuthForm = ({ view, onViewChange }: AuthFormProps) => {
             disabled={isPending}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full disabled:bg-blue-800 disabled:cursor-not-allowed"
           >
-            {isPending ? "Logging..." : isLoginView ? "Log In" : "Sign Up"}
+            {isPending ? "Processing..." : isLoginView ? "Log In" : "Sign Up"}
           </button>
         </form>
         <div className="text-center mt-6">

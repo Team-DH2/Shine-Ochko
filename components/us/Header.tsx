@@ -1,83 +1,119 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ButtonOfNav } from "./ButtonOfNav";
-import { Input } from "../ui/input";
+
 import {
-  Search,
-  X,
-  Home,
   Building,
-  Music,
-  Users,
+  Home,
   LayoutDashboard,
+  Music,
+  Search,
+  Users,
+  X,
 } from "lucide-react";
-import { Logo } from "./Logo";
+
 import { BottomNavButton } from "./BottomNavButton";
 import { AuthForm } from "./AuthForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { DialogOverlay } from "@radix-ui/react-dialog";
-import SearchFunction from "./Search";
+import { Logo } from "./Logo";
+import SearchFunction from "./Searchbar";
 
 export const Header = () => {
   const [isPhoneSearchOpen, setIsPhoneSearchOpen] = useState(false);
   const [authView, setAuthView] = useState<"login" | "signup">("login");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false); // client mount flag
+  const styleDesktop =
+    "pl-10 h-10 rounded-[20px] bg-neutral-800 border-none w-full text-sm";
+  const styleMobile =
+    "w-full pl-10 h-9 rounded-[20px] bg-neutral-800 border-none text-white text-sm";
+
+  // First effect: mark client as mounted
+  // After the component mounts on the client, check for the token.
+  useEffect(() => {
+    Promise.resolve().then(() => setHasMounted(true));
+    const token = localStorage.getItem("token");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoggedIn(!!token);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMounted) return;
+    Promise.resolve().then(() => {
+      const token = localStorage.getItem("token");
+      setIsLoggedIn(Boolean(token));
+    });
+  }, [hasMounted]);
+
+  const handleLogoutClick = () => {
+    setIsLogoutModalOpen(true);
+  };
+
+  const confirmLogout = () => {
+    localStorage.removeItem("token");
+    window.location.reload();
+  };
+
+  // SSR-safe: render nothing until client mounts
+  if (!hasMounted) return null;
 
   return (
     <>
       {/* ---------------- DESKTOP HEADER ---------------- */}
       <div className="hidden lg:flex text-white w-full h-20 items-center justify-between bg-black/50 backdrop-blur-sm px-10">
-        {/* Left Side */}
         <div className="flex-1 flex justify-start">
           <Logo />
         </div>
 
-        {/* Centered Navigation */}
         <div className="flex items-center gap-4 font-bold">
           <ButtonOfNav href="/home" text="Home" />
           <ButtonOfNav href="/event-halls" text="Event Halls" />
-          <ButtonOfNav
-            href="/performers/dashboard-to-performers"
-            text="Performers"
-          />
-          <ButtonOfNav href="/host" text="Hosts" />
+          <ButtonOfNav href="/performers" text="Performers" />
+          <ButtonOfNav href="/hosts" text="Hosts" />
           <ButtonOfNav href="/dashboard" text="Dashboard" />
-          <ButtonOfNav href="/contact" text="Event Hall Form" />
-          <ButtonOfNav href="/profile" text="Profile" />
+          <ButtonOfNav href="/contact" text="Contact" />
         </div>
 
-        {/* Right Side */}
         <div className="flex-1 flex justify-end items-center gap-3">
           <div className="flex items-center w-full max-w-[220px]">
-            {/* <Search className="mr-[-36] w-5 z-10 text-neutral-500" /> */}
-            <SearchFunction></SearchFunction>
+            <Search className="mr-[-36] w-5 z-10 text-neutral-500" />
+            <SearchFunction styleDesktop={styleDesktop} />
           </div>
-          <div className="flex items-center gap-2">
+          {isLoggedIn ? (
             <button
-              onClick={() => {
-                setAuthView("login");
-                setIsAuthModalOpen(true);
-              }}
-              className="bg-transparent rounded-md h-10 px-4 text-sm"
+              onClick={handleLogoutClick}
+              className="bg-blue-600  rounded-md px-4 h-10 text-sm"
             >
-              LogIn
+              LogOut
             </button>
-            <button
-              onClick={() => {
-                setAuthView("signup");
-                setIsAuthModalOpen(true);
-              }}
-              className="bg-blue-600 rounded-md px-4 h-10 text-sm"
-            >
-              SignUp
-            </button>
-          </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setAuthView("login");
+                  setIsAuthModalOpen(true);
+                }}
+                className="bg-transparent rounded-md h-10 px-4 text-sm"
+              >
+                LogIn
+              </button>
+              <button
+                onClick={() => {
+                  setAuthView("signup");
+                  setIsAuthModalOpen(true);
+                }}
+                className="bg-blue-600 rounded-md px-4 h-10 text-sm"
+              >
+                SignUp
+              </button>
+            </div>
+          )}
         </div>
       </div>
-
       {/* ---------------- MOBILE/TABLET HEADER ---------------- */}
       <div className="fixed top-0 left-0 right-0 z-50 flex lg:hidden h-16 w-full items-center bg-black/50 px-4 text-white backdrop-blur-sm">
-        {/* LEFT SIDE: Logo OR X Button */}
         {!isPhoneSearchOpen ? (
           <Logo />
         ) : (
@@ -87,52 +123,55 @@ export const Header = () => {
           />
         )}
 
-        {/* MIDDLE: Search input (full width when open) */}
         <div className="flex-1 mx-4">
           {isPhoneSearchOpen && (
             <div className="flex items-center">
               <Search className="mr-[-36] w-5 z-10 text-neutral-500" />
-              <Input
-                placeholder="Search..."
-                className="w-full pl-10 h-9 rounded-[20px] bg-neutral-800 border-none text-white text-sm"
-              />
+              <SearchFunction styleDesktop={styleMobile} />
             </div>
           )}
         </div>
 
-        {/* RIGHT SIDE: Search button + Auth (hidden when searching) */}
         {!isPhoneSearchOpen ? (
           <div className="flex items-center gap-3">
             <Search
               className="w-6 h-6 text-neutral-300 hover:text-white"
               onClick={() => setIsPhoneSearchOpen(true)}
             />
-            <button
-              onClick={() => {
-                setAuthView("login");
-                setIsAuthModalOpen(true);
-              }}
-              className="bg-transparent rounded-md h-9 px-3 text-xs"
-            >
-              LogIn
-            </button>
-            <button
-              onClick={() => {
-                setAuthView("signup");
-                setIsAuthModalOpen(true);
-              }}
-              className="bg-blue-600 rounded-md px-3 h-9 text-xs"
-            >
-              SignUp
-            </button>
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogoutClick}
+                className="bg-red-600 hover:bg-red-700 rounded-md px-3 h-9 text-xs"
+              >
+                LogOut
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setAuthView("login");
+                    setIsAuthModalOpen(true);
+                  }}
+                  className="bg-transparent rounded-md h-9 px-3 text-xs"
+                >
+                  LogIn
+                </button>
+                <button
+                  onClick={() => {
+                    setAuthView("signup");
+                    setIsAuthModalOpen(true);
+                  }}
+                  className="bg-blue-600 rounded-md px-3 h-9 text-xs"
+                >
+                  SignUp
+                </button>
+              </>
+            )}
           </div>
-        ) : (
-          <></>
-        )}
+        ) : null}
       </div>
-
       {/* ---------------- MOBILE/TABLET BOTTOM NAV ---------------- */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around  bg-black/50 backdrop-blur-sm lg:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around bg-black/50 backdrop-blur-sm lg:hidden">
         <BottomNavButton
           href="/home"
           label="Home"
@@ -159,18 +198,46 @@ export const Header = () => {
           icon={<LayoutDashboard className="w-5 h-5" />}
         />
       </div>
-
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <DialogOverlay className="fixed inset-0 bg-black/40 backdrop-blur-[2px]">
-          <DialogContent className="p-0 border-none bg-transparent w-100 rounded-3xl shadow-none max-w-md data-[state=open]:bg-neutral-900/50 data-[state=open]:backdrop-blur-xs [&>button]:hidden">
-            <DialogHeader className="sr-only">
-              <DialogTitle>
-                {authView === "login" ? "Log In" : "Sign Up"}
-              </DialogTitle>
-            </DialogHeader>
-            <AuthForm view={authView} onViewChange={setAuthView} />
-          </DialogContent>
-        </DialogOverlay>
+        <DialogContent className="p-0 border-none bg-transparent shadow-none max-w-md w-fit data-[state=open]:bg-black/60 data-[state=open]:backdrop-blur-sm [&>button]:hidden">
+          <DialogHeader className="sr-only">
+            <DialogTitle>
+              {authView === "login" ? "Log In" : "Sign Up"}
+            </DialogTitle>
+          </DialogHeader>
+          <AuthForm view={authView} onViewChange={setAuthView} />
+        </DialogContent>
+      </Dialog>
+      {/* ---------------- LOGOUT CONFIRMATION DIALOG ---------------- */}
+
+      <Dialog open={isLogoutModalOpen} onOpenChange={setIsLogoutModalOpen}>
+        <DialogContent className="p-0 border-none bg-transparent shadow-none max-w-md data-[state=open]:bg-black/60 data-[state=open]:backdrop-blur-sm [&>button]:hidden">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Confirm Log Out</DialogTitle>
+          </DialogHeader>
+          <div className="w-full rounded-2xl shadow-lg overflow-hidden bg-black/80">
+            <div className="p-8 text-white">
+              <h2 className="text-2xl font-bold mb-4 text-center">Log Out</h2>
+              <p className="text-center text-neutral-400 mb-8">
+                Are you sure you want to log out?
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setIsLogoutModalOpen(false)}
+                  className="bg-neutral-700 hover:bg-neutral-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmLogout}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                >
+                  Log Out
+                </button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
       </Dialog>
     </>
   );

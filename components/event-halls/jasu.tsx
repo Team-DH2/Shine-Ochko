@@ -2,11 +2,12 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Star, Users } from "lucide-react";
-import Link from "next/link";
+
 import { Button } from "../ui/button";
 import FilterSidebar from "../us/Nemelt";
 
 const EventHallsListing = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [eventHalls, setEventHalls] = React.useState<any[]>([]);
   const getEventHallData = async () => {
     try {
@@ -24,12 +25,14 @@ const EventHallsListing = () => {
     }
   };
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     getEventHallData();
   }, []);
 
   const router = useRouter();
   console.log("Event Halls:", eventHalls);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const eventHallOnclick = (hall: any) => {
     console.log("Clicked event hall:", hall);
     if (!hall?.id) {

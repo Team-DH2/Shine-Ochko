@@ -1,9 +1,9 @@
 "use client";
 
-import { Footer } from "@/components/us/Footer";
 import { CarouselMy } from "@/components/us/CarouselMy";
 import { Hero } from "@/components/us/Hero";
 import { WhyChooseUs } from "@/components/us/WhyChooseUs";
+import { LayoutFooter } from "@/components/us/LayoutFooter";
 
 interface Hall {
   id: number;
@@ -64,7 +64,7 @@ export default function Page() {
       <CarouselMy halls={halls} />
       <Hero />
       <WhyChooseUs />
-      <Footer />
+      <LayoutFooter />
     </main>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
 
 const DateForm = ({
   hallId,
@@ -57,7 +56,8 @@ const DateForm = ({
         </label>
         <div className="mt-2 p-4 border rounded-lg bg-gray-50 text-[#0A1633] text-lg">
           {selected.length > 0
-            ? selected.map((s: any, idx: number) => (
+            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              selected.map((s: any, idx: number) => (
                 <div key={idx}>
                   {s.date} (
                   {s.type === "am"

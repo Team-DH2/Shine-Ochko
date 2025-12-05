@@ -38,7 +38,6 @@ export const CarouselMy = ({ halls }: { halls: HallType[] }) => {
 
   return (
     <div className="relative w-full h-[60vh] sm:h-screen snap-start">
-      {/* Carousel */}
       <CarouselDefault
         setApi={setApi}
         plugins={[plugin.current]}
@@ -50,12 +49,10 @@ export const CarouselMy = ({ halls }: { halls: HallType[] }) => {
           ))}
         </CarouselContent>
 
-        {/* Navigation buttons */}
         <CarouselPrevious className="hidden sm:flex absolute top-1/2 left-6 lg:left-10 -translate-y-1/2 items-center justify-center z-20" />
         <CarouselNext className="hidden sm:flex absolute top-1/2 right-6 lg:right-10 -translate-y-1/2 items-center justify-center z-20" />
       </CarouselDefault>
 
-      {/* Pagination dots */}
       <div className="absolute hidden lg:flex bottom-6 left-0 right-0  justify-center z-30">
         <div className="flex gap-2">
           {Array.from({ length: count }).map((_, index) => (
@@ -76,7 +73,7 @@ export const CarouselMy = ({ halls }: { halls: HallType[] }) => {
 
 const CarouselCard = ({ el }: { el: HallType }) => {
   return (
-    <CarouselItem className="relative h-full w-full p-0! pr-0!">
+    <CarouselItem className="relative w-full h-[60vh] sm:h-screen p-0">
       {/* Card wrapper */}
       <Card className="w-full h-full p-0 border-0 ml-[16] shadow-none rounded-none  relative">
         {/* Image */}
@@ -96,7 +93,7 @@ const CarouselCard = ({ el }: { el: HallType }) => {
         <div className="absolute inset-0 bg-black/40" />
 
         {/* Desktop overlay */}
-        <CardContent className="hidden sm:flex flex-col absolute top-1/3 left-[6%] lg:left-[12%] -translate-y-1/3 text-white">
+        <CardContent className="hidden sm:flex flex-col absolute top-8/17 left-[6%] lg:left-[12%] -translate-y-1/3 text-white">
           <p className="mb-0 font-medium text-sm lg:text-base [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
             Event Hall:
           </p>
