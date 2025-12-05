@@ -54,8 +54,8 @@ export async function POST(req: NextRequest) {
       where: {
         OR: [
           { name: { contains: searchValue, mode: "insensitive" } },
-          { contact_email: { contains: searchValue, mode: "insensitive" } },
-          { contact_phone: { contains: searchValue, mode: "insensitive" } },
+          { email: { contains: searchValue, mode: "insensitive" } },
+          { phone: { contains: searchValue, mode: "insensitive" } },
         ],
       },
       orderBy: { id: "asc" },

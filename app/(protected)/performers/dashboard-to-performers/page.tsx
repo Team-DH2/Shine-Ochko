@@ -265,48 +265,6 @@ export default function PerformersPage() {
               </div>
 
               {/* Price Range Filter */}
-              <div className="mb-6">
-                <h3 className="font-semibold text-blue-400 mb-3">
-                  Үнийн хүрээ
-                </h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs text-gray-400 mb-1 block">
-                      Хамгийн бага:
-                    </label>
-                    <select
-                      value={minPrice}
-                      onChange={(e) => setMinPrice(parseInt(e.target.value))}
-                      className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none text-sm"
-                    >
-                      <option value="0">0₮</option>
-                      <option value="500000">500,000₮</option>
-                      <option value="1000000">1,000,000₮</option>
-                      <option value="1500000">1,500,000₮</option>
-                      <option value="2000000">2,000,000₮</option>
-                      <option value="3000000">3,000,000₮</option>
-                      <option value="5000000">5,000,000₮</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-400 mb-1 block">
-                      Хамгийн их:
-                    </label>
-                    <select
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(parseInt(e.target.value))}
-                      className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none text-sm"
-                    >
-                      <option value="1000000">1,000,000₮</option>
-                      <option value="2000000">2,000,000₮</option>
-                      <option value="3000000">3,000,000₮</option>
-                      <option value="5000000">5,000,000₮</option>
-                      <option value="10000000">10,000,000₮</option>
-                      <option value="100000000">Хязгааргүй</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
 
               <button
                 onClick={() => {

@@ -8,20 +8,20 @@ datasource db {
 }
 
 model booking {
-  id           Int           @id @default(autoincrement())
-  userid       Int
-  hallid       Int?
-  performersid Int?
-  hostid       Int?
-  ordereddate  DateTime?     @db.Date
-  date         DateTime      @db.Timestamp(6)
-  starttime    String?
-  endtime      String?
-  status       bookingstatus
-  event_halls  event_halls?  @relation(fields: [hallid], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  hosts        hosts?        @relation(fields: [hostid], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  performers   performers?   @relation(fields: [performersid], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User         mruser        @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                           Int           @id @default(autoincrement())
+  userid                       Int
+  hallid                       Int?
+  performersid                 Int?
+  hostid                       Int?
+  ordereddate                  DateTime?     @db.Date
+  date                         DateTime      @db.Timestamp(6)
+  starttime                    String?
+  endtime                      String?
+  status                       bookingstatus
+  event_halls                  event_halls?  @relation(fields: [hallid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  performers                   performers?   @relation(fields: [performersid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User                         mruser        @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hosts_hosts_bookingTobooking hosts[]       @relation("hosts_bookingTobooking")
 }
 
 model event_halls {
@@ -39,20 +39,25 @@ model event_halls {
   additional_informations String[]
   informations_about_hall String[]
   advantages              String[]
+  price                   Int[]
+  rating                  String?
+  location_link           String?
   booking                 booking[]
 }
 
 model hosts {
-  id            Int       @id @default(autoincrement())
-  name          String    @db.VarChar(255)
-  contact_email String?   @db.VarChar(255)
-  contact_phone String?   @db.VarChar(50)
-  title         String?   @db.VarChar(255)
-  image         String?
-  tags          String[]  @default([])
-  rating        Float?    @default(0) @db.Real
-  status        String?   @default("Available") @db.VarChar(50)
-  booking       booking[]
+  id                             Int      @id @default(autoincrement())
+  name                           String?
+  email                          String?
+  phone                          String?
+  title                          String?
+  image                          String?
+  tags                           String[]
+  rating                         Float?   @db.Real
+  status                         String?
+  booking                        Int?
+  price                          Int?     @default(0)
+  booking_hosts_bookingTobooking booking? @relation("hosts_bookingTobooking", fields: [booking], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model performers {
@@ -114,4 +119,5 @@ model Form {
 enum bookingstatus {
   pending
   approved
+  cancelled
 }

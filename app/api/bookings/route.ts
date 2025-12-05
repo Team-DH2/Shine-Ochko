@@ -22,7 +22,6 @@ export async function GET(req: NextRequest) {
       where: filters,
       include: {
         event_halls: true,
-        hosts: true,
       },
       orderBy: { id: "desc" },
     });
