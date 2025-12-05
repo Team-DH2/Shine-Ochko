@@ -1,197 +1,172 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Input } from "../ui/input";
 import { useRouter } from "next/navigation";
-import { Button } from "../ui/button";
-import { FaArrowRight } from "react-icons/fa";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function SearchFunction({ styleDesktop }: any) {
+export default function SearchFunction({
+  styleDesktop,
+}: {
+  styleDesktop?: string;
+}) {
   const [searchValue, setSearchValue] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [firstOpen, setFirstOpen] = useState(false);
   const router = useRouter();
 
-  // Debounce
   useEffect(() => {
     if (!searchValue) {
       setResults(null);
       return;
     }
 
-    const timeout = setTimeout(() => {
-      // eslint-disable-next-line react-hooks/immutability
-      handleSearch();
-    }, 300);
-
+    const timeout = setTimeout(() => handleSearch(), 300);
     return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue]);
 
   const handleSearch = async () => {
     if (!searchValue.trim()) return;
 
     setLoading(true);
-
     try {
       const res = await fetch("/api/search", {
         method: "POST",
         body: JSON.stringify({ searchValue }),
       });
-
       const data = await res.json();
-      setIsOpen(true);
       setResults(data);
-    } catch (error) {
-      console.error("Search error:", error);
+      setIsOpen(true);
+    } catch (err) {
+      console.error(err);
     }
-
     setLoading(false);
   };
 
+  const ResultItem = ({
+    children,
+    onClick,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+  }) => (
+    <div
+      onClick={onClick}
+      className="cursor-pointer px-3 py-2 rounded-md hover:bg-neutral-800 transition-colors"
+    >
+      {children}
+    </div>
+  );
+
   return (
-    <div>
-      <Popover
-        open={isOpen}
-        onOpenChange={(open) => {
-          if (!open) setIsOpen(false);
+    <Popover open={isOpen} onOpenChange={(open) => !open && setIsOpen(false)}>
+      <PopoverTrigger
+        onClick={() => {
+          setIsOpen(true);
+          setFirstOpen(true);
         }}
       >
-        <PopoverTrigger
-          onClick={() => {
-            setIsOpen(true);
-            setFirstOpen(true);
-          }}
-        >
-          <Input
-            type="text"
-            placeholder="Хайх..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className={styleDesktop}
-          />
-        </PopoverTrigger>
+        <Input
+          type="text"
+          placeholder="Хайх..."
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          className={`${styleDesktop} border-neutral-600 bg-neutral-900 text-white`}
+        />
+      </PopoverTrigger>
 
-        <PopoverContent
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          onCloseAutoFocus={(e) => e.preventDefault()}
-          className="w-[300px] bg-neutral-900 border-neutral-800 text-white shadow-lg transition-all duration-200"
-        >
-          {/* А. Эхний фокус үед гарч ирэх анхны текст */}
-          {!searchValue && firstOpen && (
-            <p className="text-gray-400 py-6 text-center">
-              Та хүссэн зүйлээ хайгаарай ✨
-            </p>
-          )}
+      <PopoverContent
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        className="w-[300px] bg-neutral-900 border border-neutral-700 text-white shadow-none rounded-lg p-2"
+      >
+        {!searchValue && firstOpen && (
+          <p className="text-gray-400 text-center text-sm font-light py-3">
+            Та хүссэн зүйлээ хайгаарай ✨
+          </p>
+        )}
 
-          {/* B. Хайж байгаа үед */}
-          {loading && (
-            <p className="mt-2 text-gray-400 text-center">Хайж байна...</p>
-          )}
+        {loading && (
+          <p className="text-gray-400 text-center text-sm font-light py-3">
+            Хайж байна...
+          </p>
+        )}
 
-          {/* C. Илэрц гарсан үед */}
-          {results && !loading && searchValue && (
-            <div className="mt-2 space-y-4 max-h-80 overflow-auto">
-              {/* Event Halls */}
-              {results?.halls?.length > 0 && (
-                <div>
-                  <h2 className="text-lg font-bold mb-2 text-blue-400">
-                    🏛 Event Halls
-                  </h2>
-                  <div className="space-y-1">
-                    {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      results.halls.map((hall: any) => (
-                        <div
-                          key={hall.id}
-                          className="p-3 bg-white rounded shadow cursor-pointer hover:bg-gray-100 transition"
-                        >
-                          <div className="flex items-center justify-between gap-4">
-                            <h3 className="font-semibold">{hall.name}</h3>
-                            <Button
-                              onClick={() =>
-                                router.push(`/event-halls/${hall.id}`)
-                              }
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                            >
-                              <FaArrowRight color="black" />
-                            </Button>
-                          </div>
-                          <p className="text-sm text-gray-600">
-                            {hall.location}
-                          </p>
-                        </div>
-                      ))
-                    }
-                  </div>
+        {results && !loading && searchValue && (
+          <div className="space-y-1 max-h-80 overflow-auto">
+            {/* Event Halls */}
+            {results?.halls?.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-neutral-400 mt-2 mb-1 ml-3">
+                  🏛 Event Halls
+                </h3>
+                <div className="space-y-1">
+                  {results.halls.map((hall: any) => (
+                    <ResultItem
+                      key={hall.id}
+                      onClick={() => router.push(`/event-halls/${hall.id}`)}
+                    >
+                      <div className="flex flex-col text-sm">
+                        <span>{hall.name}</span>
+                        <p className="text-neutral-500 text-xs">
+                          {hall.location}
+                        </p>
+                      </div>
+                    </ResultItem>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Performers */}
-              {results?.performers?.length > 0 && (
-                <div>
-                  <h2 className="text-lg font-bold mb-2 text-blue-400">
-                    🎤 Performers
-                  </h2>
-                  <div className="space-y-1">
-                    {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      results.performers.map((p: any) => (
-                        <div
-                          key={p.id}
-                          className="p-3 bg-neutral-800 rounded-md shadow hover:bg-neutral-700 transition cursor-pointer"
-                        >
-                          <h3 className="font-semibold">{p.name}</h3>
-                          <p className="text-sm text-gray-600">{p.genre}</p>
-                        </div>
-                      ))
-                    }
-                  </div>
+            {/* Performers */}
+            {results?.performers?.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-400 mt-2 mb-1 ml-3">
+                  🎤 Performers
+                </h3>
+                <div className="space-y-1">
+                  {results.performers.map((p: any) => (
+                    <ResultItem key={p.id}>
+                      <span className="text-sm">{p.name}</span>
+                      <p className="text-gray-500 text-xs">{p.genre}</p>
+                    </ResultItem>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Hosts */}
-              {results?.hosts?.length > 0 && (
-                <div>
-                  <h2 className="text-lg font-bold mb-2 text-blue-400">
-                    🎙 Hosts
-                  </h2>
-                  <div className="space-y-1">
-                    {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      results.hosts.map((h: any) => (
-                        <div
-                          key={h.id}
-                          className="p-3 bg-neutral-800 rounded-md shadow hover:bg-neutral-700 transition cursor-pointer"
-                        >
-                          <h3 className="font-semibold">{h.name}</h3>
-                          <p className="text-sm text-gray-600">
-                            {h.contact_phone}
-                          </p>
-                        </div>
-                      ))
-                    }
-                  </div>
+            {/* Hosts */}
+            {results?.hosts?.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-400 mt-2 mb-1 ml-3">
+                  🎙 Hosts
+                </h3>
+                <div className="space-y-1">
+                  {results.hosts.map((h: any) => (
+                    <ResultItem key={h.id}>
+                      <span className="text-sm">{h.name}</span>
+                      <p className="text-gray-500 text-xs">{h.contact_phone}</p>
+                    </ResultItem>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* No Results */}
-              {results?.halls?.length === 0 &&
-                results?.performers?.length === 0 &&
-                results?.hosts?.length === 0 && (
-                  <p className="text-gray-400 text-center">Илэрц олдсонгүй.</p>
-                )}
-            </div>
-          )}
-        </PopoverContent>
-      </Popover>
-    </div>
+            {/* No Results */}
+            {results?.halls?.length === 0 &&
+              results?.performers?.length === 0 &&
+              results?.hosts?.length === 0 && (
+                <p className="text-gray-500 text-center text-sm py-3 font-light">
+                  Илэрц олдсонгүй.
+                </p>
+              )}
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
   );
 }
