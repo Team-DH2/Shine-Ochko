@@ -63,6 +63,7 @@ export default function Page() {
     <main className="h-screen overflow-y-scroll snap-y snap-mandatory">
       <CarouselMy halls={halls} />
       <Hero />
+
       <WhyChooseUs />
       <LayoutFooter />
     </main>

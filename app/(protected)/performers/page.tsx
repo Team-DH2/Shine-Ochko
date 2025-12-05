@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaStar, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Image from "next/image";
-
 export default function PerformersPage() {
   const router = useRouter();
   const [performers, setPerformers] = useState<any[]>([]);
@@ -19,8 +18,7 @@ export default function PerformersPage() {
   const [maxPrice, setMaxPrice] = useState<number>(100000000);
   const [sortBy, setSortBy] = useState<string>("popularity");
   const [isGenreOpen, setIsGenreOpen] = useState(false);
-  const [bookings, setBookings] = useState([]);
-
+  const [bookings, setBookings] = useState<any[]>([]);
   useEffect(() => {
     fetchPerformers();
     fetchGenres();
@@ -29,7 +27,7 @@ export default function PerformersPage() {
   useEffect(() => {
     fetch("/api/bookings")
       .then((res) => res.json())
-      .then((data) => setBookings(data.bookings));
+      .then((data) => setBookings(data.bookings || []));
   }, []);
 
   const fetchPerformers = async () => {
