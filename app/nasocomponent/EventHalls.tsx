@@ -111,7 +111,7 @@ export default function EventHalls() {
               <div className="relative w-full h-56">
                 <Image
                   src={
-                    hall.image ||
+                    hall.images[0] ||
                     "https://img.freepik.com/premium-vector/image-icon-design-vector-template_1309674-943.jpg"
                   }
                   alt={hall.name}
