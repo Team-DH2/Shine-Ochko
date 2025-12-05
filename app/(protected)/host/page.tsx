@@ -32,7 +32,7 @@ export default function Host() {
   console.log({ hosts });
 
   return (
-    <div className="min-h-screen bg-[#09090D] text-white px-[128px]  ">
+    <div className="min-h-screen bg-[#09090D] text-white px-32  ">
       <Header />
       <h1 className="text-3xl font-bold mb-6 pt-[108px] pb-[72px] flex justify-center">
         Discover Your Ideal Host or MC
