@@ -71,7 +71,7 @@ export const Header = () => {
           <ButtonOfNav href="/home" text="Home" />
           <ButtonOfNav href="/event-halls" text="Event Halls" />
           <ButtonOfNav href="/performers" text="Performers" />
-          <ButtonOfNav href="/hosts" text="Hosts" />
+          <ButtonOfNav href="/host" text="Hosts" />
           <ButtonOfNav href="/dashboard" text="Dashboard" />
           <ButtonOfNav href="/eventhall-form" text="Event Hall Form" />
           <ButtonOfNav href="/profile" text="Profile" />
