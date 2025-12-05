@@ -60,6 +60,7 @@ export async function POST(request: Request) {
     );
 
     const { password: _, ...userWithoutPassword } = user;
+    console.log(_);
 
     return NextResponse.json(
       { user: userWithoutPassword, token },

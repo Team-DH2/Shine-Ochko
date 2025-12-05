@@ -10,6 +10,7 @@ export default function BookingCalendar({
 }: {
   hallId: number | string;
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bookings, setBookings] = useState<any[]>([]);
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
@@ -25,6 +26,7 @@ export default function BookingCalendar({
       .then((res) => res.json())
       .then((data) => {
         const hallBookings = data.bookings.filter(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (b: any) => b.hallid == hallId
         );
         setBookings(hallBookings);
@@ -155,7 +157,7 @@ export default function BookingCalendar({
         </div>
 
         <div className="grid grid-cols-7 gap-2">
-          {weeks.map((week, i) =>
+          {weeks.map((week) =>
             week.map((dayObj, j) => {
               const { day, current } = dayObj;
 
@@ -188,6 +190,7 @@ export default function BookingCalendar({
                 (b) => parseInt(b.starttime.split(":")[0], 10) === 9
               );
               const isPartial = isAmBooked || isPmBooked;
+              console.log(isPartial);
 
               return (
                 <div

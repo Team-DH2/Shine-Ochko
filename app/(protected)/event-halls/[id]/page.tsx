@@ -5,24 +5,43 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { FaMapMarkerAlt, FaPhone, FaParking } from "react-icons/fa";
 import { FaPeopleGroup } from "react-icons/fa6";
 import { IoMdCheckmarkCircleOutline } from "react-icons/io";
-import { MdMonochromePhotos, MdOutlineRestaurantMenu } from "react-icons/md";
-import { useEffect, useRef, useState } from "react";
+import { MdOutlineRestaurantMenu } from "react-icons/md";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { Header } from "@/components/us/Header";
 import MonthlyCalendar from "@/components/event-halls/DayCalendar";
+import Image from "next/image";
+
+interface EventHall {
+  id: number;
+  name: string;
+  location?: string | null;
+  capacity?: string | null;
+  description?: string | null;
+  suitable_events: string[];
+  created_at?: Date | string | null;
+  images: string[];
+  phonenumber?: string | null;
+  menu: string[];
+  parking_capacity?: number | null;
+  additional_informations: string[];
+  informations_about_hall: string[];
+  advantages: string[];
+}
 
 export default function SelectedEventHall() {
   const params = useParams();
   const eventHallId = params.id as string;
 
-  const [eventHallData, setEventHallData] = useState<any>(null);
+  const [eventHallData, setEventHallData] = useState<EventHall | null>(null);
 
-  const [api, setApi] = useState<any>();
+  const [api, setApi] = useState<CarouselApi>();
   const autoplayPlugin = useRef(
     Autoplay({
       delay: 3000,
@@ -40,7 +59,8 @@ export default function SelectedEventHall() {
     });
   }, [api]);
 
-  const getSelectedEventHall = async () => {
+  const getSelectedEventHall = useCallback(async () => {
+    if (!eventHallId) return;
     try {
       const res = await fetch(`http://localhost:3000/api/selected-event-hall`, {
         method: "POST",
@@ -56,15 +76,15 @@ export default function SelectedEventHall() {
     } catch (error) {
       console.error("Error fetching event hall:", error);
     }
-  };
+  }, [eventHallId]);
 
   useEffect(() => {
     getSelectedEventHall();
-  }, [eventHallId]);
+  }, [getSelectedEventHall]);
 
   return (
     <div className="min-h-screen bg-black pb-20">
-      <Header></Header>
+      <Header />
       <div className="w-full relative">
         <Carousel
           className="w-full"
@@ -78,10 +98,11 @@ export default function SelectedEventHall() {
             {eventHallData?.images?.map((src: string, index: number) => (
               <CarouselItem key={index}>
                 <div className="relative w-full h-[70vh] overflow-hidden flex items-center justify-center">
-                  <img
+                  <Image
+                    fill
                     src={src}
-                    alt="Midway Event Hall"
-                    className="w-full h-full object-cover animate-fadeIn"
+                    alt={eventHallData?.name || "Event Hall Image"}
+                    className="object-cover animate-fadeIn"
                   />
 
                   <div className="absolute inset-0 bg-black/40 animate-fadeIn" />
@@ -104,7 +125,7 @@ export default function SelectedEventHall() {
 
       <div className="max-w-6xl mx-auto space-y-6 text-white">
         {/* Location and Contact Info */}
-        <div className="bg-gray-500 rounded-sm p-3 my-20">
+        <div className="bg-neutral-900 rounded-lg p-6 my-20">
           <div className="space-y-1">
             <div className="text-white-100 flex gap-5 items-center">
               <FaMapMarkerAlt size={24} color="blue" />
@@ -144,7 +165,7 @@ export default function SelectedEventHall() {
         </div>
 
         {/* Main Info */}
-        <div className="bg-gray-500 rounded-sm">
+        <div className="bg-neutral-900 rounded-lg">
           <div className="p-6 space-y-4">
             <p>{eventHallData?.description}</p>
 
@@ -166,7 +187,7 @@ export default function SelectedEventHall() {
         </div>
 
         <div className="flex  justify-between my-20">
-          <div className="p-6 space-y-4 bg-gray-500 rounded-sm">
+          <div className="p-6 space-y-4 bg-neutral-900 rounded-lg">
             <h3 className="text-2xl font-bold text-white border-b-2 border-blue-500 pb-2 mb-4">
               Нэмэлт мэдээлэл
             </h3>
@@ -183,7 +204,7 @@ export default function SelectedEventHall() {
           </div>
 
           {/* Suitable Events */}
-          <div className="bg-gray-500 rounded-sm">
+          <div className="bg-neutral-900 rounded-lg">
             <div className="p-6 space-y-4">
               <h3 className="text-2xl font-bold text-white border-b-2 border-blue-500 pb-2 mb-4">
                 Тохиромжтой хүлээн авалтууд
@@ -202,7 +223,7 @@ export default function SelectedEventHall() {
           </div>
 
           {/* Hall Specs */}
-          <div className="p-6 space-y-3 bg-gray-500 rounded-sm ">
+          <div className="p-6 space-y-3 bg-neutral-900 rounded-lg ">
             <h3 className="text-2xl font-bold text-white border-b-2 border-blue-500 pb-2 mb-4">
               Танхимын мэдээлэл
             </h3>
@@ -226,15 +247,15 @@ export default function SelectedEventHall() {
           Манай үйлчлүүлэгчдийн сэтгэгдэл
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gray-500 rounded-lg p-6 space-y-4">
+          <div className="bg-neutral-900 rounded-lg p-6 space-y-4">
             <div className="flex gap-2 text-yellow-400">
               {[...Array(5)].map((_, i) => (
                 <span key={i}>★</span>
               ))}
             </div>
             <p className="text-white italic">
-              "Гайхалтай орчин, мэргэжлийн үйлчилгээ. Хуримын баярыг маань
-              дурсамжтай болгосонд баярлалаа!"
+              {`Гайхалтай орчин, мэргэжлийн үйлчилгээ. Хуримын баярыг маань
+              дурсамжтай болгосонд баярлалаа!`}
             </p>
             <div className="border-t border-gray-400 pt-4">
               <p className="text-white font-semibold">Батболд Б.</p>
@@ -243,15 +264,15 @@ export default function SelectedEventHall() {
           </div>
 
           {/* Testimonial 2 */}
-          <div className="bg-gray-500 rounded-lg p-6 space-y-4">
+          <div className="bg-neutral-900 rounded-lg p-6 space-y-4">
             <div className="flex gap-2 text-yellow-400">
               {[...Array(5)].map((_, i) => (
                 <span key={i}>★</span>
               ))}
             </div>
             <p className="text-white italic">
-              "Компанийн арга хэмжээ зохион байгуулахад тохиромжтой. Техник
-              хэрэгсэл, сандал ширээ бүгд гоё байсан."
+              {`"Компанийн арга хэмжээ зохион байгуулахад тохиромжтой. Техник
+              хэрэгсэл, сандал ширээ бүгд гоё байсан."`}
             </p>
             <div className="border-t border-gray-400 pt-4">
               <p className="text-white font-semibold">Сарантуяа Ч.</p>
@@ -260,15 +281,15 @@ export default function SelectedEventHall() {
           </div>
 
           {/* Testimonial 3 */}
-          <div className="bg-gray-500 rounded-lg p-6 space-y-4">
+          <div className="bg-neutral-900 rounded-lg p-6 space-y-4">
             <div className="flex gap-2 text-yellow-400">
               {[...Array(5)].map((_, i) => (
                 <span key={i}>★</span>
               ))}
             </div>
             <p className="text-white italic">
-              "Төгс байршил, үйлчилгээ сайхан. Хүүгийнхээ төрсөн өдрийг энд
-              тэмдэглэсэн нь маш таатай байлаа!"
+              {`Төгс байршил, үйлчилгээ сайхан. Хүүгийнхээ төрсөн өдрийг энд
+              тэмдэглэсэн нь маш таатай байлаа!`}
             </p>
             <div className="border-t border-gray-400 pt-4">
               <p className="text-white font-semibold">Эрдэнэ М.</p>

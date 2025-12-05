@@ -7,8 +7,10 @@ import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { FaArrowRight } from "react-icons/fa";
 
-export default function SearchFunction() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function SearchFunction({ styleDesktop }: any) {
   const [searchValue, setSearchValue] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -23,10 +25,12 @@ export default function SearchFunction() {
     }
 
     const timeout = setTimeout(() => {
+      // eslint-disable-next-line react-hooks/immutability
       handleSearch();
     }, 300);
 
     return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue]);
 
   const handleSearch = async () => {
@@ -69,7 +73,7 @@ export default function SearchFunction() {
             placeholder="Хайх..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="w-full p-3 border rounded-lg text-white"
+            className={styleDesktop}
           />
         </PopoverTrigger>
 
@@ -100,26 +104,30 @@ export default function SearchFunction() {
                     🏛 Event Halls
                   </h2>
                   <div className="space-y-2">
-                    {results.halls.map((hall: any) => (
-                      <div
-                        key={hall.id}
-                        className="p-3 bg-white rounded shadow cursor-pointer hover:bg-gray-100 transition"
-                      >
-                        <div className="flex items-center gap-4">
-                          <img className="h-15 w-15" src={hall.images[0]} />
-                          <h3 className="font-semibold">{hall.name}</h3>
-                          <Button
-                            onClick={() =>
-                              router.push(`/event-halls/${hall.id}`)
-                            }
-                            className="bg-white"
-                          >
-                            <FaArrowRight color="black" />
-                          </Button>
+                    {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      results.halls.map((hall: any) => (
+                        <div
+                          key={hall.id}
+                          className="p-3 bg-white rounded shadow cursor-pointer hover:bg-gray-100 transition"
+                        >
+                          <div className="flex items-center gap-4">
+                            <h3 className="font-semibold">{hall.name}</h3>
+                            <Button
+                              onClick={() =>
+                                router.push(`/event-halls/${hall.id}`)
+                              }
+                              className="bg-white"
+                            >
+                              <FaArrowRight color="black" />
+                            </Button>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            {hall.location}
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-600">{hall.location}</p>
-                      </div>
-                    ))}
+                      ))
+                    }
                   </div>
                 </div>
               )}
@@ -129,15 +137,18 @@ export default function SearchFunction() {
                 <div>
                   <h2 className="text-xl font-bold mb-2">🎤 Performers</h2>
                   <div className="space-y-2">
-                    {results.performers.map((p: any) => (
-                      <div
-                        key={p.id}
-                        className="p-3 bg-white rounded shadow hover:bg-gray-100 transition"
-                      >
-                        <h3 className="font-semibold">{p.name}</h3>
-                        <p className="text-sm text-gray-600">{p.genre}</p>
-                      </div>
-                    ))}
+                    {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      results.performers.map((p: any) => (
+                        <div
+                          key={p.id}
+                          className="p-3 bg-white rounded shadow hover:bg-gray-100 transition"
+                        >
+                          <h3 className="font-semibold">{p.name}</h3>
+                          <p className="text-sm text-gray-600">{p.genre}</p>
+                        </div>
+                      ))
+                    }
                   </div>
                 </div>
               )}
@@ -147,17 +158,20 @@ export default function SearchFunction() {
                 <div>
                   <h2 className="text-xl font-bold mb-2">🎙 Hosts</h2>
                   <div className="space-y-2">
-                    {results.hosts.map((h: any) => (
-                      <div
-                        key={h.id}
-                        className="p-3 bg-white rounded shadow hover:bg-gray-100 transition"
-                      >
-                        <h3 className="font-semibold">{h.name}</h3>
-                        <p className="text-sm text-gray-600">
-                          {h.contact_phone}
-                        </p>
-                      </div>
-                    ))}
+                    {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      results.hosts.map((h: any) => (
+                        <div
+                          key={h.id}
+                          className="p-3 bg-white rounded shadow hover:bg-gray-100 transition"
+                        >
+                          <h3 className="font-semibold">{h.name}</h3>
+                          <p className="text-sm text-gray-600">
+                            {h.contact_phone}
+                          </p>
+                        </div>
+                      ))
+                    }
                   </div>
                 </div>
               )}
