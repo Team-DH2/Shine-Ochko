@@ -41,6 +41,7 @@ model event_halls {
   advantages              String[]
   price                   Int[]
   rating                  String?
+  location_link           String?
   booking                 booking[]
 }
 
@@ -111,6 +112,7 @@ model hosts {
   rating                         Float?   @db.Real
   status                         String?
   booking                        Int?
+  price                          Int?     @default(0)
   booking_hosts_bookingTobooking booking? @relation("hosts_bookingTobooking", fields: [booking], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
