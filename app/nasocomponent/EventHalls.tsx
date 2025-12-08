@@ -150,7 +150,7 @@ export default function EventHalls() {
 
                   <Button
                     onClick={() => router.push(`/event-halls/${hall.id}`)}
-                    className="w-full border rounded-xl mt-3 hover:bg-blue-600"
+                    className="w-full rounded-xl mt-3 bg-neutral-800 hover:bg-neutral-700"
                   >
                     Дэлгэрэнгүй
                   </Button>
