@@ -73,7 +73,9 @@ export const Header = () => {
           <ButtonOfNav href="/performers" text="Performers" />
           <ButtonOfNav href="/hosts" text="Hosts" />
           <ButtonOfNav href="/dashboard" text="Dashboard" />
-          <ButtonOfNav href="/contact" text="Contact" />
+          <ButtonOfNav href="/eventhall-form" text="Event Hall Form" />
+          <ButtonOfNav href="/profile" text="Profile" />
+          <ButtonOfNav href="/adminpanel" text="Admin Panel" />
         </div>
 
         <div className="flex-1 flex justify-end items-center gap-3">

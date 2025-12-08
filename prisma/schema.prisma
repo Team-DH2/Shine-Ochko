@@ -41,7 +41,23 @@ model event_halls {
   advantages              String[]
   price                   Int[]
   rating                  String?
+  location_link           String?
   booking                 booking[]
+}
+
+model hosts {
+  id                             Int      @id @default(autoincrement())
+  name                           String?
+  email                          String?
+  phone                          String?
+  title                          String?
+  image                          String?
+  tags                           String[]
+  rating                         Float?   @db.Real
+  status                         String?
+  booking                        Int?
+  price                          Int?     @default(0)
+  booking_hosts_bookingTobooking booking? @relation("hosts_bookingTobooking", fields: [booking], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model performers {
@@ -98,20 +114,6 @@ model Form {
   email     String
   images    String[]
   createdat DateTime? @default(now()) @db.Timestamp(6)
-}
-
-model hosts {
-  id                             Int      @id @default(autoincrement())
-  name                           String?
-  email                          String?
-  phone                          String?
-  title                          String?
-  image                          String?
-  tags                           String[]
-  rating                         Float?   @db.Real
-  status                         String?
-  booking                        Int?
-  booking_hosts_bookingTobooking booking? @relation("hosts_bookingTobooking", fields: [booking], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 enum bookingstatus {

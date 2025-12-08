@@ -33,6 +33,7 @@ interface EventHall {
   additional_informations: string[];
   informations_about_hall: string[];
   advantages: string[];
+  localtion_link?: string | undefined;
 }
 
 export default function SelectedEventHall() {
@@ -131,7 +132,7 @@ export default function SelectedEventHall() {
               <FaMapMarkerAlt size={24} color="blue" />
               {eventHallData?.location}
               <a
-                href={`https://www.google.com/maps/place/Midway+Event+Center/@47.9038805,106.8910098,17z/data=!3m1!4b1!4m6!3m5!1s0x5d96916a158eb7f5:0xcdab03b9944b444b!8m2!3d47.9038805!4d106.8935901!16s%2Fg%2F11k6tnqw_2?entry=ttu&g_ep=EgoyMDI1MTExNy4wIKXMDSoASAFQAw%3D%3D`}
+                href={eventHallData?.localtion_link}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 underline cursor-pointer transition-colors"

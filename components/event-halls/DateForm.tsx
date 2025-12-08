@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const DateForm = ({
   hallId,
@@ -8,13 +9,39 @@ const DateForm = ({
   hallId: string | number;
   selected: { date: string; type: "am" | "pm" | "udur" }[];
 }) => {
-  const mockPrices: { [key: string]: number } = {
-    am: 50000, // 08:00-12:00
-    pm: 60000, // 18:00-22:00
-    udur: 150000, // 09:00-18:00
+  const [prices, setPrices] = useState<{
+    am: number;
+    pm: number;
+    udur: number;
+  }>({
+    am: 0,
+    pm: 0,
+    udur: 0,
+  });
+
+  const getPrices = async () => {
+    try {
+      const res = await fetch(`/api/event-halls/prices?hallId=${hallId}`);
+      const data = await res.json();
+
+      const mapped = {
+        am: data.price?.[0] ?? 0,
+        pm: data.price?.[1] ?? 0,
+        udur: data.price?.[2] ?? 0,
+      };
+
+      setPrices(mapped);
+    } catch (err) {
+      console.error("Error fetching prices:", err);
+    }
   };
+  useEffect(() => {
+    if (!hallId) return;
+    getPrices();
+  }, [hallId]);
+  console.log({ prices });
   const calculateTotalPrice = () => {
-    return selected.reduce((total, sel) => total + mockPrices[sel.type], 0);
+    return selected.reduce((total, sel) => total + prices[sel.type], 0);
   };
   const router = useRouter();
   const handleSubmit = async () => {
