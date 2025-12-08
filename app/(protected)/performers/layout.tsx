@@ -12,9 +12,7 @@ export default function RootLayout({
         <Header />
       </div>
       {/* Main content area becomes the scroll container */}
-      <main className="h-screen w-screen overflow-y-auto snap-y snap-mandatory">
-        {children}
-      </main>
+      <main>{children}</main>
     </div>
   );
 }
