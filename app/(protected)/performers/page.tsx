@@ -108,54 +108,70 @@ export default function PerformersPage() {
         isPopover ? "max-h-[80vh] overflow-y-auto p-3" : "p-6"
       }`}
     >
-      <h2 className="text-xl font-bold text-blue-600 mb-4">
+      <h2 className="text-xl font-bold text-white mb-4">
         Таны захиалсан Event hall
       </h2>
 
       {/* Scrollable bookings list */}
-      <div className="flex-1 min-h-0 overflow-y-auto max-h-56 mb-4">
+      <div className="max-h-60 overflow-y-auto pr-2 space-y-3 custom-scroll">
         {bookings.map((b: any) => (
-          <div key={b.id} className="rounded-xl bg-neutral-900 mb-2 p-3">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-md font-semibold text-white">
+          <div
+            key={b.id}
+            className="rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4 hover:bg-neutral-800/80 transition-colors backdrop-blur-sm"
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-lg font-semibold text-white">
                 {b.event_halls?.name ?? "Event Hall"}
               </h2>
+
               <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${
                   b.status === "pending"
-                    ? "bg-yellow-100 text-yellow-700"
+                    ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
                     : b.status === "approved"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
+                    ? "bg-green-500/20 text-green-300 border border-green-500/30"
+                    : "bg-red-500/20 text-red-300 border border-red-500/30"
                 }`}
               >
                 {b.status}
               </span>
             </div>
-            <div className="text-white mb-1">
+
+            {/* Details */}
+            <div className="text-sm text-neutral-300 space-y-1 mb-2">
               <div>
-                <span className="font-medium">Өдөр:</span>{" "}
+                <span className="font-medium text-neutral-100">Өдөр:</span>{" "}
                 {new Date(b.date).toLocaleDateString()}
               </div>
+
               <div>
-                <span className="font-medium">Эхлэх цаг:</span> {b.starttime}
+                <span className="font-medium text-neutral-100">Эхлэх цаг:</span>{" "}
+                {b.starttime}
               </div>
             </div>
-            <p className="text-gray-400 text-sm mb-1">{b.event_description}</p>
-            <p className="text-gray-500 text-sm truncate">
-              📍 {b.event_halls?.location}
+
+            {/* Description */}
+            <p className="text-neutral-400 text-sm mb-2 leading-relaxed">
+              {b.event_description}
             </p>
+
+            {/* Location */}
+            <div className="text-neutral-500 text-sm flex items-center gap-1">
+              <span>📍</span>
+              <span className="truncate">{b.event_halls?.location}</span>
+            </div>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <h2 className="font-bold text-blue-600 mb-4">Шүүлтүүр</h2>
+      <h2 className="font-bold text-white mb-4 mt-3">Шүүлтүүр</h2>
 
       {/* Genre */}
       <div className="mb-6">
         <h3
-          className="font-semibold mb-3 flex items-center gap-2 cursor-pointer hover:text-blue-600"
+          className="font-semibold mb-3 flex items-center gap-2 cursor-pointer hover:text-neutral-300"
           onClick={() => setIsGenreOpen(!isGenreOpen)}
         >
           🎵 Төрөл
@@ -192,7 +208,7 @@ export default function PerformersPage() {
 
       {/* Availability */}
       <div className="mb-6">
-        <h3 className="font-semibold text-blue-600 mb-3">Боломжтой эсэх</h3>
+        <h3 className="font-semibold text-white mb-3">Боломжтой эсэх</h3>
         <div className="space-y-2">
           {availabilityOptions.map((option) => (
             <label
@@ -217,7 +233,7 @@ export default function PerformersPage() {
 
       {/* Popularity */}
       <div className="mb-6">
-        <h3 className="font-semibold text-blue-600 mb-3">Алдартай байдал</h3>
+        <h3 className="font-semibold text-white mb-3">Алдартай байдал</h3>
         <input
           type="range"
           min="0"
@@ -234,7 +250,7 @@ export default function PerformersPage() {
 
       {/* Price */}
       <div className="mb-6">
-        <h3 className="font-semibold text-blue-600 mb-3">Үнийн хүрээ</h3>
+        <h3 className="font-semibold text-white mb-3">Үнийн хүрээ</h3>
         <div className="space-y-3">
           <div>
             <label className="text-xs text-gray-400 mb-1 block">
@@ -311,13 +327,13 @@ export default function PerformersPage() {
             <div className="lg:hidden">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button className="gap-2 bg-white text-black">
+                  <Button className="gap-2 bg-white text-black hover:bg-neutral-200 ">
                     <Filter className="h-4 w-4" />
                     Шүүлтүүр
                   </Button>
                 </PopoverTrigger>
 
-                <PopoverContent className="w-80 bg-neutral-900 text-white">
+                <PopoverContent className="w-80 bg-neutral-900 text-white border border-neutral-800">
                   <FilterControls isPopover={true} />
                 </PopoverContent>
               </Popover>

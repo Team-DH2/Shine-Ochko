@@ -86,18 +86,18 @@ export const Header = () => {
           {isLoggedIn ? (
             <button
               onClick={handleLogoutClick}
-              className="bg-blue-600  rounded-md px-4 h-10 text-sm"
+              className="bg-blue-600  rounded-md px-4 h-10 text-sm font-semibold"
             >
               LogOut
             </button>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ">
               <button
                 onClick={() => {
                   setAuthView("login");
                   setIsAuthModalOpen(true);
                 }}
-                className="bg-transparent rounded-md h-10 px-4 text-sm"
+                className="bg-transparent rounded-md h-10 px-4 text-sm font-semibold"
               >
                 LogIn
               </button>
@@ -106,7 +106,7 @@ export const Header = () => {
                   setAuthView("signup");
                   setIsAuthModalOpen(true);
                 }}
-                className="bg-blue-600 rounded-md px-4 h-10 text-sm"
+                className="bg-blue-600 rounded-md px-4 h-10 text-sm font-semibold"
               >
                 SignUp
               </button>
