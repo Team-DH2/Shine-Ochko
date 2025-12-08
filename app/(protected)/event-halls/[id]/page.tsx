@@ -33,6 +33,7 @@ interface EventHall {
   additional_informations: string[];
   informations_about_hall: string[];
   advantages: string[];
+  localtion_link?: string | undefined;
 }
 
 export default function SelectedEventHall() {
@@ -131,7 +132,7 @@ export default function SelectedEventHall() {
               <FaMapMarkerAlt size={24} color="blue" />
               {eventHallData?.location}
               <a
-                href={eventHallData?.location_link}
+                href={eventHallData?.localtion_link}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 underline cursor-pointer transition-colors"
