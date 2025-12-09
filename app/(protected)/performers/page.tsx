@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/immutability */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -47,6 +45,49 @@ export default function PerformersPage() {
       setPerformers(data.performers || []);
     } catch (error) {
       console.error("Error fetching performers:", error);
+    }
+  };
+  const HandleOnPerformerBooking = async (performerId: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
+        return;
+      }
+
+      if (bookings.length === 0) {
+        alert("Та эхлээд Event Hall захиалах шаардлагатай.");
+        return;
+      }
+
+      // Хэрэглэгчийн сонгосон эхний hall
+      const selectedHall = bookings[0]; // эхний захиалга
+      const hallId = selectedHall.hallid;
+      const starttime = selectedHall.starttime;
+
+      console.log({ hallId, starttime });
+
+      const res = await fetch("/api/performer-bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ performerId, hallId, starttime }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert(
+          "Уран бүтээлчийг захиалах хүсэлт явууллаа. Таньд мэдэгдэл ирнэ, Dashboard хэсгээс харна уу!"
+        );
+      } else {
+        alert(data.message || "Захиалга амжилтгүй боллоо.");
+      }
+    } catch (error) {
+      console.error("Error booking performer:", error);
+      alert("Серверийн алдаа.");
     }
   };
 
@@ -402,7 +443,10 @@ export default function PerformersPage() {
                       Профайл үзэх
                     </button>
 
-                    <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg">
+                    <button
+                      onClick={() => HandleOnPerformerBooking(performer.id)}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+                    >
                       Захиалах
                     </button>
                   </div>

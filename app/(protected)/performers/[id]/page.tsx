@@ -12,7 +12,6 @@ import {
   FaPause,
   FaVolumeUp,
 } from "react-icons/fa";
-import { Header } from "@/components/us/Header";
 
 declare global {
   interface Window {
