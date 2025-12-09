@@ -52,11 +52,6 @@ export async function POST(req: NextRequest) {
 
     if (exists) {
       // EMAIL: Already booked notify
-      await sendEmail({
-        email: user.email,
-        name: user.name,
-        content: `Та ${exists.performers?.name}-г аль хэдийн захиалсан байна.`,
-      });
 
       return NextResponse.json({
         success: false,

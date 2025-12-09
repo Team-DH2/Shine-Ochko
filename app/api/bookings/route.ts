@@ -26,7 +26,25 @@ export async function GET(req: NextRequest) {
       orderBy: { id: "desc" },
     });
 
-    return NextResponse.json({ bookings: results });
+    // Fetch all bookings with performer info for availability check
+    const allBookings = await prisma.booking.findMany({
+      where: {
+        performersid: { not: null },
+        status: { in: ["pending", "approved"] },
+      },
+      select: {
+        id: true,
+        performersid: true,
+        date: true,
+        starttime: true,
+        status: true,
+      },
+    });
+
+    return NextResponse.json({
+      bookings: results,
+      allBookings: allBookings,
+    });
   } catch (error) {
     console.error("GET bookings error:", error);
     return NextResponse.json({ error: "Серверийн алдаа" }, { status: 500 });

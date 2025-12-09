@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Popover,
@@ -27,8 +27,12 @@ export default function PerformersPage() {
   const [sortBy, setSortBy] = useState<string>("popularity");
   const [isGenreOpen, setIsGenreOpen] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingBookings, setIsLoadingBookings] = useState(true);
+  const [bookingPerformer, setBookingPerformer] = useState<number | null>(null);
+  const [allBookings, setAllBookings] = useState<any[]>([]); // All bookings to check availability
+  const bookingRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     fetchPerformers();
@@ -39,7 +43,15 @@ export default function PerformersPage() {
     setIsLoadingBookings(true);
     fetch("/api/bookings")
       .then((res) => res.json())
-      .then((data) => setBookings(data.bookings || []))
+      .then((data) => {
+        const bookingsData = data.bookings || [];
+        setBookings(bookingsData);
+        setAllBookings(data.allBookings || []); // Store all bookings for availability check
+        // Automatically select first booking if available
+        if (bookingsData.length > 0) {
+          setSelectedBooking(bookingsData[0]);
+        }
+      })
       .finally(() => setIsLoadingBookings(false));
   }, []);
 
@@ -48,6 +60,8 @@ export default function PerformersPage() {
     try {
       const res = await fetch("/api/performers");
       const data = await res.json();
+      console.log("Fetched performers:", data.performers);
+
       setPerformers(data.performers || []);
     } catch (error) {
       console.error("Error fetching performers:", error);
@@ -55,16 +69,47 @@ export default function PerformersPage() {
       setIsLoading(false);
     }
   };
+
+  // Check if performer is available for selected booking date/time
+  const checkPerformerAvailability = (performerId: number) => {
+    if (!selectedBooking) return "Боломжтой";
+
+    // Check if performer has any booking for the selected date and time
+    const hasBooking = allBookings.some(
+      (booking: any) =>
+        booking.performersid === performerId &&
+        booking.date === selectedBooking.date &&
+        booking.starttime === selectedBooking.starttime &&
+        (booking.status === "pending" || booking.status === "approved")
+    );
+
+    if (hasBooking) return "Захиалагдсан";
+    return "Боломжтой";
+  };
+
   const HandleOnPerformerBooking = async (performerId: number) => {
     try {
+      setBookingPerformer(performerId);
       const token = localStorage.getItem("token");
       if (!token) {
         alert("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
+        setBookingPerformer(null);
         return;
       }
 
       if (!selectedBooking) {
         alert("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
+        setBookingPerformer(null);
+        return;
+      }
+
+      // Check if performer is already booked for this date/time
+      const availability = checkPerformerAvailability(performerId);
+      if (availability === "Захиалагдсан") {
+        alert(
+          "Уучлаарай, энэ уран бүтээлч сонгосон өдөр болон цагт аль хэдийн захиалагдсан байна."
+        );
+        setBookingPerformer(null);
         return;
       }
 
@@ -92,6 +137,8 @@ export default function PerformersPage() {
     } catch (error) {
       console.error("Error booking performer:", error);
       alert("Серверийн алдаа.");
+    } finally {
+      setBookingPerformer(null);
     }
   };
 
@@ -105,6 +152,29 @@ export default function PerformersPage() {
     }
   };
 
+  const handleBookingSelect = (booking: any) => {
+    setSelectedBooking(booking);
+    console.log("Selected Booking Details:", {
+      id: booking.id,
+      date: booking.date,
+      starttime: booking.starttime,
+      endtime: booking.endtime,
+      hallId: booking.hallid,
+      hallName: booking.event_halls?.name,
+      status: booking.status,
+    });
+    // Scroll the selected booking into view
+    setTimeout(() => {
+      const element = bookingRefs.current[booking.id];
+      if (element) {
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }
+    }, 100);
+  };
+
   const availabilityOptions = ["Боломжтой", "Хүлээгдэж байна", "Захиалагдсан"];
 
   const filteredPerformers = performers.filter((performer) => {
@@ -112,9 +182,11 @@ export default function PerformersPage() {
       selectedGenres.length === 0 ||
       selectedGenres.some((genre) => performer.genre?.includes(genre));
 
+    // Check availability based on bookings instead of availability column
+    const availability = checkPerformerAvailability(performer.id);
     const availabilityMatch =
       selectedAvailability.length === 0 ||
-      selectedAvailability.includes(performer.availability);
+      selectedAvailability.includes(availability);
 
     const popularityMatch = (performer.popularity || 0) >= minPopularity;
     const priceMatch =
@@ -181,12 +253,25 @@ export default function PerformersPage() {
           : bookings.map((b: any) => (
               <div
                 key={b.id}
-                className="rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4 hover:bg-neutral-800/80 transition-colors backdrop-blur-sm"
+                ref={(el) => {
+                  bookingRefs.current[b.id] = el;
+                }}
+                onClick={() => handleBookingSelect(b)}
+                className={`rounded-xl bg-neutral-800/60 border p-4 hover:bg-neutral-800/80 transition-colors backdrop-blur-sm cursor-pointer ${
+                  selectedBooking?.id === b.id
+                    ? "border-blue-500 bg-neutral-800/80"
+                    : "border-neutral-700/40"
+                }`}
               >
                 {/* Header */}
                 <div className="flex justify-between items-center mb-3">
                   <h2 className="text-lg font-semibold text-white">
                     {b.event_halls?.name ?? "Event Hall"}
+                    {selectedBooking?.id === b.id && (
+                      <span className="ml-2 text-blue-400 text-sm">
+                        ✓ Сонгогдсон
+                      </span>
+                    )}
                   </h2>
 
                   <span
@@ -457,22 +542,31 @@ export default function PerformersPage() {
                     className="bg-neutral-900 rounded-lg overflow-hidden hover:scale-[1.02] transition"
                   >
                     <div className="relative h-90 bg-neutral-800">
-                      <Image
-                        src={
-                          performer.image ||
-                          "https://via.placeholder.com/400x300?text=No+Image"
-                        }
-                        alt={performer.name}
-                        fill
-                        className="object-cover"
-                      />
+                      {performer.image ? (
+                        <Image
+                          src={performer.image}
+                          alt={performer.name}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src =
+                              "https://via.placeholder.com/400x300?text=No+Image";
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-neutral-500">
+                          No Image
+                        </div>
+                      )}
 
                       <div
                         className={`absolute top-3 left-3 ${getAvailabilityColor(
-                          performer.availability || "Боломжтой"
+                          checkPerformerAvailability(performer.id)
                         )} text-white px-3 py-1 rounded-full text-xs font-semibold`}
                       >
-                        {performer.availability || "Боломжтой"}
+                        {checkPerformerAvailability(performer.id)}
                       </div>
                     </div>
 
@@ -515,9 +609,16 @@ export default function PerformersPage() {
 
                         <button
                           onClick={() => HandleOnPerformerBooking(performer.id)}
-                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+                          disabled={bookingPerformer === performer.id}
+                          className={`flex-1 text-white py-2 rounded-lg transition-colors ${
+                            bookingPerformer === performer.id
+                              ? "bg-blue-400 cursor-not-allowed"
+                              : "bg-blue-600 hover:bg-blue-700"
+                          }`}
                         >
-                          Захиалах
+                          {bookingPerformer === performer.id
+                            ? "Түр хүлээнэ үү..."
+                            : "Захиалах"}
                         </button>
                       </div>
                     </div>
