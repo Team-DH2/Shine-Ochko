@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       );
     }
+
     // ---- hallId ба performerId хослолыг шалгах ----
     const existingBooking = await prisma.booking.findFirst({
       where: {
@@ -61,7 +62,12 @@ export async function POST(req: NextRequest) {
     let booking = await prisma.booking.findFirst({
       where: {
         hallid: hallId,
-        performersid: null, // performerId хараахан оноогдоогүй
+        performersid: null,
+      },
+      include: {
+        performers: true,
+        event_halls: true,
+        User: true,
       },
     });
 
@@ -87,13 +93,13 @@ export async function POST(req: NextRequest) {
           userid: userId,
           hallid: hallId,
           performersid: performerId,
-          ordereddate: new Date(), // Захиалга хийсэн өдөр
-          date: new Date(date), // Үйл явдал болох өдөр (шинэ)
+          ordereddate: new Date(),
+          date: new Date(date),
           starttime,
           status: "pending",
         },
         include: {
-          performers: true,
+          performers: true, // ✅ include
           event_halls: true,
           User: true,
         },
@@ -101,38 +107,38 @@ export async function POST(req: NextRequest) {
     }
 
     // ---- Performer-д email илгээх ----
-    // if (booking.performers?.contact_email) {
-    //   const performerEmailContent = `
-    //     <p>Сайн байна уу, ${booking.performers?.name}?</p>
-    //     <p>Хэрэглэгч <strong>${
-    //       booking.User.name
-    //     }</strong> танай Event Hall-д захиалга хүсэлт илгээсэн байна:</p>
-    //     <ul>
-    //       <li>Event Hall: ${booking.event_halls?.name}</li>
-    //       <li>Огноо: ${new Date(booking.date).toLocaleDateString()}</li>
-    //       <li>Эхлэх цаг: ${booking.starttime || "Тодорхойгүй"}</li>
-    //     </ul>
-    //     <p>Захиалга баталгаажуулахын тулд доорх товч дээр дарна уу:</p>
-    //     <p>
-    //       <a href="${
-    //         process.env.NEXT_PUBLIC_BASE_URL
-    //       }/booking-response?bookingId=${
-    //     booking.id
-    //   }&action=approve" style="padding:10px 20px; background-color:green; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Approve</a>
-    //       <a href="${
-    //         process.env.NEXT_PUBLIC_BASE_URL
-    //       }/booking-response?bookingId=${
-    //     booking.id
-    //   }&action=decline" style="padding:10px 20px; background-color:red; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Decline</a>
-    //     </p>
-    //   `;
+    if (booking.performers?.contact_email) {
+      const performerEmailContent = `
+        <p>Сайн байна уу, ${booking.performers.name}?</p>
+        <p>Хэрэглэгч <strong>${
+          booking.User.name
+        }</strong> танай Event Hall-д захиалга хүсэлт илгээсэн байна:</p>
+        <ul>
+          <li>Event Hall: ${booking.event_halls?.name}</li>
+          <li>Огноо: ${new Date(booking.date).toLocaleDateString()}</li>
+          <li>Эхлэх цаг: ${booking.starttime || "Тодорхойгүй"}</li>
+        </ul>
+        <p>Захиалга баталгаажуулахын тулд доорх товч дээр дарна уу:</p>
+        <p>
+          <a href="${
+            process.env.NEXT_PUBLIC_BASE_URL
+          }/booking-response?bookingId=${
+        booking.id
+      }&action=approve" style="padding:10px 20px; background-color:green; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Approve</a>
+          <a href="${
+            process.env.NEXT_PUBLIC_BASE_URL
+          }/booking-response?bookingId=${
+        booking.id
+      }&action=decline" style="padding:10px 20px; background-color:red; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Decline</a>
+        </p>
+      `;
 
-    //   await sendEmail({
-    //     email: booking.performers.contact_email,
-    //     name: booking.performers.name,
-    //     content: performerEmailContent,
-    //   });
-    // }
+      await sendEmail({
+        email: booking.performers.contact_email,
+        name: booking.performers.name,
+        content: performerEmailContent,
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -160,10 +166,14 @@ async function sendEmail({ email, name, content }: any) {
     },
   });
 
-  await transporter.sendMail({
-    from: `"Event Hall" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: "Танд шинэ захиалга ирлээ",
-    html: content,
-  });
+  try {
+    await transporter.sendMail({
+      from: `"Event Hall" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Танд шинэ захиалга ирлээ",
+      html: content,
+    });
+  } catch (err) {
+    console.error("Email send error:", err);
+  }
 }
