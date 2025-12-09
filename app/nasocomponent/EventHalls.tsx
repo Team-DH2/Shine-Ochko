@@ -1,29 +1,25 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { MapPin, Star, Users, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import EventHallsPage from "./EventHallFilter"; // Filter Component
-import { useRouter } from "next/navigation"; // ← н
+import EventHallsPage from "./EventHallFilter";
+import { useRouter } from "next/navigation";
 
 export default function EventHalls() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [originalHalls, setOriginalHalls] = useState<any[]>([]);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [filteredHalls, setFilteredHalls] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const router = useRouter();
 
-  // Fetch Data
   useEffect(() => {
     const getData = async () => {
       try {
         const res = await fetch("/api/event-halls");
         const data = await res.json();
-        console.log({ data });
+        console.log(data);
 
         if (data) {
           setOriginalHalls(data.data);
@@ -38,13 +34,11 @@ export default function EventHalls() {
     getData();
   }, []);
 
-  // Auto-close filter on mobile after applied
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isFilterOpen) setIsFilterOpen(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredHalls]);
   console.log({ filteredHalls });
+
   return (
     <div className="flex">
       <div className="w-full min-h-screen mt-20 bg-black text-white flex flex-col md:flex-row gap-6 md:px-9 px-5 md:38">
@@ -99,10 +93,10 @@ export default function EventHalls() {
               >
                 <div className="h-56 bg-neutral-800"></div>
                 <div className="p-4 space-y-3">
-                  <div className="h-4 bg-neutral-800 rounded"></div>
-                  <div className="h-4 bg-neutral-800 rounded w-2/3"></div>
-                  <div className="h-4 bg-neutral-800 rounded w-1/2"></div>
-                  <div className="h-10 bg-neutral-800 rounded-lg mt-4"></div>
+                  <div className="h-4 bg-neutral-800 rounded" />
+                  <div className="h-4 bg-neutral-800 rounded w-2/3" />
+                  <div className="h-4 bg-neutral-800 rounded w-1/2" />
+                  <div className="h-10 bg-neutral-800 rounded-lg mt-4" />
                 </div>
               </div>
             ))}
