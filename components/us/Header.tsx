@@ -55,8 +55,6 @@ export const Header = () => {
     window.location.reload();
   };
 
-  if (!hasMounted) return null;
-
   return (
     <>
       {/* DESKTOP HEADER */}
@@ -81,38 +79,38 @@ export const Header = () => {
             <Search className="mr-[-36] w-5 z-10 text-neutral-500" />
             <SearchFunction styleDesktop={styleDesktop} />
           </div>
-
-          {isLoggedIn ? (
-            <div className="flex gap-2 items-center">
-              <UserIcon className="" />
-              <button
-                onClick={handleLogoutClick}
-                className="bg-blue-600 rounded-md px-4 h-10 text-sm"
-              >
-                LogOut
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 ">
-              <button
-                onClick={() => {
-                  setAuthView("login");
-                  setIsAuthModalOpen(true);
-                }}
-                className="bg-transparent rounded-md h-10 px-4 text-sm font-semibold"
-              >
-                LogIn
-              </button>
-              <button
-                onClick={() => {
-                  setAuthView("signup");
-                  setIsAuthModalOpen(true);
-                }}
-                className="bg-blue-600 rounded-md px-4 h-10 text-sm font-semibold"
-              >
-                SignUp
-              </button>
-            </div>
+          {hasMounted && (
+            <>
+              {isLoggedIn ? (
+                <button
+                  onClick={handleLogoutClick}
+                  className="bg-blue-600  rounded-md px-4 h-10 text-sm"
+                >
+                  LogOut
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setAuthView("login");
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="bg-transparent rounded-md h-10 px-4 text-sm"
+                  >
+                    LogIn
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAuthView("signup");
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="bg-blue-600 rounded-md px-4 h-10 text-sm"
+                  >
+                    SignUp
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -145,33 +143,37 @@ export const Header = () => {
               className="w-6 h-6 text-neutral-300 hover:text-white"
               onClick={() => setIsPhoneSearchOpen(true)}
             />
-            {isLoggedIn ? (
-              <button
-                onClick={handleLogoutClick}
-                className="bg-blue-600 hover:bg-blue-700 rounded-md px-3 h-9 text-xs"
-              >
-                LogOut
-              </button>
-            ) : (
+            {hasMounted && (
               <>
-                <button
-                  onClick={() => {
-                    setAuthView("login");
-                    setIsAuthModalOpen(true);
-                  }}
-                  className="bg-transparent rounded-md h-9 px-3 text-xs"
-                >
-                  LogIn
-                </button>
-                <button
-                  onClick={() => {
-                    setAuthView("signup");
-                    setIsAuthModalOpen(true);
-                  }}
-                  className="bg-blue-600 rounded-md px-3 h-9 text-xs"
-                >
-                  SignUp
-                </button>
+                {isLoggedIn ? (
+                  <button
+                    onClick={handleLogoutClick}
+                    className="bg-blue-600 hover:bg-blue-700 rounded-md px-3 h-9 text-xs"
+                  >
+                    LogOut
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        setAuthView("login");
+                        setIsAuthModalOpen(true);
+                      }}
+                      className="bg-transparent rounded-md h-9 px-3 text-xs"
+                    >
+                      LogIn
+                    </button>
+                    <button
+                      onClick={() => {
+                        setAuthView("signup");
+                        setIsAuthModalOpen(true);
+                      }}
+                      className="bg-blue-600 rounded-md px-3 h-9 text-xs"
+                    >
+                      SignUp
+                    </button>
+                  </>
+                )}
               </>
             )}
           </div>
