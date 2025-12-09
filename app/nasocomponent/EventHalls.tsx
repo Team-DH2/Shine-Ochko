@@ -19,7 +19,6 @@ export default function EventHalls() {
       try {
         const res = await fetch("/api/event-halls");
         const data = await res.json();
-        console.log(data);
 
         if (data) {
           setOriginalHalls(data.data);
