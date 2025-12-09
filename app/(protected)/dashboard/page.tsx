@@ -1,8 +1,7 @@
 "use client";
-import Dashboard from "@/components/event-halls/turshih";
-import { Button } from "@/components/ui/button";
+import Dashboard from "@/components/event-halls/Dashboard";
+
 import { Header } from "@/components/us/Header";
-import { useEffect, useState } from "react";
 
 export default function BookingPage() {
   return (

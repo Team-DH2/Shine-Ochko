@@ -36,7 +36,15 @@ export default function PerformersPage() {
   useEffect(() => {
     fetch("/api/bookings")
       .then((res) => res.json())
-      .then((data) => setBookings(data.bookings || []));
+      .then((data) => {
+        const bookingsData = data.bookings || [];
+        setBookings(bookingsData);
+
+        // Хэрэв зөвхөн 1 booking байвал автоматаар selectedBooking болгоно
+        if (bookingsData.length === 1) {
+          setSelectedBooking(bookingsData[0]);
+        }
+      });
   }, []);
 
   const fetchPerformers = async () => {
@@ -58,6 +66,7 @@ export default function PerformersPage() {
 
       if (!selectedBooking) {
         alert("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
+        router.push("event-halls");
         return;
       }
 

@@ -14,7 +14,6 @@ export default function BookingCalendar({
   const [bookings, setBookings] = useState<any[]>([]);
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
-
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [selected, setSelected] = useState<
