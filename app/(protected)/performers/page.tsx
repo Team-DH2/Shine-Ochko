@@ -89,7 +89,7 @@ export default function PerformersPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-black text-white px-8 pt-25">
+    <div className="min-h-screen w-full bg-black text-white px-40 pt-25">
       <div className="flex gap-8">
         {/* Sidebar */}
         <div className="w-80 shrink-0">
@@ -300,11 +300,28 @@ export default function PerformersPage() {
 
         {/* Performers Grid */}
         <div className="flex-1 w-full">
-          <h1 className="text-4xl font-bold mb-8">Уран бүтээлчид хайх</h1>
+          <div className="flex justify-between">
+            <h1 className="text-4xl font-bold mb-8">Уран бүтээлчид хайх</h1>
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-3">
+              <label className="text-sm text-gray-400">Эрэмбэлэх:</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
+              >
+                <option value="popularity">Алдартай байдал</option>
+                <option value="price-high">Үнэ: Ихээс бага</option>
+                <option value="price-low">Үнэ: Багаас их</option>
+                <option value="name">Нэр</option>
+              </select>
+            </div>
+          </div>
+
           <div className="mb-4 text-gray-400 text-sm">
             {sortedPerformers.length} уран бүтээлч олдлоо
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {sortedPerformers.map((performer) => (
               <div
                 key={performer.id}
