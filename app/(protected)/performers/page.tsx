@@ -232,7 +232,7 @@ export default function PerformersPage() {
               >
                 <Checkbox
                   checked={selectedGenres.includes(genre)}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={(checked: any) =>
                     checked
                       ? setSelectedGenres([...selectedGenres, genre])
                       : setSelectedGenres(
@@ -258,7 +258,7 @@ export default function PerformersPage() {
             >
               <Checkbox
                 checked={selectedAvailability.includes(option)}
-                onCheckedChange={(checked) =>
+                onCheckedChange={(checked: any) =>
                   checked
                     ? setSelectedAvailability([...selectedAvailability, option])
                     : setSelectedAvailability(
@@ -374,11 +374,9 @@ export default function PerformersPage() {
                 <option value="price-low">Үнэ: Багаас их</option>
                 <option value="name">Нэр</option>
               </select>
+            </div>
+          </div>
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold">
-              Уран бүтээлчид хайх
-            </h1>
-
             {/* Mobile Popover */}
             <div className="lg:hidden">
               <Popover>
