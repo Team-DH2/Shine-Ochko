@@ -82,12 +82,17 @@ export const Header = () => {
           {hasMounted && (
             <>
               {isLoggedIn ? (
-                <button
-                  onClick={handleLogoutClick}
-                  className="bg-blue-600  rounded-md px-4 h-10 text-sm"
-                >
-                  LogOut
-                </button>
+                <div className="flex items-center gap-4">
+                  <div>
+                    <UserIcon></UserIcon>
+                  </div>
+                  <button
+                    onClick={handleLogoutClick}
+                    className="bg-blue-600  rounded-md px-4 h-10 text-sm"
+                  >
+                    LogOut
+                  </button>
+                </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <button

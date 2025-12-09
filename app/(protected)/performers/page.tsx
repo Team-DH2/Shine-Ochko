@@ -26,6 +26,7 @@ export default function PerformersPage() {
   const [sortBy, setSortBy] = useState<string>("popularity");
   const [isGenreOpen, setIsGenreOpen] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
 
   useEffect(() => {
     fetchPerformers();
@@ -55,17 +56,13 @@ export default function PerformersPage() {
         return;
       }
 
-      if (bookings.length === 0) {
-        alert("Та эхлээд Event Hall захиалах шаардлагатай.");
+      if (!selectedBooking) {
+        alert("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
         return;
       }
 
-      // Хэрэглэгчийн сонгосон эхний hall
-      const selectedHall = bookings[0]; // эхний захиалга
-      const hallId = selectedHall.hallid;
-      const starttime = selectedHall.starttime;
-
-      console.log({ hallId, starttime });
+      const hallId = selectedBooking.hallid;
+      const starttime = selectedBooking.starttime;
 
       const res = await fetch("/api/performer-bookings", {
         method: "POST",
@@ -158,7 +155,10 @@ export default function PerformersPage() {
         {bookings.map((b: any) => (
           <div
             key={b.id}
-            className="rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4 hover:bg-neutral-800/80 transition-colors backdrop-blur-sm"
+            className={`rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4 hover:bg-neutral-800/80 transition-colors backdrop-blur-sm cursor-pointer ${
+              selectedBooking?.id === b.id ? " border-blue-500!" : ""
+            }`}
+            onClick={() => setSelectedBooking(b)}
           >
             {/* Header */}
             <div className="flex justify-between items-center mb-3">
@@ -178,6 +178,7 @@ export default function PerformersPage() {
                 {b.status}
               </span>
             </div>
+            <div className="max-h-60 overflow-y-auto pr-2 space-y-3 custom-scroll"></div>
 
             {/* Details */}
             <div className="text-sm text-neutral-300 space-y-1 mb-2">
