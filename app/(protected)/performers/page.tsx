@@ -72,6 +72,7 @@ export default function PerformersPage() {
 
       const hallId = selectedBooking.hallid;
       const starttime = selectedBooking.starttime;
+      const date = selectedBooking.date; // <-- ШИНЭ
 
       const res = await fetch("/api/performer-bookings", {
         method: "POST",
@@ -79,15 +80,13 @@ export default function PerformersPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ performerId, hallId, starttime }),
+        body: JSON.stringify({ performerId, hallId, starttime, date }), // <-- ШИНЭ
       });
 
       const data = await res.json();
 
       if (data.success) {
-        alert(
-          "Уран бүтээлчийг захиалах хүсэлт явууллаа. Таньд мэдэгдэл ирнэ, Dashboard хэсгээс харна уу!"
-        );
+        alert("Уран бүтээлчийг захиалах хүсэлт явууллаа.");
       } else {
         alert(data.message || "Захиалга амжилтгүй боллоо.");
       }

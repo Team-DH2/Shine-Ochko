@@ -6,7 +6,6 @@ import { Button } from "../ui/button";
 
 export default function Dashboard() {
   const [bookings, setBookings] = useState<any[]>([]);
-  const [performerBookings, setPerformerBookings] = useState<any[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,11 +22,10 @@ export default function Dashboard() {
       .then((res) => res.json())
       .then((data) => {
         setBookings(data.bookings || []);
-        setPerformerBookings(data.performerBookings || []);
       })
       .catch((err) => console.error(err));
   }, [router]);
-  console.log({ bookings });
+
   const DeleteBooking = async (id: number) => {
     const token = localStorage.getItem("token");
     if (!token) return alert("Нэвтэрнэ үү");
@@ -55,42 +53,63 @@ export default function Dashboard() {
   if (!bookings.length)
     return <p className="text-white text-4xl">Loading...</p>;
 
+  // ---- Hall бүрээр group хийх ----
+  const groupedBookings = bookings.reduce((acc: any, curr: any) => {
+    const key = `${curr.hallid}-${curr.starttime}`;
+    if (!acc[key])
+      acc[key] = { hall: curr.event_halls, hallBooking: null, performers: [] };
+
+    if (!curr.performersid) {
+      acc[key].hallBooking = curr; // Hall booking
+    } else {
+      acc[key].performers.push(curr); // Performer booking
+    }
+
+    return acc;
+  }, {});
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-      {bookings.map((b) => {
-        const relatedPerformers = performerBookings.filter(
-          (pb) => pb.hallid === b.hallid && pb.starttime === b.starttime
-        );
-        console.log({ relatedPerformers });
-        console.log({ bookings });
+      {Object.values(groupedBookings).map((group: any) => {
+        const hallBooking = group.hallBooking;
+        const performers = group.performers;
 
         return (
-          <Card key={b.id} className="bg-white text-black p-4 rounded-xl">
-            <h3 className="font-semibold">{b.event_halls?.name}</h3>
-            <p>Өдөр: {new Date(b.date).toLocaleDateString()}</p>
-            <p>Эхлэх цаг: {b.starttime}</p>
-            <p>Статус: {b.status}</p>
-            <Button onClick={() => DeleteBooking(b.id)}>Цуцлах</Button>
+          <Card
+            key={hallBooking?.id || performers[0]?.id}
+            className="bg-white text-black p-4 rounded-xl"
+          >
+            <h3 className="font-semibold">{group.hall?.name}</h3>
+            {hallBooking && (
+              <>
+                <p>Өдөр: {new Date(hallBooking.date).toLocaleDateString()}</p>
+                <p>Эхлэх цаг: {hallBooking.starttime}</p>
+                <p>Статус: {hallBooking.status}</p>
+                <Button onClick={() => DeleteBooking(hallBooking.id)}>
+                  Цуцлах
+                </Button>
+              </>
+            )}
 
-            {relatedPerformers.length > 0 && (
+            {performers.length > 0 && (
               <div className="mt-2 p-2 bg-gray-100 rounded">
                 <h4 className="font-medium mb-1">Уран бүтээлчид:</h4>
-                {relatedPerformers.map((pb) => (
+                {performers.map((p: any) => (
                   <div
-                    key={pb.id}
+                    key={p.id}
                     className="flex justify-between px-2 py-1 mb-1 bg-gray-200 rounded"
                   >
-                    <span>{pb.performers?.name}</span>
+                    <span>{p.performers?.name}</span>
                     <span
                       className={`px-2 py-1 text-xs rounded-full ${
-                        pb.status === "pending"
+                        p.status === "pending"
                           ? "bg-yellow-200 text-yellow-800"
-                          : pb.status === "approved"
+                          : p.status === "approved"
                           ? "bg-green-200 text-green-800"
                           : "bg-red-200 text-red-800"
                       }`}
                     >
-                      {pb.status}
+                      {p.status}
                     </span>
                   </div>
                 ))}

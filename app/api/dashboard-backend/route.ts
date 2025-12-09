@@ -17,35 +17,19 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    const userId = decoded.userId;
+    const userId = decoded.id;
 
-    // 1. Hall booking-ууд
+    // ---- Бүгдийг буцаах, distinct байхгүй ----
     const bookings = await prisma.booking.findMany({
       where: { userid: userId },
       include: {
         event_halls: true,
+        performers: true, // performer байгаа бол эндээс авна
       },
       orderBy: { date: "asc" },
     });
 
-    // 2. Performer booking-ууд
-    const performerBookings = await prisma.booking.findMany({
-      where: {
-        userid: userId,
-        performersid: { not: null }, // performer холбогдсон bookings
-      },
-      include: {
-        performers: true,
-      },
-    });
-
-    return NextResponse.json(
-      {
-        bookings,
-        performerBookings,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({ bookings }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

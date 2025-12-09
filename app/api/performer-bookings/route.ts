@@ -5,7 +5,7 @@ import nodemailer from "nodemailer";
 
 export async function POST(req: NextRequest) {
   try {
-    const { performerId, hallId, starttime } = await req.json();
+    const { performerId, hallId, starttime, date } = await req.json();
 
     if (!performerId || !hallId) {
       return NextResponse.json(
@@ -87,7 +87,8 @@ export async function POST(req: NextRequest) {
           userid: userId,
           hallid: hallId,
           performersid: performerId,
-          date: new Date(),
+          ordereddate: new Date(), // Захиалга хийсэн өдөр
+          date: new Date(date), // Үйл явдал болох өдөр (шинэ)
           starttime,
           status: "pending",
         },
@@ -100,38 +101,38 @@ export async function POST(req: NextRequest) {
     }
 
     // ---- Performer-д email илгээх ----
-    if (booking.performers?.contact_email) {
-      const performerEmailContent = `
-        <p>Сайн байна уу, ${booking.performers?.name}?</p>
-        <p>Хэрэглэгч <strong>${
-          booking.User.name
-        }</strong> танай Event Hall-д захиалга хүсэлт илгээсэн байна:</p>
-        <ul>
-          <li>Event Hall: ${booking.event_halls?.name}</li>
-          <li>Огноо: ${new Date(booking.date).toLocaleDateString()}</li>
-          <li>Эхлэх цаг: ${booking.starttime || "Тодорхойгүй"}</li>
-        </ul>
-        <p>Захиалга баталгаажуулахын тулд доорх товч дээр дарна уу:</p>
-        <p>
-          <a href="${
-            process.env.NEXT_PUBLIC_BASE_URL
-          }/booking-response?bookingId=${
-        booking.id
-      }&action=approve" style="padding:10px 20px; background-color:green; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Approve</a>
-          <a href="${
-            process.env.NEXT_PUBLIC_BASE_URL
-          }/booking-response?bookingId=${
-        booking.id
-      }&action=decline" style="padding:10px 20px; background-color:red; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Decline</a>
-        </p>
-      `;
+    // if (booking.performers?.contact_email) {
+    //   const performerEmailContent = `
+    //     <p>Сайн байна уу, ${booking.performers?.name}?</p>
+    //     <p>Хэрэглэгч <strong>${
+    //       booking.User.name
+    //     }</strong> танай Event Hall-д захиалга хүсэлт илгээсэн байна:</p>
+    //     <ul>
+    //       <li>Event Hall: ${booking.event_halls?.name}</li>
+    //       <li>Огноо: ${new Date(booking.date).toLocaleDateString()}</li>
+    //       <li>Эхлэх цаг: ${booking.starttime || "Тодорхойгүй"}</li>
+    //     </ul>
+    //     <p>Захиалга баталгаажуулахын тулд доорх товч дээр дарна уу:</p>
+    //     <p>
+    //       <a href="${
+    //         process.env.NEXT_PUBLIC_BASE_URL
+    //       }/booking-response?bookingId=${
+    //     booking.id
+    //   }&action=approve" style="padding:10px 20px; background-color:green; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Approve</a>
+    //       <a href="${
+    //         process.env.NEXT_PUBLIC_BASE_URL
+    //       }/booking-response?bookingId=${
+    //     booking.id
+    //   }&action=decline" style="padding:10px 20px; background-color:red; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Decline</a>
+    //     </p>
+    //   `;
 
-      await sendEmail({
-        email: booking.performers.contact_email,
-        name: booking.performers.name,
-        content: performerEmailContent,
-      });
-    }
+    //   await sendEmail({
+    //     email: booking.performers.contact_email,
+    //     name: booking.performers.name,
+    //     content: performerEmailContent,
+    //   });
+    // }
 
     return NextResponse.json({
       success: true,
