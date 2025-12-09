@@ -165,7 +165,7 @@ export default function EventHallsPage({
 
         <button
           onClick={resetFilters}
-          className="border border-blue-600 text-blue-400 py-3 rounded-xl w-full hover:bg-blue-600 hover:text-white transition-colors"
+          className=" text-white py-3 rounded-xl w-full bg-neutral-800 hover:bg-neutral-700  transition-colors"
         >
           Reset
         </button>
