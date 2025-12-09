@@ -63,17 +63,13 @@ export default function PerformersPage() {
         return;
       }
 
-      if (bookings.length === 0) {
-        alert("Та эхлээд Event Hall захиалах шаардлагатай.");
+      if (!selectedBooking) {
+        alert("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
         return;
       }
 
-      // Хэрэглэгчийн сонгосон эхний hall
-      const selectedHall = bookings[0]; // эхний захиалга
-      const hallId = selectedHall.hallid;
-      const starttime = selectedHall.starttime;
-
-      console.log({ hallId, starttime });
+      const hallId = selectedBooking.hallid;
+      const starttime = selectedBooking.starttime;
 
       const res = await fetch("/api/performer-bookings", {
         method: "POST",
