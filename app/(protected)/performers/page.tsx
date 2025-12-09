@@ -7,6 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { FaStar, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Image from "next/image";
@@ -26,7 +27,8 @@ export default function PerformersPage() {
   const [sortBy, setSortBy] = useState<string>("popularity");
   const [isGenreOpen, setIsGenreOpen] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
-  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(true);
 
   useEffect(() => {
     fetchPerformers();
@@ -34,18 +36,23 @@ export default function PerformersPage() {
   }, []);
 
   useEffect(() => {
+    setIsLoadingBookings(true);
     fetch("/api/bookings")
       .then((res) => res.json())
-      .then((data) => setBookings(data.bookings || []));
+      .then((data) => setBookings(data.bookings || []))
+      .finally(() => setIsLoadingBookings(false));
   }, []);
 
   const fetchPerformers = async () => {
+    setIsLoading(true);
     try {
       const res = await fetch("/api/performers");
       const data = await res.json();
       setPerformers(data.performers || []);
     } catch (error) {
       console.error("Error fetching performers:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
   const HandleOnPerformerBooking = async (performerId: number) => {
@@ -152,59 +159,76 @@ export default function PerformersPage() {
 
       {/* Scrollable bookings list */}
       <div className="max-h-60 overflow-y-auto pr-2 space-y-3 custom-scroll">
-        {bookings.map((b: any) => (
-          <div
-            key={b.id}
-            className={`rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4 hover:bg-neutral-800/80 transition-colors backdrop-blur-sm cursor-pointer ${
-              selectedBooking?.id === b.id ? " border-blue-500!" : ""
-            }`}
-            onClick={() => setSelectedBooking(b)}
-          >
-            {/* Header */}
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-semibold text-white">
-                {b.event_halls?.name ?? "Event Hall"}
-              </h2>
-
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${
-                  b.status === "pending"
-                    ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
-                    : b.status === "approved"
-                    ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                    : "bg-red-500/20 text-red-300 border border-red-500/30"
-                }`}
+        {isLoadingBookings
+          ? // Skeleton loading for bookings
+            Array.from({ length: 2 }).map((_, index) => (
+              <div
+                key={index}
+                className="rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4"
               >
-                {b.status}
-              </span>
-            </div>
-            <div className="max-h-60 overflow-y-auto pr-2 space-y-3 custom-scroll"></div>
-
-            {/* Details */}
-            <div className="text-sm text-neutral-300 space-y-1 mb-2">
-              <div>
-                <span className="font-medium text-neutral-100">Өдөр:</span>{" "}
-                {new Date(b.date).toLocaleDateString()}
+                <div className="flex justify-between items-center mb-3">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-6 w-20" />
+                </div>
+                <div className="space-y-2 mb-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-3 w-2/3 mt-2" />
               </div>
+            ))
+          : bookings.map((b: any) => (
+              <div
+                key={b.id}
+                className="rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4 hover:bg-neutral-800/80 transition-colors backdrop-blur-sm"
+              >
+                {/* Header */}
+                <div className="flex justify-between items-center mb-3">
+                  <h2 className="text-lg font-semibold text-white">
+                    {b.event_halls?.name ?? "Event Hall"}
+                  </h2>
 
-              <div>
-                <span className="font-medium text-neutral-100">Эхлэх цаг:</span>{" "}
-                {b.starttime}
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${
+                      b.status === "pending"
+                        ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
+                        : b.status === "approved"
+                        ? "bg-green-500/20 text-green-300 border border-green-500/30"
+                        : "bg-red-500/20 text-red-300 border border-red-500/30"
+                    }`}
+                  >
+                    {b.status}
+                  </span>
+                </div>
+
+                {/* Details */}
+                <div className="text-sm text-neutral-300 space-y-1 mb-2">
+                  <div>
+                    <span className="font-medium text-neutral-100">Өдөр:</span>{" "}
+                    {new Date(b.date).toLocaleDateString()}
+                  </div>
+
+                  <div>
+                    <span className="font-medium text-neutral-100">
+                      Эхлэх цаг:
+                    </span>{" "}
+                    {b.starttime}
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-neutral-400 text-sm mb-2 leading-relaxed">
+                  {b.event_description}
+                </p>
+
+                {/* Location */}
+                <div className="text-neutral-500 text-sm flex items-center gap-1">
+                  <span>📍</span>
+                  <span className="truncate">{b.event_halls?.location}</span>
+                </div>
               </div>
-            </div>
-
-            {/* Description */}
-            <p className="text-neutral-400 text-sm mb-2 leading-relaxed">
-              {b.event_description}
-            </p>
-
-            {/* Location */}
-            <div className="text-neutral-500 text-sm flex items-center gap-1">
-              <span>📍</span>
-              <span className="truncate">{b.event_halls?.location}</span>
-            </div>
-          </div>
-        ))}
+            ))}
       </div>
 
       {/* Filters */}
@@ -396,85 +420,121 @@ export default function PerformersPage() {
           </div>
 
           <div className="mb-4 text-gray-400 text-sm">
-            {sortedPerformers.length} уран бүтээлч олдлоо
+            {isLoading ? (
+              <Skeleton className="h-5 w-40" />
+            ) : (
+              `${sortedPerformers.length} уран бүтээлч олдлоо`
+            )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {sortedPerformers.map((performer) => (
-              <div
-                key={performer.id}
-                className="bg-neutral-900 rounded-lg overflow-hidden hover:scale-[1.02] transition"
-              >
-                <div className="relative h-90 bg-neutral-800">
-                  <Image
-                    src={
-                      performer.image ||
-                      "https://via.placeholder.com/400x300?text=No+Image"
-                    }
-                    alt={performer.name}
-                    fill
-                    className="object-cover"
-                  />
-
+            {isLoading ? (
+              // Skeleton loading state
+              Array.from({ length: 8 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-neutral-900 rounded-lg overflow-hidden"
+                >
+                  <Skeleton className="h-60 w-full" />
+                  <div className="p-4 space-y-3">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-full" />
+                      <Skeleton className="h-6 w-1/3" />
+                    </div>
+                    <div className="flex gap-2">
+                      <Skeleton className="h-10 flex-1" />
+                      <Skeleton className="h-10 flex-1" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                {sortedPerformers.map((performer) => (
                   <div
-                    className={`absolute top-3 left-3 ${getAvailabilityColor(
-                      performer.availability || "Боломжтой"
-                    )} text-white px-3 py-1 rounded-full text-xs font-semibold`}
+                    key={performer.id}
+                    className="bg-neutral-900 rounded-lg overflow-hidden hover:scale-[1.02] transition"
                   >
-                    {performer.availability || "Боломжтой"}
-                  </div>
-                </div>
+                    <div className="relative h-90 bg-neutral-800">
+                      <Image
+                        src={
+                          performer.image ||
+                          "https://via.placeholder.com/400x300?text=No+Image"
+                        }
+                        alt={performer.name}
+                        fill
+                        className="object-cover"
+                      />
 
-                <div className="p-4">
-                  <h3 className="text-xl font-bold mb-1">{performer.name}</h3>
-
-                  <p className="text-neutral-400 text-sm mb-3 truncate">
-                    {performer.performance_type || performer.genre}
-                  </p>
-
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <FaStar className="text-yellow-400" />
-                      <span className="font-semibold">
-                        {performer.popularity
-                          ? Number(performer.popularity).toLocaleString()
-                          : "N/A"}
-                      </span>
-                      <span className="text-xs text-gray-400">Viberate</span>
+                      <div
+                        className={`absolute top-3 left-3 ${getAvailabilityColor(
+                          performer.availability || "Боломжтой"
+                        )} text-white px-3 py-1 rounded-full text-xs font-semibold`}
+                      >
+                        {performer.availability || "Боломжтой"}
+                      </div>
                     </div>
 
-                    <div className="text-lg font-bold text-blue-600">
-                      {Number(performer.price).toLocaleString()}₮
+                    <div className="p-4">
+                      <h3 className="text-xl font-bold mb-1">
+                        {performer.name}
+                      </h3>
+
+                      <p className="text-neutral-400 text-sm mb-3 truncate">
+                        {performer.performance_type || performer.genre}
+                      </p>
+
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FaStar className="text-yellow-400" />
+                          <span className="font-semibold">
+                            {performer.popularity
+                              ? Number(performer.popularity).toLocaleString()
+                              : "N/A"}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            Viberate
+                          </span>
+                        </div>
+
+                        <div className="text-lg font-bold text-blue-600">
+                          {Number(performer.price).toLocaleString()}₮
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() =>
+                            router.push(`/performers/${performer.id}`)
+                          }
+                          className="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white py-2 rounded-lg"
+                        >
+                          Профайл үзэх
+                        </button>
+
+                        <button
+                          onClick={() => HandleOnPerformerBooking(performer.id)}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+                        >
+                          Захиалах
+                        </button>
+                      </div>
                     </div>
                   </div>
+                ))}
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => router.push(`/performers/${performer.id}`)}
-                      className="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white py-2 rounded-lg"
-                    >
-                      Профайл үзэх
-                    </button>
-
-                    <button
-                      onClick={() => HandleOnPerformerBooking(performer.id)}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
-                    >
-                      Захиалах
-                    </button>
+                {!isLoading && sortedPerformers.length === 0 && (
+                  <div className="col-span-3 text-center py-12">
+                    <div className="text-neutral-400 text-lg mb-2">
+                      Уучлаарай, уран бүтээлч олдсонгүй
+                    </div>
+                    <div className="text-neutral-500 text-sm">
+                      Шүүлтүүрийг өөрчилж дахин оролдоно уу
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
-
-            {sortedPerformers.length === 0 && (
-              <div className="col-span-3 text-center py-12">
-                <div className="text-neutral-400 text-lg mb-2">
-                  Уучлаарай, уран бүтээлч олдсонгүй
-                </div>
-                <div className="text-neutral-500 text-sm">
-                  Шүүлтүүрийг өөрчилж дахин оролдоно уу
-                </div>
-              </div>
+                )}
+              </>
             )}
           </div>
         </div>
