@@ -1,25 +1,27 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Users } from "lucide-react";
 
 interface Hall {
   id: number;
   name: string;
   location: string;
+  duureg: string;
   capacity: string;
-  rating: number;
-  price: number;
-  image: string;
+  rating: number | string;
+  price: number | number[];
+  images: string[];
+  additional_informations?: string[];
+  advantages?: string[];
+  informations_about_hall?: string[];
+  location_link?: string;
+  menu?: string[];
+  parking_capacity?: number;
+  phonenumber?: string;
+  suitable_events?: string[];
+  created_at?: string;
+  description?: string;
 }
-
-const LOCATIONS = [
-  "Баянгол",
-  "Баянзүрх",
-  "Сонгино хайрхан",
-  "Сүхбаатар",
-  "Хан-Уул",
-  "Чингэлтэй",
-];
 
 interface EventHallsPageProps {
   originalData: Hall[];
@@ -37,18 +39,20 @@ export default function EventHallsPage({
   const [price, setPrice] = useState(MAX);
   const [capacity, setCapacity] = useState("");
   const [openLoc, setOpenLoc] = useState(false);
+  const [district, setDistrict] = useState("");
+  const [districts, setDistricts] = useState<string[]>([]);
 
   const applyFilters = () => {
     let filtered = [...originalData];
-    console.log({ filtered });
-    console.log({ location });
 
+    // Location filter
     if (location) {
       filtered = filtered.filter((hall) =>
         hall.location?.toLowerCase().includes(location.toLowerCase())
       );
     }
 
+    // Capacity filter
     if (capacity) {
       filtered = filtered.filter((hall) => {
         const [maxCap] = String(hall.capacity).split("-").map(Number);
@@ -56,7 +60,20 @@ export default function EventHallsPage({
       });
     }
 
-    filtered = filtered.filter((hall) => hall.price <= price);
+    // Price filter
+    if (price && price < MAX) {
+      filtered = filtered.filter((hall) => {
+        const hallPrice = Array.isArray(hall.price)
+          ? Math.min(...hall.price)
+          : hall.price;
+        return hallPrice <= price;
+      });
+    }
+
+    // District filter
+    if (district) {
+      filtered = filtered.filter((hall) => hall.duureg === district);
+    }
 
     onFilterChange(filtered);
   };
@@ -68,6 +85,26 @@ export default function EventHallsPage({
     setOpenLoc(false);
     onFilterChange(originalData);
   };
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const res = await fetch("/api/event-halls");
+        const data = await res.json();
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    getData();
+  }, []);
+
+  useEffect(() => {
+    const uniqueDistricts = Array.from(
+      new Set(originalData.map((hall) => hall.duureg))
+    );
+    setDistricts(uniqueDistricts);
+  }, [originalData]);
 
   return (
     <aside className="w-100 bg-neutral-900 text-gray-200 rounded-2xl p-6 shadow-lg relative">
@@ -96,17 +133,17 @@ export default function EventHallsPage({
 
         {openLoc && (
           <div className="absolute z-20 mt-2 w-full bg-[#444548] rounded-xl shadow-xl py-2">
-            {LOCATIONS.map((loc) => (
+            {districts.map((d) => (
               <div
-                key={loc}
+                key={d}
                 onClick={() => {
-                  setLocation(loc);
+                  setDistrict(d);
                   setOpenLoc(false);
                 }}
                 className="px-4 py-2 cursor-pointer hover:bg-white/10 flex justify-between items-center"
               >
-                <span>{loc}</span>
-                {location === loc && (
+                <span>{d}</span>
+                {district === d && (
                   <svg
                     className="w-4 h-4 text-white"
                     fill="none"
@@ -147,13 +184,12 @@ export default function EventHallsPage({
             value={capacity}
             onChange={(e) => setCapacity(e.target.value)}
             placeholder="Min. guests"
-            className="bg-transparent outline-none w-full text-gray-200 
-            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none 
+            className="bg-transparent outline-none w-full text-gray-200
+            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none
             [&::-webkit-inner-spin-button]:appearance-none"
           />
         </div>
       </div>
-
       {/* Buttons */}
       <div className="flex gap-3 mt-6">
         <button
