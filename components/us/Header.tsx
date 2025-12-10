@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ButtonOfNav } from "./ButtonOfNav";
 
 import {
   Building,
+  ChevronDown,
   Home,
   LayoutDashboard,
   Music,
@@ -17,14 +20,25 @@ import { BottomNavButton } from "./BottomNavButton";
 import { AuthForm } from "./AuthForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Logo } from "./Logo";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import SearchFunction from "./Searchbar";
+import { Separator } from "../ui/separator";
+import { useRouter } from "next/navigation";
 
 export const Header = () => {
   const [isPhoneSearchOpen, setIsPhoneSearchOpen] = useState(false);
+  const router = useRouter();
   const [authView, setAuthView] = useState<"login" | "signup">("login");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(
+    null
+  );
   const [hasMounted, setHasMounted] = useState(false);
 
   const styleDesktop =
@@ -33,18 +47,26 @@ export const Header = () => {
     "w-full pl-10 h-9 rounded-[20px] bg-neutral-800 border-none text-white text-sm justify-center ";
 
   useEffect(() => {
-    Promise.resolve().then(() => setHasMounted(true));
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
-
-  useEffect(() => {
-    if (!hasMounted) return;
-    Promise.resolve().then(() => {
+    const checkAuth = async () => {
       const token = localStorage.getItem("token");
-      setIsLoggedIn(Boolean(token));
-    });
-  }, [hasMounted]);
+      if (token) {
+        setIsLoggedIn(true);
+        try {
+          const res = await fetch("/api/auth/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setUser(data.user);
+          }
+        } catch (error) {
+          console.error("Failed to fetch user data:", error);
+        }
+      }
+      setHasMounted(true);
+    };
+    checkAuth();
+  }, []);
 
   const handleLogoutClick = () => {
     setIsLogoutModalOpen(true);
@@ -63,18 +85,15 @@ export const Header = () => {
           <Logo />
         </div>
 
-        <div className="flex items-center gap-4 font-bold">
+        <div className="flex items-center gap-10 font-bold ">
           <ButtonOfNav href="/home" text="Home" />
           <ButtonOfNav href="/event-halls" text="Event Halls" />
           <ButtonOfNav href="/performers" text="Performers" />
           <ButtonOfNav href="/host" text="Hosts" />
           <ButtonOfNav href="/dashboard" text="Dashboard" />
-          <ButtonOfNav href="/eventhall-form" text="Event Hall Form" />
-          {/* <ButtonOfNav href="/profile" text="Profile" /> */}
-          <ButtonOfNav href="/adminpanel" text="Admin Panel" />
         </div>
 
-        <div className="flex-1 flex justify-end items-center gap-3">
+        <div className="flex-1 flex justify-end items-center">
           <div className="flex items-center w-full max-w-[220px]">
             <Search className="mr-[-36] w-5 z-10 text-neutral-500" />
             <SearchFunction styleDesktop={styleDesktop} />
@@ -82,17 +101,63 @@ export const Header = () => {
           {hasMounted && (
             <>
               {isLoggedIn ? (
-                <div className="flex items-center gap-4">
-                  <div>
-                    <UserIcon></UserIcon>
-                  </div>
-                  <button
-                    onClick={handleLogoutClick}
-                    className="bg-blue-600  rounded-md px-4 h-10 text-sm"
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="p-2 rounded-full bg-neutral-900 transition-colors h-10 px-4 flex items-center gap-2 w-40">
+                      <UserIcon className="h-4 text-neutral-400" />
+                      <span className="font-medium text-sm truncate">
+                        {user?.name || "User"}
+                      </span>
+                      <ChevronDown className="h-4 text-neutral-500" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="end"
+                    className="w-60 bg-neutral-900/95 backdrop-blur-xl border border-neutral-800 
+             text-white rounded-xl shadow-2xl p-2"
                   >
-                    LogOut
-                  </button>
-                </div>
+                    {/* User Section */}
+                    {user?.name && (
+                      <div className="px-4 py-3 border-b border-neutral-800/60">
+                        <div className="font-semibold text-sm">{user.name}</div>
+                        <div className="text-xs text-neutral-400">
+                          {user.email}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Menu Links */}
+                    <div className="py-2">
+                      <button
+                        onClick={() => router.push("/editProfile")}
+                        className="w-full text-left px-4 py-2.5 text-sm rounded-lg 
+                 hover:bg-neutral-800/60 transition-all duration-150"
+                      >
+                        👤 Миний профайл
+                      </button>
+
+                      <button
+                        onClick={() => router.push("/dashboard")}
+                        className="w-full text-left px-4 py-2.5 text-sm rounded-lg 
+                 hover:bg-neutral-800/60 transition-all duration-150"
+                      >
+                        📦 Миний захиалгууд
+                      </button>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-neutral-800/60 my-1" />
+
+                    {/* Logout */}
+                    <button
+                      onClick={handleLogoutClick}
+                      className="w-full text-left px-4 py-2.5 text-sm rounded-lg text-red-400 
+               hover:bg-red-500/10 hover:text-red-300 transition-all duration-150"
+                    >
+                      🚪 Гарах
+                    </button>
+                  </PopoverContent>
+                </Popover>
               ) : (
                 <div className="flex items-center gap-2">
                   <button
@@ -102,7 +167,7 @@ export const Header = () => {
                     }}
                     className="bg-transparent rounded-md h-10 px-4 text-sm"
                   >
-                    LogIn
+                    Нэвтрэх
                   </button>
                   <button
                     onClick={() => {
@@ -111,7 +176,7 @@ export const Header = () => {
                     }}
                     className="bg-blue-600 rounded-md px-4 h-10 text-sm"
                   >
-                    SignUp
+                    Бүртгүүлэх
                   </button>
                 </div>
               )}
@@ -151,12 +216,61 @@ export const Header = () => {
             {hasMounted && (
               <>
                 {isLoggedIn ? (
-                  <button
-                    onClick={handleLogoutClick}
-                    className="bg-blue-600 hover:bg-blue-700 rounded-md px-3 h-9 text-xs"
-                  >
-                    LogOut
-                  </button>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="p-2 rounded-full hover:bg-neutral-800 transition-colors">
+                        <UserIcon className="w-5 h-5" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="end"
+                      className="w-60 bg-neutral-900/95 backdrop-blur-xl border border-neutral-800 
+             text-white rounded-xl shadow-2xl p-2"
+                    >
+                      {/* User Section */}
+                      {user?.name && (
+                        <div className="px-4 py-3 border-b border-neutral-800/60">
+                          <div className="font-semibold text-sm">
+                            {user.name}
+                          </div>
+                          <div className="text-xs text-neutral-400">
+                            {user.email}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Menu Links */}
+                      <div className="py-2">
+                        <button
+                          onClick={() => router.push("/editProfile")}
+                          className="w-full text-left px-4 py-2.5 text-sm rounded-lg 
+                 hover:bg-neutral-800/60 transition-all duration-150"
+                        >
+                          👤 Миний профайл
+                        </button>
+
+                        <button
+                          onClick={() => router.push("/dashboard")}
+                          className="w-full text-left px-4 py-2.5 text-sm rounded-lg 
+                 hover:bg-neutral-800/60 transition-all duration-150"
+                        >
+                          📦 Миний захиалгууд
+                        </button>
+                      </div>
+
+                      {/* Divider */}
+                      <div className="border-t border-neutral-800/60 my-1" />
+
+                      {/* Logout */}
+                      <button
+                        onClick={handleLogoutClick}
+                        className="w-full text-left px-4 py-2.5 text-sm rounded-lg text-red-400 
+               hover:bg-red-500/10 hover:text-red-300 transition-all duration-150"
+                      >
+                        🚪 Гарах
+                      </button>
+                    </PopoverContent>
+                  </Popover>
                 ) : (
                   <>
                     <button
@@ -166,7 +280,7 @@ export const Header = () => {
                       }}
                       className="bg-transparent rounded-md h-9 px-3 text-xs"
                     >
-                      LogIn
+                      Нэвтрэх
                     </button>
                     <button
                       onClick={() => {
@@ -175,7 +289,7 @@ export const Header = () => {
                       }}
                       className="bg-blue-600 rounded-md px-3 h-9 text-xs"
                     >
-                      SignUp
+                      Бүртгүүлэх
                     </button>
                   </>
                 )}
@@ -203,7 +317,7 @@ export const Header = () => {
           icon={<Music className="w-5 h-5" />}
         />
         <BottomNavButton
-          href="/hosts"
+          href="/host"
           label="Hosts"
           icon={<Users className="w-5 h-5" />}
         />
@@ -222,39 +336,58 @@ export const Header = () => {
               {authView === "login" ? "Log In" : "Sign Up"}
             </DialogTitle>
           </DialogHeader>
-          <AuthForm view={authView} onViewChange={setAuthView} />
+          <AuthForm
+            view={authView}
+            onViewChange={setAuthView}
+            onLoginSuccess={(userData: any) => setUser(userData)}
+          />
         </DialogContent>
       </Dialog>
 
       {/* LOGOUT MODAL (FIXED) */}
       <Dialog open={isLogoutModalOpen} onOpenChange={setIsLogoutModalOpen}>
-        <DialogContent className="p-0 border-none bg-transparent shadow-none max-w-md data-[state=open]:bg-black/60 data-[state=open]:backdrop-blur-sm">
+        <DialogContent
+          className="
+      max-w-sm p-0 border-none shadow-xl rounded-2xl 
+      bg-neutral-900/80 backdrop-blur-xl
+      animate-in fade-in zoom-in-90 duration-200
+    "
+        >
           <DialogHeader className="sr-only">
-            <DialogTitle>Confirm Log Out</DialogTitle>
+            <DialogTitle>Гарах</DialogTitle>
           </DialogHeader>
 
-          <div className="w-full rounded-2xl shadow-lg overflow-hidden bg-black/80">
-            <div className="p-8 text-white">
-              <h2 className="text-2xl font-bold mb-4 text-center">Log Out</h2>
-              <p className="text-center text-neutral-400 mb-8">
-                Are you sure you want to log out?
-              </p>
+          <div className="p-8 text-white">
+            <h2 className="text-2xl font-bold mb-3 text-center">Гарах</h2>
 
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setIsLogoutModalOpen(false)}
-                  className="bg-neutral-700 hover:bg-neutral-600 text-white font-bold py-3 px-4 rounded-lg w-full"
-                >
-                  Cancel
-                </button>
+            <p className="text-center text-neutral-400 mb-8 leading-relaxed">
+              Та системээс гарах гэж байна. Үргэлжлүүлэх үү?
+            </p>
 
-                <button
-                  onClick={confirmLogout}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg w-full"
-                >
-                  Log Out
-                </button>
-              </div>
+            <div className="flex gap-4">
+              {/* Cancel Button */}
+              <button
+                onClick={() => setIsLogoutModalOpen(false)}
+                className="
+            w-full py-3 rounded-lg font-semibold
+            bg-neutral-800 hover:bg-neutral-700
+            transition-colors duration-200
+          "
+              >
+                Үгүй
+              </button>
+
+              {/* Confirm Button */}
+              <button
+                onClick={confirmLogout}
+                className="
+            w-full py-3 rounded-lg font-semibold
+            bg-blue-600 hover:bg-blue-700
+            transition-colors duration-200
+          "
+              >
+                Тийм
+              </button>
             </div>
           </div>
         </DialogContent>
