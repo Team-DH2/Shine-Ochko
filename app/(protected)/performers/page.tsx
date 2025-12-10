@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/immutability */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,7 +20,6 @@ import { useRouter } from "next/navigation";
 import { FaStar, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Image from "next/image";
 import { Filter } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PerformersPage() {
   const router = useRouter();
@@ -64,7 +61,7 @@ export default function PerformersPage() {
         setBookings(bookingsData);
         setAllBookings(bookingsData); // Store all bookings for availability check
         // Automatically select first booking if available
-        if (bookingsData.length > 0) {
+        if (bookingsData.length === 1) {
           setSelectedBooking(bookingsData[0]);
         }
       })
@@ -172,13 +169,16 @@ export default function PerformersPage() {
       const hallId = selectedBooking.hallid;
       const starttime = selectedBooking.starttime;
 
+      const bookeddate = selectedBooking.date;
+      console.log({ bookeddate });
+
       const res = await fetch("/api/performer-bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ performerId, hallId, starttime }),
+        body: JSON.stringify({ performerId, hallId, starttime, bookeddate }),
       });
 
       const data = await res.json();
@@ -206,7 +206,6 @@ export default function PerformersPage() {
     } catch (error) {
       console.error("Error fetching genres:", error);
     }
-    setLoading(false);
   };
 
   const handleBookingSelect = (booking: any) => {
@@ -284,7 +283,7 @@ export default function PerformersPage() {
     }
   };
 
-  /** FILTER SIDEBAR */
+  /** FIXED FILTER SIDEBAR (removed sticky from inside) */
   const FilterControls = ({ isPopover = false }: { isPopover?: boolean }) => (
     <div
       className={`w-full bg-neutral-900 rounded-lg flex flex-col ${
@@ -295,32 +294,25 @@ export default function PerformersPage() {
         Таны захиалсан Event hall
       </h2>
 
+      {/* Scrollable bookings list */}
       <div className="max-h-60 overflow-y-auto pr-2 space-y-3 custom-scroll">
-        {bookings.map((b: any) => (
-          <div
-            key={b.id}
-            className="rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4 hover:bg-neutral-800/80 transition-colors backdrop-blur-sm"
-          >
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-semibold text-white">
-                {b.event_halls?.name ?? "Event Hall"}
-              </h2>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${
-                  b.status === "pending"
-                    ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
-                    : b.status === "approved"
-                    ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                    : "bg-red-500/20 text-red-300 border border-red-500/30"
-                }`}
+        {isLoadingBookings
+          ? // Skeleton loading for bookings
+            Array.from({ length: 2 }).map((_, index) => (
+              <div
+                key={index}
+                className="rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4"
               >
-                {b.status}
-              </span>
-            </div>
-            <div className="text-sm text-neutral-300 space-y-1 mb-2">
-              <div>
-                <span className="font-medium text-neutral-100">Өдөр:</span>{" "}
-                {new Date(b.date).toLocaleDateString()}
+                <div className="flex justify-between items-center mb-3">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-6 w-20" />
+                </div>
+                <div className="space-y-2 mb-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-3 w-2/3 mt-2" />
               </div>
             ))
           : bookings.map((b: any) => (
@@ -386,20 +378,13 @@ export default function PerformersPage() {
                   <span className="truncate">{b.event_halls?.location}</span>
                 </div>
               </div>
-            </div>
-            <p className="text-neutral-400 text-sm mb-2 leading-relaxed">
-              {b.event_description}
-            </p>
-            <div className="text-neutral-500 text-sm flex items-center gap-1">
-              <span>📍</span>
-              <span className="truncate">{b.event_halls?.location}</span>
-            </div>
-          </div>
-        ))}
+            ))}
       </div>
 
-      {/* Genre Filter */}
+      {/* Filters */}
       <h2 className="font-bold text-white mb-4 mt-3">Шүүлтүүр</h2>
+
+      {/* Genre */}
       <div className="mb-6">
         <h3
           className="font-semibold mb-3 flex items-center gap-2 cursor-pointer hover:text-neutral-300"
@@ -412,6 +397,7 @@ export default function PerformersPage() {
             <FaChevronDown className="ml-auto" />
           )}
         </h3>
+
         {isGenreOpen && (
           <div className="space-y-2">
             {genres.map((genre) => (
@@ -436,7 +422,7 @@ export default function PerformersPage() {
         )}
       </div>
 
-      {/* Availability Filter */}
+      {/* Availability */}
       <div className="mb-6">
         <h3 className="font-semibold text-white mb-3">Боломжтой эсэх</h3>
         <div className="space-y-2">
@@ -553,76 +539,8 @@ export default function PerformersPage() {
     </div>
   );
 
-  /** Skeleton Card */
-  const SkeletonCard = () => (
-    <div className="bg-neutral-900 rounded-lg overflow-hidden animate-pulse">
-      <div className="h-72 bg-neutral-800 w-full" />
-      <div className="p-4 space-y-3">
-        <div className="h-6 w-3/4 bg-neutral-700 rounded" />
-        <div className="h-4 w-1/2 bg-neutral-700 rounded" />
-        <div className="h-5 w-1/3 bg-neutral-700 rounded" />
-        <div className="h-21 w-full bg-neutral-700 rounded-lg" />
-      </div>
-    </div>
-  );
-
-  /** Performer Card */
-  const PerformerCard = ({ performer }: { performer: any }) => (
-    <div className="bg-neutral-900 rounded-xl overflow-hidden hover:scale-[1.02] transition">
-      <div className="relative h-72 bg-neutral-800">
-        <Image
-          src={
-            performer.image ||
-            "https://via.placeholder.com/400x300?text=No+Image"
-          }
-          alt={performer.name}
-          fill
-          className="object-cover"
-        />
-        <div
-          className={`absolute top-3 left-3 ${getAvailabilityColor(
-            performer.availability || "Боломжтой"
-          )} text-white px-3 py-1 rounded-full text-xs font-semibold`}
-        >
-          {performer.availability || "Боломжтой"}
-        </div>
-      </div>
-      <div className="p-4">
-        <h3 className="text-xl font-bold mb-1">{performer.name}</h3>
-        <p className="text-neutral-400 text-sm mb-3 truncate">
-          {performer.performance_type || performer.genre}
-        </p>
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <FaStar className="text-yellow-400" />
-            <span className="font-semibold">
-              {performer.popularity
-                ? Number(performer.popularity).toLocaleString()
-                : "N/A"}
-            </span>
-            <span className="text-xs text-gray-400">Viberate</span>
-          </div>
-          <div className="text-lg font-bold text-blue-600">
-            {Number(performer.price).toLocaleString()}₮
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => router.push(`/performers/${performer.id}`)}
-            className="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white py-2 rounded-lg"
-          >
-            Профайл үзэх
-          </button>
-          <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg">
-            Захиалах
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen w-full bg-black text-white px-5 lg:px-10 pt-28 mb-5">
+    <div className="min-h-screen w-full bg-black text-white px-4 sm:px-8 pt-28">
       <div className="flex gap-8">
         {/* FIXED SIDEBAR */}
         <div className="w-80 shrink-0 hidden lg:block">
@@ -639,14 +557,34 @@ export default function PerformersPage() {
             <div className="flex items-center gap-3">
               <label className="text-sm text-gray-400">Эрэмбэлэх:</label>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[200px] bg-gray-800 text-white border-gray-700 focus:border-blue-500">
+                <SelectTrigger className="w-[200px] bg-neutral-800 text-white border-neutral-700 hover:border-neutral-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 text-white border-gray-700">
-                  <SelectItem value="popularity">Алдартай байдал</SelectItem>
-                  <SelectItem value="price-high">Үнэ: Ихээс бага</SelectItem>
-                  <SelectItem value="price-low">Үнэ: Багаас их</SelectItem>
-                  <SelectItem value="name">Нэр</SelectItem>
+                <SelectContent className="bg-neutral-800 text-white border-neutral-700">
+                  <SelectItem
+                    value="popularity"
+                    className="focus:bg-neutral-700 focus:text-white cursor-pointer"
+                  >
+                    Алдартай байдал
+                  </SelectItem>
+                  <SelectItem
+                    value="price-high"
+                    className="focus:bg-neutral-700 focus:text-white cursor-pointer"
+                  >
+                    Үнэ: Ихээс бага
+                  </SelectItem>
+                  <SelectItem
+                    value="price-low"
+                    className="focus:bg-neutral-700 focus:text-white cursor-pointer"
+                  >
+                    Үнэ: Багаас их
+                  </SelectItem>
+                  <SelectItem
+                    value="name"
+                    className="focus:bg-neutral-700 focus:text-white cursor-pointer"
+                  >
+                    Нэр
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -661,6 +599,7 @@ export default function PerformersPage() {
                     Шүүлтүүр
                   </Button>
                 </PopoverTrigger>
+
                 <PopoverContent className="w-80 bg-neutral-900 text-white border border-neutral-800">
                   <FilterControls isPopover={true} />
                 </PopoverContent>
@@ -668,12 +607,35 @@ export default function PerformersPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {loading ? (
-              Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-            ) : sortedPerformers.length > 0 ? (
-              sortedPerformers.map((performer) => (
-                <PerformerCard key={performer.id} performer={performer} />
+          <div className="mb-4 text-gray-400 text-sm">
+            {isLoading ? (
+              <Skeleton className="h-5 w-40" />
+            ) : (
+              `${sortedPerformers.length} уран бүтээлч олдлоо`
+            )}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {isLoading ? (
+              // Skeleton loading state
+              Array.from({ length: 8 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-neutral-900 rounded-lg overflow-hidden"
+                >
+                  <Skeleton className="h-60 w-full" />
+                  <div className="p-4 space-y-3">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-full" />
+                      <Skeleton className="h-6 w-1/3" />
+                    </div>
+                    <div className="flex gap-2">
+                      <Skeleton className="h-10 flex-1" />
+                      <Skeleton className="h-10 flex-1" />
+                    </div>
+                  </div>
+                </div>
               ))
             ) : (
               <>
