@@ -11,7 +11,11 @@ interface Booking {
   performers: { name: string };
 }
 
-const BookingResponseDetails: React.FC<{ bookingId: string | null }> = ({
+interface BookingResponseDetailsProps {
+  bookingId: string | null;
+}
+
+const BookingResponseDetails: React.FC<BookingResponseDetailsProps> = ({
   bookingId,
 }) => (
   <div className="mt-4">
@@ -24,13 +28,7 @@ const BookingResponseDetails: React.FC<{ bookingId: string | null }> = ({
   </div>
 );
 
-export function ClientSearch() {
-  const searchParams = useSearchParams();
-  const query = searchParams.get("q");
-  return <div>Query: {query}</div>;
-}
-
-const BookingResponsePage: React.FC = () => {
+const BookingResponsePage = () => {
   const searchParams = useSearchParams();
   const bookingIdParam = searchParams.get("bookingId");
   const actionParam = searchParams.get("action");
@@ -85,8 +83,9 @@ const BookingResponsePage: React.FC = () => {
     }
   };
 
-  if (loading)
+  if (loading) {
     return <div className="p-6 text-center text-white">Loading...</div>;
+  }
 
   return (
     <div className="max-w-xl mx-auto mt-[70px] p-6 bg-gray-800 text-white rounded-xl shadow-lg">
@@ -107,7 +106,6 @@ const BookingResponsePage: React.FC = () => {
       </div>
 
       <BookingResponseDetails bookingId={bookingIdParam} />
-      <ClientSearch />
     </div>
   );
 };

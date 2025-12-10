@@ -47,7 +47,7 @@ export default function EventHalls() {
           {/* Mobile Title and Filter */}
           <div className="md:hidden flex-1 flex justify-between text-center items-center mt-8 mb-6 space-y-4 w-full">
             <h1 className="text-3xl font-bold text-center m-0">
-              Эвэнт холл хайх
+              Ивэнт холл хайх
             </h1>
 
             <Popover>

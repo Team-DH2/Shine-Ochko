@@ -45,8 +45,17 @@ const DateForm = ({
   };
   const router = useRouter();
   const handleSubmit = async () => {
+    // 1️⃣ Сонгосон өдөр шалгах
     if (selected.length === 0) return alert("Өдөр сонгоно уу");
 
+    // 2️⃣ Token шалгах
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
+      return;
+    }
+
+    // 3️⃣ POST хийх өгөгдөл
     const bookingData = {
       hallId,
       bookings: selected,
@@ -55,7 +64,10 @@ const DateForm = ({
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // token-г header-д нэмнэ
+        },
         body: JSON.stringify(bookingData),
       });
 
@@ -63,7 +75,8 @@ const DateForm = ({
         alert("Захиалга амжилттай илгээгдлээ");
         router.push(`/dashboard`);
       } else {
-        alert("Алдаа гарлаа");
+        const errData = await res.json();
+        alert("Алдаа гарлаа: " + (errData.error || "Серверийн алдаа"));
       }
     } catch (error) {
       console.error(error);
