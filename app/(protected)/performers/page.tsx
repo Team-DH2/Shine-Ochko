@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/immutability */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,12 +10,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { FaStar, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Image from "next/image";
 import { Filter } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PerformersPage() {
   const router = useRouter();
@@ -358,7 +358,7 @@ export default function PerformersPage() {
   );
 
   return (
-    <div className="min-h-screen w-full bg-black text-white px-5 lg:px-10 pt-28">
+    <div className="min-h-screen w-full bg-black text-white px-5 lg:px-10 pt-28 mb-5">
       <div className="flex gap-8">
         {/* FIXED SIDEBAR */}
         <div className="w-80 shrink-0 hidden lg:block">
@@ -403,7 +403,7 @@ export default function PerformersPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
             ) : sortedPerformers.length > 0 ? (
