@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/immutability */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import { useState, useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -13,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { FaStar, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Image from "next/image";
 import { Filter } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PerformersPage() {
   const router = useRouter();
@@ -28,36 +30,31 @@ export default function PerformersPage() {
   const [sortBy, setSortBy] = useState<string>("popularity");
   const [isGenreOpen, setIsGenreOpen] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchPerformers();
-    fetchGenres();
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    fetch("/api/bookings")
-      .then((res) => res.json())
-      .then((data) => setBookings(data.bookings || []));
-  }, []);
-
-  const fetchPerformers = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch("/api/performers");
-      const data = await res.json();
-      setPerformers(data.performers || []);
-    } catch (error) {
-      console.error("Error fetching performers:", error);
-    }
-  };
+      const [perfRes, genreRes, bookingRes] = await Promise.all([
+        fetch("/api/performers"),
+        fetch("/api/performers/genres"),
+        fetch("/api/bookings"),
+      ]);
 
-  const fetchGenres = async () => {
-    try {
-      const res = await fetch("/api/performers/genres");
-      const data = await res.json();
-      setGenres(data.genres || []);
+      const perfData = await perfRes.json();
+      const genreData = await genreRes.json();
+      const bookingData = await bookingRes.json();
+
+      setPerformers(perfData.performers || []);
+      setGenres(genreData.genres || []);
+      setBookings(bookingData.bookings || []);
     } catch (error) {
-      console.error("Error fetching genres:", error);
+      console.error("Error fetching data:", error);
     }
+    setLoading(false);
   };
 
   const availabilityOptions = ["Боломжтой", "Хүлээгдэж байна", "Захиалагдсан"];
@@ -101,7 +98,7 @@ export default function PerformersPage() {
     }
   };
 
-  /** FIXED FILTER SIDEBAR (removed sticky from inside) */
+  /** FILTER SIDEBAR */
   const FilterControls = ({ isPopover = false }: { isPopover?: boolean }) => (
     <div
       className={`w-full bg-neutral-900 rounded-lg flex flex-col ${
@@ -112,19 +109,16 @@ export default function PerformersPage() {
         Таны захиалсан Event hall
       </h2>
 
-      {/* Scrollable bookings list */}
       <div className="max-h-60 overflow-y-auto pr-2 space-y-3 custom-scroll">
         {bookings.map((b: any) => (
           <div
             key={b.id}
             className="rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4 hover:bg-neutral-800/80 transition-colors backdrop-blur-sm"
           >
-            {/* Header */}
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-lg font-semibold text-white">
                 {b.event_halls?.name ?? "Event Hall"}
               </h2>
-
               <span
                 className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${
                   b.status === "pending"
@@ -137,26 +131,19 @@ export default function PerformersPage() {
                 {b.status}
               </span>
             </div>
-
-            {/* Details */}
             <div className="text-sm text-neutral-300 space-y-1 mb-2">
               <div>
                 <span className="font-medium text-neutral-100">Өдөр:</span>{" "}
                 {new Date(b.date).toLocaleDateString()}
               </div>
-
               <div>
                 <span className="font-medium text-neutral-100">Эхлэх цаг:</span>{" "}
                 {b.starttime}
               </div>
             </div>
-
-            {/* Description */}
             <p className="text-neutral-400 text-sm mb-2 leading-relaxed">
               {b.event_description}
             </p>
-
-            {/* Location */}
             <div className="text-neutral-500 text-sm flex items-center gap-1">
               <span>📍</span>
               <span className="truncate">{b.event_halls?.location}</span>
@@ -165,10 +152,8 @@ export default function PerformersPage() {
         ))}
       </div>
 
-      {/* Filters */}
+      {/* Genre Filter */}
       <h2 className="font-bold text-white mb-4 mt-3">Шүүлтүүр</h2>
-
-      {/* Genre */}
       <div className="mb-6">
         <h3
           className="font-semibold mb-3 flex items-center gap-2 cursor-pointer hover:text-neutral-300"
@@ -181,7 +166,6 @@ export default function PerformersPage() {
             <FaChevronDown className="ml-auto" />
           )}
         </h3>
-
         {isGenreOpen && (
           <div className="space-y-2">
             {genres.map((genre) => (
@@ -206,7 +190,7 @@ export default function PerformersPage() {
         )}
       </div>
 
-      {/* Availability */}
+      {/* Availability Filter */}
       <div className="mb-6">
         <h3 className="font-semibold text-white mb-3">Боломжтой эсэх</h3>
         <div className="space-y-2">
@@ -306,8 +290,76 @@ export default function PerformersPage() {
     </div>
   );
 
+  /** Skeleton Card */
+  const SkeletonCard = () => (
+    <div className="bg-neutral-900 rounded-lg overflow-hidden animate-pulse">
+      <div className="h-72 bg-neutral-800 w-full" />
+      <div className="p-4 space-y-3">
+        <div className="h-6 w-3/4 bg-neutral-700 rounded" />
+        <div className="h-4 w-1/2 bg-neutral-700 rounded" />
+        <div className="h-5 w-1/3 bg-neutral-700 rounded" />
+        <div className="h-21 w-full bg-neutral-700 rounded-lg" />
+      </div>
+    </div>
+  );
+
+  /** Performer Card */
+  const PerformerCard = ({ performer }: { performer: any }) => (
+    <div className="bg-neutral-900 rounded-xl overflow-hidden hover:scale-[1.02] transition">
+      <div className="relative h-72 bg-neutral-800">
+        <Image
+          src={
+            performer.image ||
+            "https://via.placeholder.com/400x300?text=No+Image"
+          }
+          alt={performer.name}
+          fill
+          className="object-cover"
+        />
+        <div
+          className={`absolute top-3 left-3 ${getAvailabilityColor(
+            performer.availability || "Боломжтой"
+          )} text-white px-3 py-1 rounded-full text-xs font-semibold`}
+        >
+          {performer.availability || "Боломжтой"}
+        </div>
+      </div>
+      <div className="p-4">
+        <h3 className="text-xl font-bold mb-1">{performer.name}</h3>
+        <p className="text-neutral-400 text-sm mb-3 truncate">
+          {performer.performance_type || performer.genre}
+        </p>
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <FaStar className="text-yellow-400" />
+            <span className="font-semibold">
+              {performer.popularity
+                ? Number(performer.popularity).toLocaleString()
+                : "N/A"}
+            </span>
+            <span className="text-xs text-gray-400">Viberate</span>
+          </div>
+          <div className="text-lg font-bold text-blue-600">
+            {Number(performer.price).toLocaleString()}₮
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => router.push(`/performers/${performer.id}`)}
+            className="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white py-2 rounded-lg"
+          >
+            Профайл үзэх
+          </button>
+          <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg">
+            Захиалах
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen w-full bg-black text-white px-4 sm:px-8 pt-28">
+    <div className="min-h-screen w-full bg-black text-white px-5 lg:px-10 pt-28">
       <div className="flex gap-8">
         {/* FIXED SIDEBAR */}
         <div className="w-80 shrink-0 hidden lg:block">
@@ -332,7 +384,6 @@ export default function PerformersPage() {
                     Шүүлтүүр
                   </Button>
                 </PopoverTrigger>
-
                 <PopoverContent className="w-80 bg-neutral-900 text-white border border-neutral-800">
                   <FilterControls isPopover={true} />
                 </PopoverContent>
@@ -340,77 +391,14 @@ export default function PerformersPage() {
             </div>
           </div>
 
-          <div className="mb-4 text-gray-400 text-sm">
-            {sortedPerformers.length} уран бүтээлч олдлоо
-          </div>
-
-          {/* Performer Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedPerformers.map((performer) => (
-              <div
-                key={performer.id}
-                className="bg-neutral-900 rounded-lg overflow-hidden hover:scale-[1.02] transition"
-              >
-                <div className="relative h-90 bg-neutral-800">
-                  <Image
-                    src={
-                      performer.image ||
-                      "https://via.placeholder.com/400x300?text=No+Image"
-                    }
-                    alt={performer.name}
-                    fill
-                    className="object-cover"
-                  />
-
-                  <div
-                    className={`absolute top-3 left-3 ${getAvailabilityColor(
-                      performer.availability || "Боломжтой"
-                    )} text-white px-3 py-1 rounded-full text-xs font-semibold`}
-                  >
-                    {performer.availability || "Боломжтой"}
-                  </div>
-                </div>
-
-                <div className="p-4">
-                  <h3 className="text-xl font-bold mb-1">{performer.name}</h3>
-
-                  <p className="text-neutral-400 text-sm mb-3 truncate">
-                    {performer.performance_type || performer.genre}
-                  </p>
-
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <FaStar className="text-yellow-400" />
-                      <span className="font-semibold">
-                        {performer.popularity
-                          ? Number(performer.popularity).toLocaleString()
-                          : "N/A"}
-                      </span>
-                      <span className="text-xs text-gray-400">Viberate</span>
-                    </div>
-
-                    <div className="text-lg font-bold text-blue-600">
-                      {Number(performer.price).toLocaleString()}₮
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => router.push(`/performers/${performer.id}`)}
-                      className="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white py-2 rounded-lg"
-                    >
-                      Профайл үзэх
-                    </button>
-
-                    <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg">
-                      Захиалах
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {sortedPerformers.length === 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+            ) : sortedPerformers.length > 0 ? (
+              sortedPerformers.map((performer) => (
+                <PerformerCard key={performer.id} performer={performer} />
+              ))
+            ) : (
               <div className="col-span-3 text-center py-12">
                 <div className="text-neutral-400 text-lg mb-2">
                   Уучлаарай, уран бүтээлч олдсонгүй

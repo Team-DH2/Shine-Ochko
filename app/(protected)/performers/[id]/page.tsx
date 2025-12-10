@@ -212,10 +212,12 @@ export default function PerformerDetailPage() {
           <div className="lg:col-span-1">
             <div className="bg-gray-900 rounded-lg overflow-hidden sticky top-8">
               <div className="relative h-120 bg-gray-800">
-                <img
+                <Image
                   src={performer.image || "https://via.placeholder.com/400x600"}
                   alt={performer.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
                 />
                 <div
                   className={`absolute top-4 right-4 ${getAvailabilityColor(
