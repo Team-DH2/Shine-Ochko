@@ -8,6 +8,14 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { FaStar, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Image from "next/image";
@@ -27,11 +35,11 @@ export default function PerformersPage() {
   const [sortBy, setSortBy] = useState<string>("popularity");
   const [isGenreOpen, setIsGenreOpen] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [allBookings, setAllBookings] = useState<any[]>([]); // All bookings for availability check
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingBookings, setIsLoadingBookings] = useState(true);
   const [bookingPerformer, setBookingPerformer] = useState<number | null>(null);
-  const [allBookings, setAllBookings] = useState<any[]>([]); // All bookings to check availability
   const bookingRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   useEffect(() => {
@@ -45,8 +53,13 @@ export default function PerformersPage() {
       .then((res) => res.json())
       .then((data) => {
         const bookingsData = data.bookings || [];
+        console.log("All bookings fetched:", bookingsData);
+        console.log(
+          "Bookings with performer IDs:",
+          bookingsData.filter((b: any) => b.performersid)
+        );
         setBookings(bookingsData);
-        setAllBookings(data.allBookings || []); // Store all bookings for availability check
+        setAllBookings(bookingsData); // Store all bookings for availability check
         // Automatically select first booking if available
         if (bookingsData.length > 0) {
           setSelectedBooking(bookingsData[0]);
@@ -54,6 +67,73 @@ export default function PerformersPage() {
       })
       .finally(() => setIsLoadingBookings(false));
   }, []);
+
+  // Check if performer is booked for the selected time slot
+  const isPerformerBooked = (performerId: number) => {
+    if (!selectedBooking) return false;
+
+    return allBookings.some((booking) => {
+      // Compare dates by converting both to date strings (YYYY-MM-DD)
+      const bookingDate = new Date(booking.date).toISOString().split("T")[0];
+      const selectedDate = new Date(selectedBooking.date)
+        .toISOString()
+        .split("T")[0];
+
+      return (
+        booking.performersid === performerId &&
+        bookingDate === selectedDate &&
+        booking.starttime === selectedBooking.starttime &&
+        booking.status !== "cancelled"
+      );
+    });
+  };
+
+  // Get performer availability status
+  const getPerformerAvailability = (performerId: number) => {
+    if (!selectedBooking) return "Сонголт хийнэ үү";
+
+    // Find if performer has a booking for the selected time slot
+    const performerBooking = allBookings.find((booking) => {
+      // Compare dates by converting both to date strings (YYYY-MM-DD)
+      const bookingDate = new Date(booking.date).toISOString().split("T")[0];
+      const selectedDate = new Date(selectedBooking.date)
+        .toISOString()
+        .split("T")[0];
+
+      return (
+        booking.performersid === performerId &&
+        bookingDate === selectedDate &&
+        booking.starttime === selectedBooking.starttime &&
+        booking.status !== "cancelled"
+      );
+    });
+
+    // Debug logging - log ALL bookings for this performer
+    const allPerformerBookings = allBookings.filter(
+      (b) => b.performersid === performerId
+    );
+    if (allPerformerBookings.length > 0) {
+      console.log(
+        `Performer ID ${performerId} all bookings:`,
+        allPerformerBookings
+      );
+      console.log(`Selected booking date/time:`, {
+        date: selectedBooking?.date,
+        dateFormatted: new Date(selectedBooking?.date)
+          .toISOString()
+          .split("T")[0],
+        starttime: selectedBooking?.starttime,
+      });
+    }
+
+    if (!performerBooking) return "Боломжтой";
+
+    // Check booking status
+    if (performerBooking.status === "pending") return "Хүлээгдэж байна";
+    if (performerBooking.status === "approved") return "Захиалагдсан";
+
+    return "Боломжтой";
+  };
 
   const fetchPerformers = async () => {
     setIsLoading(true);
@@ -70,23 +150,6 @@ export default function PerformersPage() {
     }
   };
 
-  // Check if performer is available for selected booking date/time
-  const checkPerformerAvailability = (performerId: number) => {
-    if (!selectedBooking) return "Боломжтой";
-
-    // Check if performer has any booking for the selected date and time
-    const hasBooking = allBookings.some(
-      (booking: any) =>
-        booking.performersid === performerId &&
-        booking.date === selectedBooking.date &&
-        booking.starttime === selectedBooking.starttime &&
-        (booking.status === "pending" || booking.status === "approved")
-    );
-
-    if (hasBooking) return "Захиалагдсан";
-    return "Боломжтой";
-  };
-
   const HandleOnPerformerBooking = async (performerId: number) => {
     try {
       setBookingPerformer(performerId);
@@ -99,16 +162,6 @@ export default function PerformersPage() {
 
       if (!selectedBooking) {
         alert("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
-        setBookingPerformer(null);
-        return;
-      }
-
-      // Check if performer is already booked for this date/time
-      const availability = checkPerformerAvailability(performerId);
-      if (availability === "Захиалагдсан") {
-        alert(
-          "Уучлаарай, энэ уран бүтээлч сонгосон өдөр болон цагт аль хэдийн захиалагдсан байна."
-        );
         setBookingPerformer(null);
         return;
       }
@@ -175,18 +228,27 @@ export default function PerformersPage() {
     }, 100);
   };
 
-  const availabilityOptions = ["Боломжтой", "Хүлээгдэж байна", "Захиалагдсан"];
+  const availabilityOptions = ["Боломжтой", "Захиалагдсан", "Хүлээгдэж байна"];
 
   const filteredPerformers = performers.filter((performer) => {
     const genreMatch =
       selectedGenres.length === 0 ||
       selectedGenres.some((genre) => performer.genre?.includes(genre));
 
-    // Check availability based on bookings instead of availability column
-    const availability = checkPerformerAvailability(performer.id);
+    // Filter by booking-based availability
+    const performerAvailability = getPerformerAvailability(performer.id);
     const availabilityMatch =
       selectedAvailability.length === 0 ||
-      selectedAvailability.includes(availability);
+      selectedAvailability.includes(performerAvailability);
+
+    // Debug logging
+    if (selectedAvailability.length > 0) {
+      console.log(`Performer ${performer.name}:`, {
+        availability: performerAvailability,
+        selectedFilters: selectedAvailability,
+        matches: selectedAvailability.includes(performerAvailability),
+      });
+    }
 
     const popularityMatch = (performer.popularity || 0) >= minPopularity;
     const priceMatch =
@@ -385,59 +447,76 @@ export default function PerformersPage() {
       {/* Popularity */}
       <div className="mb-6">
         <h3 className="font-semibold text-white mb-3">Алдартай байдал</h3>
-        <input
-          type="range"
-          min="0"
-          max="100000"
-          step="5000"
-          value={minPopularity}
-          onChange={(e) => setMinPopularity(parseFloat(e.target.value))}
-          className="w-full accent-blue-600"
-        />
-        <div className="text-sm text-gray-400 mt-2">
-          Хамгийн бага: {minPopularity.toLocaleString()}
+        <div className="px-2 py-4">
+          <Slider
+            min={0}
+            max={100000}
+            step={5000}
+            value={[minPopularity]}
+            onValueChange={(value) => setMinPopularity(value[0])}
+            className="w-full"
+          />
+        </div>
+        <div className="text-sm text-gray-400 mt-3 flex justify-between px-2">
+          <span>Хамгийн бага: {minPopularity.toLocaleString()}</span>
+          <span className="text-xs text-gray-500">Макс: 100,000</span>
         </div>
       </div>
 
       {/* Price */}
       <div className="mb-6">
-        <h3 className="font-semibold text-white mb-3">Үнийн хүрээ</h3>
-        <div className="space-y-3">
+        <h3 className="font-semibold text-white mb-3">💰 Үнийн хүрээ</h3>
+        <div className="space-y-4">
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">
+            <label className="text-xs text-gray-400 mb-2 block font-medium">
               Хамгийн бага:
             </label>
-            <select
-              value={minPrice}
-              onChange={(e) => setMinPrice(parseInt(e.target.value))}
-              className="w-full bg-neutral-800 text-white px-3 py-2 rounded-lg border border-neutral-700"
+            <Select
+              value={minPrice.toString()}
+              onValueChange={(value) => setMinPrice(parseInt(value))}
             >
-              <option value="0">0₮</option>
-              <option value="500000">500,000₮</option>
-              <option value="1000000">1,000,000₮</option>
-              <option value="1500000">1,500,000₮</option>
-              <option value="2000000">2,000,000₮</option>
-              <option value="3000000">3,000,000₮</option>
-              <option value="5000000">5,000,000₮</option>
-            </select>
+              <SelectTrigger className="w-full bg-neutral-800 text-white border-neutral-700 hover:border-neutral-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                <SelectValue placeholder="Сонгох" />
+              </SelectTrigger>
+              <SelectContent className="bg-neutral-800 text-white border-neutral-700">
+                <SelectItem value="0">0₮</SelectItem>
+                <SelectItem value="500000">500,000₮</SelectItem>
+                <SelectItem value="1000000">1,000,000₮</SelectItem>
+                <SelectItem value="1500000">1,500,000₮</SelectItem>
+                <SelectItem value="2000000">2,000,000₮</SelectItem>
+                <SelectItem value="3000000">3,000,000₮</SelectItem>
+                <SelectItem value="5000000">5,000,000₮</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">
+            <label className="text-xs text-gray-400 mb-2 block font-medium">
               Хамгийн их:
             </label>
-            <select
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(parseInt(e.target.value))}
-              className="w-full bg-neutral-800 text-white px-3 py-2 rounded-lg border border-neutral-700"
+            <Select
+              value={maxPrice.toString()}
+              onValueChange={(value) => setMaxPrice(parseInt(value))}
             >
-              <option value="1000000">1,000,000₮</option>
-              <option value="2000000">2,000,000₮</option>
-              <option value="3000000">3,000,000₮</option>
-              <option value="5000000">5,000,000₮</option>
-              <option value="10000000">10,000,000₮</option>
-              <option value="100000000">Хязгааргүй</option>
-            </select>
+              <SelectTrigger className="w-full bg-neutral-800 text-white border-neutral-700 hover:border-neutral-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                <SelectValue placeholder="Сонгох" />
+              </SelectTrigger>
+              <SelectContent className="bg-neutral-800 text-white border-neutral-700">
+                <SelectItem value="1000000">1,000,000₮</SelectItem>
+                <SelectItem value="2000000">2,000,000₮</SelectItem>
+                <SelectItem value="3000000">3,000,000₮</SelectItem>
+                <SelectItem value="5000000">5,000,000₮</SelectItem>
+                <SelectItem value="10000000">10,000,000₮</SelectItem>
+                <SelectItem value="100000000">Хязгааргүй</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+        </div>
+        <div className="mt-3 text-xs text-gray-500 flex justify-between px-1">
+          <span>{minPrice.toLocaleString()}₮</span>
+          <span>—</span>
+          <span>
+            {maxPrice === 100000000 ? "∞" : maxPrice.toLocaleString() + "₮"}
+          </span>
         </div>
       </div>
 
@@ -474,16 +553,17 @@ export default function PerformersPage() {
             {/* Sort Dropdown */}
             <div className="flex items-center gap-3">
               <label className="text-sm text-gray-400">Эрэмбэлэх:</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
-              >
-                <option value="popularity">Алдартай байдал</option>
-                <option value="price-high">Үнэ: Ихээс бага</option>
-                <option value="price-low">Үнэ: Багаас их</option>
-                <option value="name">Нэр</option>
-              </select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[200px] bg-gray-800 text-white border-gray-700 focus:border-blue-500">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 text-white border-gray-700">
+                  <SelectItem value="popularity">Алдартай байдал</SelectItem>
+                  <SelectItem value="price-high">Үнэ: Ихээс бага</SelectItem>
+                  <SelectItem value="price-low">Үнэ: Багаас их</SelectItem>
+                  <SelectItem value="name">Нэр</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex justify-between items-center mb-8">
@@ -563,10 +643,10 @@ export default function PerformersPage() {
 
                       <div
                         className={`absolute top-3 left-3 ${getAvailabilityColor(
-                          checkPerformerAvailability(performer.id)
+                          getPerformerAvailability(performer.id)
                         )} text-white px-3 py-1 rounded-full text-xs font-semibold`}
                       >
-                        {checkPerformerAvailability(performer.id)}
+                        {getPerformerAvailability(performer.id)}
                       </div>
                     </div>
 
