@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken"; // эсвэл чамай JWT verify ашиглаж болох
 
 export async function GET(req: NextRequest) {
   try {
@@ -53,8 +54,22 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { hallId, bookings } = await req.json();
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Token байхгүй" }, { status: 401 });
+    }
 
+    const token = authHeader.split(" ")[1];
+
+    let user: any;
+    try {
+      user = jwt.verify(token, process.env.JWT_SECRET || "secretKey");
+      // user.email, user.id гэх мэт token-аас гаргаж авах
+    } catch (err) {
+      return NextResponse.json({ error: "Token буруу байна" }, { status: 401 });
+    }
+
+    const { hallId, bookings } = await req.json();
     if (!hallId || !bookings || !Array.isArray(bookings)) {
       return NextResponse.json(
         { error: "Танхим болон bookings array шаардлагатай" },
@@ -83,9 +98,10 @@ export async function POST(req: NextRequest) {
 
       const booking = await prisma.booking.create({
         data: {
-          userid: 1,
+          userid: user.id, // token-аас гаргасан user id
+          // хүсвэл email-ийг хадгалах
           hallid: Number(hallId),
-          hostid: 1,
+          hostid: 1, // хэрэгтэй бол өөрчлөх
           ordereddate: new Date(),
           date: new Date(date),
           starttime,

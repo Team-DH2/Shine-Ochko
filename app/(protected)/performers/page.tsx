@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/immutability */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -620,7 +622,7 @@ export default function PerformersPage() {
   );
 
   return (
-    <div className="min-h-screen w-full bg-black text-white px-5 lg:px-10 pt-28">
+    <div className="min-h-screen w-full bg-black text-white px-5 lg:px-10 pt-28 mb-5">
       <div className="flex gap-8">
         {/* FIXED SIDEBAR */}
         <div className="w-80 shrink-0 hidden lg:block">

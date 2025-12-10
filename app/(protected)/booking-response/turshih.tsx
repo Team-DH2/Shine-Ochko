@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 
 interface Booking {
   id: number;
@@ -11,30 +10,15 @@ interface Booking {
   performers: { name: string };
 }
 
-const BookingResponseDetails: React.FC<{ bookingId: string | null }> = ({
-  bookingId,
-}) => (
-  <div className="mt-4">
-    <h2 className="text-xl font-semibold mb-2">Booking Confirmation</h2>
-    {bookingId ? (
-      <p>Your booking ID is: {bookingId}</p>
-    ) : (
-      <p>No booking ID found.</p>
-    )}
-  </div>
-);
-
-export function ClientSearch() {
-  const searchParams = useSearchParams();
-  const query = searchParams.get("q");
-  return <div>Query: {query}</div>;
+interface BookingResponsePageProps {
+  bookingId: string;
+  action?: string;
 }
 
-const BookingResponsePage: React.FC = () => {
-  const searchParams = useSearchParams();
-  const bookingIdParam = searchParams.get("bookingId");
-  const actionParam = searchParams.get("action");
-
+export default function BookingResponsePage({
+  bookingId,
+  action,
+}: BookingResponsePageProps) {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(
@@ -42,20 +26,13 @@ const BookingResponsePage: React.FC = () => {
   );
 
   useEffect(() => {
-    if (
-      bookingIdParam &&
-      actionParam &&
-      (actionParam === "approve" || actionParam === "decline")
-    ) {
-      handleBookingResponse(
-        Number(bookingIdParam),
-        actionParam as "approve" | "decline"
-      );
+    if (bookingId && (action === "approve" || action === "decline")) {
+      handleBookingResponse(Number(bookingId), action as "approve" | "decline");
     } else {
       setLoading(false);
       setMessage("Буруу query параметр байна");
     }
-  }, [bookingIdParam, actionParam]);
+  }, [bookingId, action]);
 
   const handleBookingResponse = async (
     bookingId: number,
@@ -78,7 +55,7 @@ const BookingResponsePage: React.FC = () => {
         setMessage(data.message || "Алдаа гарлаа");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error(error);
       setMessage("Серверийн алдаа гарлаа");
     } finally {
       setLoading(false);
@@ -105,11 +82,6 @@ const BookingResponsePage: React.FC = () => {
           </div>
         )}
       </div>
-
-      <BookingResponseDetails bookingId={bookingIdParam} />
-      <ClientSearch />
     </div>
   );
-};
-
-export default BookingResponsePage;
+}
