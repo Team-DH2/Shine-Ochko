@@ -70,7 +70,7 @@ export default function EventHallsPage({
   };
 
   return (
-    <aside className="w-100 bg-neutral-900 text-gray-200 rounded-2xl p-6 shadow-lg relative">
+    <aside className="w-100 bg-neutral-900 text-gray-200 mt-[-15] rounded-2xl p-6 shadow-lg relative">
       <h2 className="text-2xl font-semibold mb-6">Filter Event Halls</h2>
 
       {/* Location */}

@@ -70,7 +70,6 @@ model performers {
   contact_phone    String?   @db.VarChar(50)
   performance_type String?   @db.VarChar(100)
   created_at       DateTime? @default(now()) @db.Timestamp(6)
-  availability     String?   @db.VarChar(50)
   image            String?
   price            Decimal   @default(500000) @db.Decimal(12, 0)
   popularity       Int?
@@ -116,18 +115,18 @@ model Form {
   images          String[]
   createdat       DateTime? @default(now()) @db.Timestamp(6)
   suitableEvents  String?
-  price           Int?      @map("price")
-  rating          Float?    @map("rating") @db.Real
-  menu            String?   @map("menu")
+  price           Int?
+  rating          Float?    @db.Real
+  menu            String?
   locationlink    String?
   parkingcapacity Int?
   description     String?
   additional      String?
   abouthall       String?
-  advantages      String?   @map("advantages")
-  booking         String?   @map("booking")
-  capacity        Int?      @map("capacity")
-  phonenumber     String?   @map("phonenumber")
+  advantages      String?
+  booking         String?
+  capacity        Int?
+  phonenumber     String?
 }
 
 enum bookingstatus {
