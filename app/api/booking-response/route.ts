@@ -32,8 +32,10 @@ export async function GET(req: NextRequest) {
     email: booking.User.email,
     name: booking.User.name,
     content: `Таны захиалга ${booking.performers?.name}-д ${
-      action === "approve" ? "баталгаажлаа" : "татгалзлаа"
-    }.`,
+      action === "approve"
+        ? "баталгаажлаа цагийг хөгжилтэй өнгөрүүлээрэй! манайхаар зочилсонд баярлалаа. үнсэе!"
+        : "татгалзлаа уучлаарай. та өөр захиалга хийхийг хүсвэл манай вэбсайтаар зочлоорой"
+    }. `,
   });
 
   return NextResponse.json({
@@ -62,9 +64,9 @@ async function sendEmail({
   });
 
   await transporter.sendMail({
-    from: `"Event Hall" <${process.env.EMAIL_USER}>`,
+    from: `"Eventlux" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Таны захиалгын статус өөрчлөгдлөө",
+    subject: "Таны захиалгын хүсэлтэнд хариу ирлээ",
     html: `
       <p>Сайн байна уу, ${name}?</p>
       <p>${content}</p>

@@ -17,6 +17,7 @@ async function fetcher(url: string) {
   if (!res.ok) throw new Error("Failed to fetch");
 
   const data = await res.json();
+  console.log({ data });
   return data.bookings;
 }
 
@@ -63,6 +64,16 @@ export default function Dashboard() {
   };
 
   console.log({ bookings });
+  if (bookings.length === 0) {
+    return (
+      <div>
+        <h1 className="text-2xl text-white font-bold mb-5">
+          Таны захиалсан Event hall
+        </h1>
+        <p className="text-white text-4xl">Таны захиалга хоосон байна.</p>
+      </div>
+    );
+  }
   // ---- Group bookings ----
   const groupedBookings = bookings.reduce((acc: any, curr: any) => {
     const key = `${curr.hallid}-${curr.starttime}`;
@@ -75,6 +86,9 @@ export default function Dashboard() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+      <h1 className="text-2xl text-white font-bold mb-5">
+        Таны захиалсан Event hall
+      </h1>
       {Object.entries(groupedBookings).map(([key, group]: any) => {
         const hallBooking = group.hallBooking;
         const performers = group.performers;
@@ -83,7 +97,7 @@ export default function Dashboard() {
         return (
           <Card
             key={hallBooking?.id || performers[0]?.id}
-            className="bg-white text-black p-4 rounded-xl space-y-2"
+            className="bg-white text-black p-2 rounded-xl space-y-1"
           >
             {/* Hall Info */}
             <h3 className="font-semibold text-lg">{group.hall?.name}</h3>
@@ -92,14 +106,13 @@ export default function Dashboard() {
             {group.hall?.images?.length > 0 && (
               <HallCarousel images={group.hall.images} />
             )}
-            <p className="text-gray-600">
-              <span className="text-black font-bold">Хаяг : </span>
+            <p className="text-gray-600 h-10 ">
+              <span className="text-black font-bold ">Хаяг : </span>
               {group.hall?.location}
             </p>
             <p className="text-gray-600">
-              {" "}
-              <span className="text-black font-bold">Суудлын тоо : </span>
-              {group.hall?.capacity}
+              <span className="text-black font-bold">Холбогдох Утас : </span>
+              {group.hall?.phonenumber}
             </p>
             <p className="text-gray-600">
               <span className="text-black font-bold">Өдөр: </span>

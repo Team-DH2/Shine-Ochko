@@ -112,9 +112,9 @@ export async function POST(req: NextRequest) {
         <p>Сайн байна уу, ${booking.performers.name}?</p>
         <p>Хэрэглэгч <strong>${
           booking.User.name
-        }</strong> танай Event Hall-д захиалга хүсэлт илгээсэн байна:</p>
+        }</strong> Таньд Event lux  захиалга хүсэлт илгээсэн байна:</p>
         <ul>
-          <li>Event Hall: ${booking.event_halls?.name}</li>
+          <li>Event hall: ${booking.event_halls?.name}</li>
           <li>Огноо: ${new Date(booking.date).toLocaleDateString()}</li>
           <li>Эхлэх цаг: ${booking.starttime || "Тодорхойгүй"}</li>
         </ul>
@@ -168,7 +168,7 @@ async function sendEmail({ email, name, content }: any) {
 
   try {
     await transporter.sendMail({
-      from: `"Event Hall" <${process.env.EMAIL_USER}>`,
+      from: `"Event lux" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Танд шинэ захиалга ирлээ",
       html: content,
