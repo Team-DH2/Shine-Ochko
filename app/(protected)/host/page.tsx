@@ -3,12 +3,22 @@
 import HostCard from "@/components/us/Host";
 import { Header } from "@/components/us/Header";
 import { useEffect, useState } from "react";
-import { LuUserRoundSearch } from "react-icons/lu";
-import { IoIosPricetags } from "react-icons/io";
-import { MdCalendarMonth } from "react-icons/md";
-import { MdOutlinePriceChange } from "react-icons/md";
-import { FiSearch } from "react-icons/fi";
-import { VscDebugRestart } from "react-icons/vsc";
+
+// DESIGN COMPONENTS
+import { RotateCcw } from "lucide-react";
+import { MdOutlinePersonSearch } from "react-icons/md";
+import { IoMdSearch } from "react-icons/io";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 
 type HostDB = {
   id: number;
@@ -24,19 +34,20 @@ type HostDB = {
 };
 
 export default function Host() {
-  const [search, setSearch] = useState("");
-  const [minRate, setMinRate] = useState<number | null>(null);
-  const [maxRate, setMaxRate] = useState<number | null>(null);
+  // Filter States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string>("all");
+  const [availability, setAvailability] = useState<string>("all");
 
-  const [minPrice, setMinPrice] = useState<number | null>(null);
-  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [priceRange, setPriceRange] = useState([2000000, 10000000]);
+  const [minRating, setMinRating] = useState("0");
+  const [maxRating, setMaxRating] = useState("5");
 
-  const [selectedTag, setSelectedTag] = useState("all");
-  const [selectedStatus, setSelectedStatus] = useState("all");
-
+  // Data States
   const [hosts, setHosts] = useState<HostDB[]>([]);
   const [filteredHosts, setFilteredHosts] = useState<HostDB[]>([]);
 
+  // FETCH HOSTS
   useEffect(() => {
     fetch("/api/hosts")
       .then((res) => res.json())
@@ -47,25 +58,18 @@ export default function Host() {
       });
   }, []);
 
+  // APPLY FILTER LOGIC
   const handleFilter = () => {
     let result = [...hosts];
 
     // SEARCH
-    if (search.trim() !== "") {
+    if (searchQuery.trim() !== "") {
       result = result.filter(
         (h) =>
-          h.name.toLowerCase().includes(search.toLowerCase()) ||
-          h.title.toLowerCase().includes(search.toLowerCase())
+          h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          h.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-
-    // RATING MIN/MAX
-    if (minRate !== null) result = result.filter((h) => h.rating >= minRate);
-    if (maxRate !== null) result = result.filter((h) => h.rating <= maxRate);
-
-    // PRICE RANGE
-    if (minPrice !== null) result = result.filter((h) => h.price >= minPrice);
-    if (maxPrice !== null) result = result.filter((h) => h.price <= maxPrice);
 
     // TAG FILTER
     if (selectedTag !== "all") {
@@ -73,144 +77,154 @@ export default function Host() {
     }
 
     // STATUS FILTER
-    if (selectedStatus !== "all") {
-      result = result.filter((h) => h.status === selectedStatus);
+    if (availability !== "all") {
+      result = result.filter((h) => h.status === availability);
     }
+
+    // RATING FILTER
+    result = result.filter(
+      (h) => h.rating >= Number(minRating) && h.rating <= Number(maxRating)
+    );
+
+    // PRICE FILTER
+    result = result.filter(
+      (h) => h.price >= priceRange[0] && h.price <= priceRange[1]
+    );
 
     setFilteredHosts(result);
   };
 
+  // RESET FILTERS
   const handleReset = () => {
-    setSearch("");
-    setMinRate(null);
-    setMaxRate(null);
-    setMinPrice(null);
-    setMaxPrice(null);
+    setSearchQuery("");
     setSelectedTag("all");
-    setSelectedStatus("all");
+    setAvailability("all");
+    setPriceRange([2000000, 10000000]);
+    setMinRating("0");
+    setMaxRating("5");
 
     setFilteredHosts(hosts);
   };
 
   return (
     <div className="min-h-screen bg-[#09090D] text-white px-32">
-      <h1 className="text-3xl font-bold mb-6 pt-[108px] pb-[72px] flex justify-center">
+      <Header />
+
+      <h1 className="text-3xl font-bold mb-6 pt-[108px] pb-[72px] text-center">
         Discover Your Ideal Host or MC
       </h1>
 
       {/* FILTER CARD */}
-      <div className="bg-[#32374380] rounded-2xl pr-[33px]">
-        <div className="p-[33px] flex gap-8">
-          {/* SEARCH BAR */}
-          <div className="flex items-center gap-3 bg-[#262A33FF] rounded-full px-4 w-[300px]">
-            <LuUserRoundSearch />
-            <input
-              className="flex-1 bg-transparent outline-none text-white placeholder-gray-500"
-              placeholder="Хөтлөгч хайх..."
+      <div className="rounded-3xl bg-white/5 p-8 shadow-2xl backdrop-blur-[20px] border border-white/10">
+        {/* TOP ROW */}
+        <div className="mb-6 flex flex-wrap items-center gap-4">
+          {/* SEARCH INPUT */}
+          <div className="relative flex-1 min-w-[280px]">
+            <MdOutlinePersonSearch className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
+            <Input
               type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Хөтлөгч хайх..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-12 w-full rounded-full border border-white/10 bg-white/5 text-white placeholder:text-white/40 pl-12 pr-4 focus-visible:ring-2 focus-visible:ring-blue-500/50  focus-visible:border-blue-500/50 outline-none"
             />
           </div>
 
-          {/* FILTER BUTTONS */}
-          <div className="flex gap-6">
-            {/* TAG FILTER */}
-            <div className="bg-black flex items-center gap-2 rounded-2xl py-1 px-4">
-              <IoIosPricetags />
-              <select
-                className="bg-transparent outline-none"
-                value={selectedTag}
-                onChange={(e) => setSelectedTag(e.target.value)}
-              >
-                <option value="all">Бүгд</option>
-                <option value="Телевизийн хөтлөгч">Телевизийн хөтлөгч</option>
-                <option value="Комеди">Комеди</option>
-                <option value="Эвент">Эвент</option>
-                <option value="Энтертайнмент">Энтертайнмент</option>
-              </select>
-            </div>
+          {/* TAG FILTER */}
+          <Select value={selectedTag} onValueChange={setSelectedTag}>
+            <SelectTrigger className="h-12 w-[200px] rounded-xl border-white/10 bg-white/5 text-white backdrop-blur-sm">
+              <SelectValue placeholder="Төрөл сонгох" />
+            </SelectTrigger>
+            <SelectContent className="border-white/10 bg-[#1A1A24]/95 backdrop-blur-xl text-white">
+              <SelectItem value="all">Бүгд</SelectItem>
+              <SelectItem value="Телевизийн хөтлөгч">
+                Телевизийн хөтлөгч
+              </SelectItem>
+              <SelectItem value="Комеди">Комеди</SelectItem>
+              <SelectItem value="Эвент">Эвент</SelectItem>
+              <SelectItem value="Энтертайнмент">Энтертайнмент</SelectItem>
+            </SelectContent>
+          </Select>
 
-            {/* STATUS FILTER */}
-            <div className="bg-black flex items-center gap-2 rounded-2xl py-1 px-4">
-              <MdCalendarMonth />
-              <select
-                className="bg-transparent outline-none"
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-              >
-                <option value="all">Бүгд</option>
-                <option value="Боломжтой">Боломжтой</option>
-                <option value="Захиалагдсан">Захиалагдсан</option>
-                <option value="Хүлээгдэж байна">Хүлээгдэж байна</option>
-              </select>
-            </div>
+          {/* STATUS FILTER */}
+          <Select value={availability} onValueChange={setAvailability}>
+            <SelectTrigger className="h-12 w-[180px] rounded-xl border-white/10 bg-white/5 text-white backdrop-blur-sm">
+              <SelectValue placeholder="Боломжит байдал" />
+            </SelectTrigger>
+            <SelectContent className="border-white/10 bg-[#1A1A24]/95 backdrop-blur-xl text-white ">
+              <SelectItem value="all">Бүгд</SelectItem>
+              <SelectItem value="Боломжтой">Боломжтой</SelectItem>
+              <SelectItem value="Захиалагдсан">Захиалагдсан</SelectItem>
+              <SelectItem value="Хүлээгдэж байна">Хүлээгдэж байна</SelectItem>
+            </SelectContent>
+          </Select>
 
-            <div
-              className="bg-black flex items-center gap-2 rounded-2xl py-1 px-5 cursor-pointer hover:bg-gray-800"
-              onClick={handleReset}
-            >
-              <VscDebugRestart />
-            </div>
-
-            {/* PRICE RANGE */}
-            <div className="bg-black  gap-2 rounded-2xl  py-1 px-4">
-              <div className="flex items-center gap-2">
-                <MdOutlinePriceChange />
-                <p>Үнэ</p>
-              </div>
-
-              <div>
-                <input
-                  type="range"
-                  min="2000000"
-                  max="10000000"
-                  step="50000"
-                  value={minPrice ?? 2000000}
-                  onChange={(e) => setMinPrice(Number(e.target.value))}
-                />
-
-                <div className="text-sm text-gray-400 ">
-                  Хамгийн бага: {minPrice?.toLocaleString()} ₮
-                </div>
-              </div>
-            </div>
-
-            {/* RESET BUTTON */}
-          </div>
+          {/* RESET BUTTON */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleReset}
+            className="h-12 w-12 rounded-xl border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+          >
+            <RotateCcw className="h-5 w-5" />
+          </Button>
         </div>
 
-        {/* RATING FILTER */}
-        <div className="flex justify-between">
-          <div className="px-[33px] pb-8 flex items-center gap-2">
-            <div>Үнэлгээ:</div>
+        {/* BOTTOM ROW */}
+        <div className="flex flex-wrap items-end gap-6">
+          {/* RATING */}
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-medium text-white/70">
+              Үнэлгээ:
+            </label>
 
-            <input
-              className="w-20 bg-[#262A33FF] rounded-md px-2"
-              placeholder="min"
+            <Input
               type="number"
-              value={minRate ?? ""}
-              onChange={(e) => setMinRate(Number(e.target.value))}
+              min="0"
+              max="5"
+              step="1"
+              value={minRating}
+              onChange={(e) => setMinRating(e.target.value)}
+              className="h-10 w-20 rounded-xl border-white/10 bg-white/5 text-center text-white focus-visible:ring-2 focus-visible:ring-blue-500/50  focus-visible:border-blue-500/50 outline-none"
             />
 
-            <div>-</div>
+            <span className="text-white/40">-</span>
 
-            <input
-              className="w-20 bg-[#262A33FF] rounded-md px-2"
-              placeholder="max"
+            <Input
               type="number"
-              value={maxRate ?? ""}
-              onChange={(e) => setMaxRate(Number(e.target.value))}
+              min="0"
+              max="5"
+              step="1"
+              value={maxRating}
+              onChange={(e) => setMaxRating(e.target.value)}
+              className="h-10 w-20 rounded-xl border-white/10 bg-white/5 text-center text-white focus-visible:ring-2 focus-visible:ring-blue-500/50  focus-visible:border-blue-500/50 outline-none"
             />
           </div>
 
-          <div
+          {/* PRICE RANGE */}
+          <div className="flex-1 min-w-[280px]">
+            <label className="mb-3 block text-sm font-medium text-white/70">
+              Үнийн хязгаар: {priceRange[0].toLocaleString()}₮ –{" "}
+              {priceRange[1].toLocaleString()}₮
+            </label>
+
+            <Slider
+              value={priceRange}
+              onValueChange={setPriceRange}
+              min={2000000}
+              max={10000000}
+              step={100000}
+            />
+          </div>
+
+          {/* SEARCH BUTTON */}
+          <Button
             onClick={handleFilter}
-            className="bg-blue-700 cursor-pointer h-8 flex items-center gap-2 justify-center rounded-2xl px-6 hover:bg-blue-800"
+            className="h-12 rounded-2xl bg-linear-to-r from-blue-600 to-blue-500 px-8 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:from-blue-500 hover:to-blue-600 transition-all"
           >
-            <FiSearch />
+            <IoMdSearch className=" w-5" />
             Хайх
-          </div>
+          </Button>
         </div>
       </div>
 
