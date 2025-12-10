@@ -22,7 +22,7 @@ const LOCATIONS = [
 ];
 
 interface EventHallsPageProps {
-  originalData: Hall[]; // API-аас ирсэн дата
+  originalData: Hall[];
   onFilterChange: (filtered: Hall[]) => void;
 }
 
@@ -66,7 +66,7 @@ export default function EventHallsPage({
     setPrice(MAX);
     setCapacity("");
     setOpenLoc(false);
-    onFilterChange(originalData); // API дата буцааж харуулна
+    onFilterChange(originalData);
   };
 
   return (

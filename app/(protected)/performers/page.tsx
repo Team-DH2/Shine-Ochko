@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/immutability */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { FaStar, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Image from "next/image";
@@ -175,7 +174,7 @@ export default function PerformersPage() {
               >
                 <Checkbox
                   checked={selectedGenres.includes(genre)}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={(checked: any) =>
                     checked
                       ? setSelectedGenres([...selectedGenres, genre])
                       : setSelectedGenres(
@@ -201,7 +200,7 @@ export default function PerformersPage() {
             >
               <Checkbox
                 checked={selectedAvailability.includes(option)}
-                onCheckedChange={(checked) =>
+                onCheckedChange={(checked: any) =>
                   checked
                     ? setSelectedAvailability([...selectedAvailability, option])
                     : setSelectedAvailability(
@@ -370,11 +369,24 @@ export default function PerformersPage() {
 
         {/* Performer Grid */}
         <div className="flex-1 w-full">
+          <div className="flex justify-between">
+            <h1 className="text-4xl font-bold mb-8">Уран бүтээлчид хайх</h1>
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-3">
+              <label className="text-sm text-gray-400">Эрэмбэлэх:</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
+              >
+                <option value="popularity">Алдартай байдал</option>
+                <option value="price-high">Үнэ: Ихээс бага</option>
+                <option value="price-low">Үнэ: Багаас их</option>
+                <option value="name">Нэр</option>
+              </select>
+            </div>
+          </div>
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold">
-              Уран бүтээлчид хайх
-            </h1>
-
             {/* Mobile Popover */}
             <div className="lg:hidden">
               <Popover>

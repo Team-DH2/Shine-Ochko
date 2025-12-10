@@ -1,14 +1,24 @@
 import nodemailer from "nodemailer";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const { email, name, content } = await req.json();
 
+    if (!email || !name || !content) {
+      return NextResponse.json(
+        { success: false, message: "Шаардлагатай өгөгдөл дутуу байна" },
+        { status: 400 }
+      );
+    }
+
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
-        user: process.env.EMAIL_USER, // Gmail
-        pass: process.env.EMAIL_PASS, // App password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
@@ -22,11 +32,15 @@ export async function POST(req: Request) {
       `,
     });
 
-    return Response.json({ success: true, message: "Email илгээлээ!" });
+    return NextResponse.json({
+      success: true,
+      message: "Email амжилттай илгээлээ!",
+    });
   } catch (error) {
     console.error("Email error:", error);
-    return Response.json(
-      { success: false, message: "Email илгээж чадсангүй" },
+
+    return NextResponse.json(
+      { success: false, message: "Email илгээж чадсангүй", error: `${error}` },
       { status: 500 }
     );
   }

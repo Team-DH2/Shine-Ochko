@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { MapPin, Star, Users, Filter } from "lucide-react";
@@ -17,6 +16,7 @@ import {
 export default function EventHalls() {
   const [originalHalls, setOriginalHalls] = useState<any[]>([]);
   const [filteredHalls, setFilteredHalls] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
