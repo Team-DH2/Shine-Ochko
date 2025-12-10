@@ -46,23 +46,31 @@ export default function PerformersPage() {
     fetchPerformers();
     fetchGenres();
   }, []);
-
   useEffect(() => {
     setIsLoadingBookings(true);
-    fetch("/api/bookings")
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.log("User not logged in → first booking cannot auto-select");
+    }
+    fetch("/api/bookings", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         const bookingsData = data.bookings || [];
-        console.log("All bookings fetched:", bookingsData);
-        console.log(
-          "Bookings with performer IDs:",
-          bookingsData.filter((b: any) => b.performersid)
-        );
+
         setBookings(bookingsData);
-        setAllBookings(bookingsData); // Store all bookings for availability check
-        // Automatically select first booking if available
-        if (bookingsData.length === 1) {
+        setAllBookings(bookingsData);
+
+        // ✔User must be logged in to auto-select first booking
+
+        setBookings(data.bookings);
+
+        if (bookingsData.length > 0 && token) {
           setSelectedBooking(bookingsData[0]);
+          console.log("Auto-selected first booking:", bookingsData[0]);
         }
       })
       .finally(() => setIsLoadingBookings(false));
@@ -301,18 +309,18 @@ export default function PerformersPage() {
             Array.from({ length: 2 }).map((_, index) => (
               <div
                 key={index}
-                className="rounded-xl bg-neutral-800 border border-neutral-700 p-4"
+                className="rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4"
               >
                 <div className="flex justify-between items-center mb-3">
-                  <Skeleton className="h-6 w-32 bg-neutral-600" />
-                  <Skeleton className="h-6 w-20 bg-neutral-600" />
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-6 w-20" />
                 </div>
                 <div className="space-y-2 mb-2">
-                  <Skeleton className="h-4 w-full bg-neutral-600" />
-                  <Skeleton className="h-4 w-3/4 bg-neutral-600" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
                 </div>
-                <Skeleton className="h-4 w-full bg-neutral-600" />
-                <Skeleton className="h-3 w-2/3 mt-2 bg-neutral-600" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-3 w-2/3 mt-2" />
               </div>
             ))
           : bookings.map((b: any) => (
@@ -620,19 +628,19 @@ export default function PerformersPage() {
               Array.from({ length: 8 }).map((_, index) => (
                 <div
                   key={index}
-                  className="bg-neutral-800 rounded-lg overflow-hidden"
+                  className="bg-neutral-900 rounded-lg overflow-hidden"
                 >
-                  <Skeleton className="h-60 w-full bg-neutral-600" />
+                  <Skeleton className="h-60 w-full" />
                   <div className="p-4 space-y-3">
-                    <Skeleton className="h-6 w-3/4 bg-neutral-600" />
-                    <Skeleton className="h-4 w-1/2 bg-neutral-600" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
                     <div className="space-y-2">
-                      <Skeleton className="h-5 w-full bg-neutral-600" />
-                      <Skeleton className="h-6 w-1/3 bg-neutral-600" />
+                      <Skeleton className="h-5 w-full" />
+                      <Skeleton className="h-6 w-1/3" />
                     </div>
                     <div className="flex gap-2">
-                      <Skeleton className="h-10 flex-1 bg-neutral-600" />
-                      <Skeleton className="h-10 flex-1 bg-neutral-600" />
+                      <Skeleton className="h-10 flex-1" />
+                      <Skeleton className="h-10 flex-1" />
                     </div>
                   </div>
                 </div>
