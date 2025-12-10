@@ -24,7 +24,8 @@ export async function GET(req: NextRequest) {
       where: { userid: userId },
       include: {
         event_halls: true,
-        performers: true, // performer байгаа бол эндээс авна
+        performers: true,
+        // performer байгаа бол эндээс авна
       },
       orderBy: { date: "asc" },
     });
