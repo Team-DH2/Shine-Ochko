@@ -61,7 +61,7 @@ export default function PerformersPage() {
         setBookings(bookingsData);
         setAllBookings(bookingsData); // Store all bookings for availability check
         // Automatically select first booking if available
-        if (bookingsData.length > 0) {
+        if (bookingsData.length === 1) {
           setSelectedBooking(bookingsData[0]);
         }
       })
@@ -169,13 +169,16 @@ export default function PerformersPage() {
       const hallId = selectedBooking.hallid;
       const starttime = selectedBooking.starttime;
 
+      const bookeddate = selectedBooking.date;
+      console.log({ bookeddate });
+
       const res = await fetch("/api/performer-bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ performerId, hallId, starttime }),
+        body: JSON.stringify({ performerId, hallId, starttime, bookeddate }),
       });
 
       const data = await res.json();
