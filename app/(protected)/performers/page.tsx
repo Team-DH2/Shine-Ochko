@@ -63,9 +63,6 @@ export default function PerformersPage() {
 
         setBookings(bookingsData);
         setAllBookings(bookingsData);
-
-        // ✔User must be logged in to auto-select first booking
-
         setBookings(data.bookings);
 
         if (bookingsData.length > 0 && token) {
@@ -323,7 +320,7 @@ export default function PerformersPage() {
                 <Skeleton className="h-3 w-2/3 mt-2" />
               </div>
             ))
-          : bookings.map((b: any) => (
+          : bookings?.map((b: any) => (
               <div
                 key={b.id}
                 ref={(el) => {
