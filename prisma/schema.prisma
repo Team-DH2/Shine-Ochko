@@ -42,6 +42,7 @@ model event_halls {
   price                   Int[]
   rating                  String?
   location_link           String?
+  duureg                  String?
   booking                 booking[]
 }
 
@@ -105,14 +106,27 @@ model performers_new {
 }
 
 model Form {
-  id        Int       @id @default(autoincrement())
-  name      String
-  hallname  String
-  location  String
-  number    String
-  email     String
-  images    String[]
-  createdat DateTime? @default(now()) @db.Timestamp(6)
+  id              Int       @id @default(autoincrement())
+  name            String
+  hallname        String
+  location        String
+  number          String
+  email           String
+  images          String[]
+  createdat       DateTime? @default(now()) @db.Timestamp(6)
+  suitableEvents  String?
+  price           Int?
+  rating          Float?    @db.Real
+  menu            String?
+  locationlink    String?
+  parkingcapacity Int?
+  description     String?
+  additional      String?
+  abouthall       String?
+  advantages      String?
+  booking         String?
+  capacity        Int?
+  phonenumber     String?
 }
 
 enum bookingstatus {

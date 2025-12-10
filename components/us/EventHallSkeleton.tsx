@@ -1,0 +1,44 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function EventHallsSkeleton() {
+  const [skeletonCount, setSkeletonCount] = useState(6);
+
+  useEffect(() => {
+    // calculate how many skeletons to fill row
+    const cardMinWidth = 280; // same as your min-w-[280px]
+    const cols = Math.floor(window.innerWidth / cardMinWidth) || 1;
+    setSkeletonCount(Math.max(6, cols * 2)); // at least 6 skeletons
+  }, []);
+
+  return (
+    <>
+      {Array.from({ length: skeletonCount }).map((_, i) => (
+        <div
+          key={i}
+          className="flex-1 min-w-[280px] max-w-[400px] w-full
+                     bg-neutral-900 rounded-2xl overflow-hidden shadow-xl
+                     flex flex-col"
+        >
+          <div className="relative w-full h-56 bg-neutral-800">
+            <Skeleton className="absolute inset-0 h-full w-full bg-neutral-800" />
+          </div>
+
+          <div className="p-4 space-y-3">
+            <Skeleton className="h-6 w-3/5 rounded-md bg-neutral-700" />
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-4 w-1/2 rounded-md bg-neutral-700" />
+              <Skeleton className="h-4 w-10 rounded-md bg-neutral-700" />
+            </div>
+            <div className="flex justify-between items-center h-10">
+              <Skeleton className="h-4 w-24 rounded-md bg-neutral-700" />
+              <Skeleton className="h-4 w-16 rounded-md bg-neutral-700" />
+            </div>
+            <Skeleton className="h-10 w-full rounded-xl bg-neutral-700" />
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
