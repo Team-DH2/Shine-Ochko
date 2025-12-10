@@ -5,7 +5,7 @@ import nodemailer from "nodemailer";
 
 export async function POST(req: NextRequest) {
   try {
-    const { performerId, hallId, starttime } = await req.json();
+    const { performerId, hallId, starttime, date } = await req.json();
 
     if (!performerId || !hallId) {
       return NextResponse.json(
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ---- TOKEN SHALGANA ----
+    // ---- TOKEN шалгах ----
     const token = req.headers.get("authorization")?.replace("Bearer ", "");
     if (!token) {
       return NextResponse.json(
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
     const userId = decoded.id;
 
-    // ---- USER ИЙН EMAIL + NAME АВСАН ----
+    // ---- Хэрэглэгчийн мэдээлэл авах ----
     const user = await prisma.mruser.findUnique({
       where: { id: userId },
       select: { email: true, name: true },
@@ -39,79 +39,106 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ---- DAWHAR PERFORMER BOOKING SHALGANA ----
-    const exists = await prisma.booking.findFirst({
+    // ---- hallId ба performerId хослолыг шалгах ----
+    const existingBooking = await prisma.booking.findFirst({
       where: {
-        userid: userId,
+        hallid: hallId,
         performersid: performerId,
+      },
+    });
+
+    if (existingBooking) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Энэ Event Hall дээр энэ уран бүтээлч аль хэдийн захиалагдсан байна.",
+        },
+        { status: 409 }
+      );
+    }
+
+    // ---- hallId-тэй performerId нь null booking байгаа эсэхийг шалгах ----
+    let booking = await prisma.booking.findFirst({
+      where: {
+        hallid: hallId,
+        performersid: null,
       },
       include: {
         performers: true,
+        event_halls: true,
+        User: true,
       },
     });
 
-    if (exists) {
-      // EMAIL: Already booked notify
-      await sendEmail({
-        email: user.email,
-        name: user.name,
-        content: `Та ${exists.performers?.name}-г аль хэдийн захиалсан байна.`,
+    if (booking) {
+      // Update хийх
+      booking = await prisma.booking.update({
+        where: { id: booking.id },
+        data: {
+          performersid: performerId,
+          starttime,
+          status: "pending",
+        },
+        include: {
+          performers: true,
+          event_halls: true,
+          User: true,
+        },
       });
-
-      return NextResponse.json({
-        success: false,
-        message: "Та энэ уран бүтээлчийг аль хэдийн захиалсан байна.",
+    } else {
+      // Шинэ booking үүсгэх
+      booking = await prisma.booking.create({
+        data: {
+          userid: userId,
+          hallid: hallId,
+          performersid: performerId,
+          ordereddate: new Date(),
+          date: new Date(date),
+          starttime,
+          status: "pending",
+        },
+        include: {
+          performers: true, // ✅ include
+          event_halls: true,
+          User: true,
+        },
       });
     }
 
-    // ---- NEW BOOKING ----
-    const booking = await prisma.booking.create({
-      data: {
-        userid: userId,
-        performersid: performerId,
-        hallid: hallId,
-        date: new Date(),
-        starttime,
-        status: "pending",
-      },
-      include: {
-        performers: true, // Performer info
-        event_halls: true, // Hall info
-        User: true, // Хэрэглэгч info
-      },
-    });
+    // ---- Performer-д email илгээх ----
+    if (booking.performers?.contact_email) {
+      const performerEmailContent = `
+        <p>Сайн байна уу, ${booking.performers.name}?</p>
+        <p>Хэрэглэгч <strong>${
+          booking.User.name
+        }</strong> Таньд Event lux  захиалга хүсэлт илгээсэн байна:</p>
+        <ul>
+          <li>Event hall: ${booking.event_halls?.name}</li>
+          <li>Огноо: ${new Date(booking.date).toLocaleDateString()}</li>
+          <li>Эхлэх цаг: ${booking.starttime || "Тодорхойгүй"}</li>
+        </ul>
+        <p>Захиалга баталгаажуулахын тулд доорх товч дээр дарна уу:</p>
+        <p>
+          <a href="${
+            process.env.NEXT_PUBLIC_BASE_URL
+          }/booking-response?bookingId=${
+        booking.id
+      }&action=approve" style="padding:10px 20px; background-color:green; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Approve</a>
+          <a href="${
+            process.env.NEXT_PUBLIC_BASE_URL
+          }/booking-response?bookingId=${
+        booking.id
+      }&action=decline" style="padding:10px 20px; background-color:red; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Decline</a>
+        </p>
+      `;
 
-    const performerEmailContent = `
-<p>Сайн байна уу, ${booking.performers?.name}?</p>
-<p>Хэрэглэгч <strong>${
-      booking.User.name
-    }</strong> танай Event Hall-д захиалга хүсэлт илгээсэн байна:</p>
-<ul>
-  <li>Event Hall: ${booking.event_halls?.name}</li>
-  <li>Огноо: ${new Date(booking.date).toLocaleDateString()}</li>
-  <li>Эхлэх цаг: ${booking.starttime || "Тодорхойгүй"}</li>
-</ul>
-
-<p>Захиалга баталгаажуулахын тулд доорх товч дээр дарна уу:</p>
-<p>
-<a href="${process.env.NEXT_PUBLIC_BASE_URL}/booking-response?bookingId=${
-      booking.id
-    }&action=approve" style="padding:10px 20px; background-color:green; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Approve</a>
-
-
-
-  <a href="${process.env.NEXT_PUBLIC_BASE_URL}/booking-response?bookingId=${
-      booking.id
-    }&action=decline" style="padding:10px 20px; background-color:red; color:white; text-decoration:none; border-radius:5px; margin-left:10px;">Decline</a>
-</p>
-`;
-
-    // EMAIL: Success notify
-    await sendEmail({
-      email: booking.performers?.contact_email, // Performer-ийн email
-      name: booking.performers?.name,
-      content: performerEmailContent,
-    });
+      await sendEmail({
+        email: booking.performers.contact_email,
+        name: booking.performers.name,
+        content: performerEmailContent,
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -127,6 +154,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// ---- Email илгээх функц ----
 async function sendEmail({ email, name, content }: any) {
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -138,10 +166,14 @@ async function sendEmail({ email, name, content }: any) {
     },
   });
 
-  await transporter.sendMail({
-    from: `"Event Hall" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: "Танд шинэ захиалга ирлээ web orj shalganu",
-    html: content,
-  });
+  try {
+    await transporter.sendMail({
+      from: `"Event lux" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Танд шинэ захиалга ирлээ",
+      html: content,
+    });
+  } catch (err) {
+    console.error("Email send error:", err);
+  }
 }
