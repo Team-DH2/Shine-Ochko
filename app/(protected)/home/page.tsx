@@ -11,7 +11,6 @@ export default function Page() {
       <CarouselMy halls={[]} />
       <Hero />
       <WhyChooseUs />
-      <LayoutFooter />
     </main>
   );
 }
