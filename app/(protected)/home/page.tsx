@@ -12,7 +12,6 @@ export default function Page() {
       <Hero />
       <Map />
       <WhyChooseUs />
-      <LayoutFooter />
     </main>
   );
 }
