@@ -1,3 +1,5 @@
+"use client";
+
 import Dashboard from "@/components/event-halls/Dashboard";
 
 export default function BookingPage() {

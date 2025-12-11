@@ -5,7 +5,8 @@ import nodemailer from "nodemailer";
 
 export async function POST(req: NextRequest) {
   try {
-    const { performerId, hallId, starttime, date } = await req.json();
+    const { performerId, hallId, starttime, bookeddate } = await req.json();
+    console.log({ bookeddate });
 
     if (!performerId || !hallId) {
       return NextResponse.json(
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
           hallid: hallId,
           performersid: performerId,
           ordereddate: new Date(),
-          date: new Date(date),
+          date: new Date(bookeddate),
           starttime,
           status: "pending",
         },

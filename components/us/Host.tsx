@@ -38,6 +38,7 @@ const handleBooking = async (hostId: number) => {
 };
 
 export default function HostCard({ host }: { host: HostType }) {
+  const isBooked = host.status === "Захиалагдсан";
   return (
     <div className="bg-[#1E2128FF] p-6 rounded-xl h-[478px] w-[374px] border border-gray-800 text-white hover:border-gray-600 transition">
       <img
@@ -89,12 +90,26 @@ export default function HostCard({ host }: { host: HostType }) {
           Профайл үзэх
         </Link>
 
-        <button
-          onClick={() => handleBooking(host.id)}
-          className="flex-1 bg-blue-700 py-2 rounded-lg hover:bg-blue-800 text-sm text-center"
-        >
-          Захиалах
-        </button>
+        <div className="relative flex-1 group">
+          <button
+            disabled={isBooked}
+            onClick={() => !isBooked && handleBooking(host.id)}
+            className={`w-full py-2 rounded-lg text-sm text-center transition
+            ${
+              isBooked
+                ? "bg-gray-700 text-gray-400 cursor-not-allowed group-hover:opacity-30"
+                : "bg-blue-700 hover:bg-blue-800"
+            }`}
+          >
+            Захиалах
+          </button>
+
+          {isBooked && (
+            <div className="absolute left-1/2 top-[-38px] -translate-x-1/2 bg-red-700/90 text-xs text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition">
+              Захиалагдсан
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

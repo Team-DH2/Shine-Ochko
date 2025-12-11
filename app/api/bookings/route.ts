@@ -6,14 +6,35 @@ import jwt from "jsonwebtoken"; // эсвэл чамай JWT verify ашигла
 
 export async function GET(req: NextRequest) {
   try {
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { error: "Token байхгүй байна" },
+        { status: 401 }
+      );
+    }
+    const token = authHeader.split(" ")[1];
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    } catch (err) {
+      return NextResponse.json(
+        { error: "Token буруу эсвэл хүчингүй" },
+        { status: 403 }
+      );
+    }
+
+    const userId = decoded.id;
+
     const { searchParams } = new URL(req.url);
 
     const event_hall_id = searchParams.get("event_hall_id");
     const date = searchParams.get("date");
     const status = searchParams.get("status");
 
-    // Query conditions
-    const filters: any = {};
+    const filters: any = {
+      userid: userId,
+    };
 
     if (event_hall_id) filters.hallid = Number(event_hall_id);
     if (status) filters.status = status;
@@ -27,7 +48,27 @@ export async function GET(req: NextRequest) {
       orderBy: { id: "desc" },
     });
 
-    return NextResponse.json({ bookings: results });
+    const allBookings = await prisma.booking.findMany({
+      where: {
+        performersid: { not: null },
+        status: { in: ["pending", "approved"] },
+      },
+      select: {
+        id: true,
+        performersid: true,
+        date: true,
+        starttime: true,
+        status: true,
+      },
+    });
+
+    return NextResponse.json(
+      {
+        bookings: results,
+        allBookings,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("GET bookings error:", error);
     return NextResponse.json({ error: "Серверийн алдаа" }, { status: 500 });

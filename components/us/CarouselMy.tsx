@@ -12,20 +12,44 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"; // named exports
+import { useEffect, useState } from "react";
 
 interface HallType {
   id: number;
+  name: string;
+  description: string;
+  duureg: string;
   title: string;
-  overview: string;
-  backdrop_path: string;
-  vote_average: number;
+  rating: number;
+  images: string[];
 }
 
-export const CarouselMy = ({ halls }: { halls: HallType[] }) => {
+export const CarouselMy = () => {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
+  const [originalHalls, setOriginalHalls] = useState<any[]>([]);
+  const [filteredHalls, setFilteredHalls] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const plugin = React.useRef(Autoplay({ delay: 2000 }));
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const res = await fetch("/api/event-halls");
+        const data = await res.json();
+
+        if (data) {
+          setOriginalHalls(data.data);
+          setFilteredHalls(data.data);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      setLoading(false);
+    };
+
+    getData();
+  }, []);
 
   React.useEffect(() => {
     if (!api) return;
@@ -44,7 +68,7 @@ export const CarouselMy = ({ halls }: { halls: HallType[] }) => {
         className="w-full h-full"
       >
         <CarouselContent className="w-full h-full">
-          {halls.slice(0, 5).map((el: HallType) => (
+          {originalHalls.slice(0, 5).map((el: HallType) => (
             <CarouselCard key={el.id} el={el} />
           ))}
         </CarouselContent>
@@ -79,10 +103,10 @@ const CarouselCard = ({ el }: { el: HallType }) => {
         {/* Image */}
         <Image
           src={
-            el.backdrop_path ||
+            el.images[0] ||
             "https://img.freepik.com/premium-vector/image-icon-design-vector-template_1309674-943.jpg"
           }
-          alt={el.title}
+          alt={el.name}
           fill={true}
           priority
           sizes="100vw"
@@ -98,7 +122,7 @@ const CarouselCard = ({ el }: { el: HallType }) => {
             Event Hall:
           </p>
           <h1 className="font-extrabold text-4xl lg:text-6xl [text-shadow:0_2px_4px_rgb(0_0_0/0.5)]">
-            {el.title}
+            {el.name}
           </h1>
           <div className="flex items-center text-base mt-2 [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
             <svg
@@ -115,11 +139,11 @@ const CarouselCard = ({ el }: { el: HallType }) => {
                 strokeLinejoin="round"
               />
             </svg>
-            <span>{el.vote_average}</span>
+            <span>{el.rating}</span>
             <span className="text-gray-300 ml-1">/10</span>
           </div>
-          <p className="mt-2 lg:mt-4 text-base lg:text-lg max-w-[320px] lg:max-w-[500px] [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
-            {el.overview}
+          <p className="mt-2 lg:mt-4 text-base lg:text-lg max-w-[320px] lg:max-w-[500px] [text-shadow:0_1px_3px_rgb(0_0_0/0.5)] truncate">
+            {el.description}
           </p>
           {/* TODO: Replace with <Link> to details page */}
           <button className="mt-4 w-fit bg-white/90 text-black font-bold py-2 px-6 rounded-md hover:bg-white transition-colors">
@@ -151,11 +175,11 @@ const CarouselCard = ({ el }: { el: HallType }) => {
                 stroke="#FDE047"
               />
             </svg>
-            <span>{el.vote_average}</span>
+            <span>{el.rating}</span>
             <span className="text-gray-300 ml-1">/10</span>
           </div>
           <p className="text-[14px] line-clamp-3 [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
-            {el.overview}
+            {el.description}
           </p>
           {/* TODO: Replace with <Link> to details page */}
           <button className="mt-3 w-fit bg-white/90 text-black font-bold py-1.5 px-4 rounded-md text-sm hover:bg-white transition-colors">
