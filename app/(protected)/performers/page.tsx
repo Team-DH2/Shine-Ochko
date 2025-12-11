@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { FaStar, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Image from "next/image";
 import { Filter } from "lucide-react";
+import { toast } from "sonner";
 
 export default function PerformersPage() {
   const router = useRouter();
@@ -155,13 +156,13 @@ export default function PerformersPage() {
       setBookingPerformer(performerId);
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
+        toast.error("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
         setBookingPerformer(null);
         return;
       }
 
       if (!selectedBooking) {
-        alert("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
+        toast.error("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
         setBookingPerformer(null);
         return;
       }
@@ -172,27 +173,30 @@ export default function PerformersPage() {
       const bookeddate = selectedBooking.date;
       console.log({ bookeddate });
 
-      const res = await fetch("/api/performer-bookings", {
+      const bookingPromise = fetch("/api/performer-bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ performerId, hallId, starttime, bookeddate }),
+      }).then(async (res) => {
+        const data = await res.json();
+        if (!data.success) {
+          throw new Error(data.message || "Захиалга амжилтгүй боллоо.");
+        }
+        return data;
       });
 
-      const data = await res.json();
+      toast.promise(bookingPromise, {
+        loading: "Захиалга явуулж байна...",
+        success: "Уран бүтээлчийг захиалах хүсэлт явууллаа. Таньд мэдэгдэл ирнэ, Dashboard хэсгээс харна уу!",
+        error: (err) => err.message || "Серверийн алдаа.",
+      });
 
-      if (data.success) {
-        alert(
-          "Уран бүтээлчийг захиалах хүсэлт явууллаа. Таньд мэдэгдэл ирнэ, Dashboard хэсгээс харна уу!"
-        );
-      } else {
-        alert(data.message || "Захиалга амжилтгүй боллоо.");
-      }
+      await bookingPromise;
     } catch (error) {
       console.error("Error booking performer:", error);
-      alert("Серверийн алдаа.");
     } finally {
       setBookingPerformer(null);
     }

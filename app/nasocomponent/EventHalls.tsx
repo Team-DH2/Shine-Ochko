@@ -91,15 +91,25 @@ export default function EventHalls() {
                            flex flex-col"
               >
                 <div className="relative w-full h-56">
-                  <Image
-                    src={
-                      hall.images[0] ||
-                      "https://img.freepik.com/premium-vector/image-icon-design-vector-template_1309674-943.jpg"
-                    }
-                    alt={hall.name}
-                    fill
-                    className="object-cover"
-                  />
+                  {(() => {
+                    const imageUrl = (hall.images && hall.images.length > 0 && hall.images[0]) || 
+                      "https://img.freepik.com/premium-vector/image-icon-design-vector-template_1309674-943.jpg";
+                    const isFacebookImage = imageUrl.includes('fbcdn.net');
+                    
+                    return (
+                      <Image
+                        src={imageUrl}
+                        alt={hall.name}
+                        fill
+                        className="object-cover"
+                        unoptimized={isFacebookImage}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "https://img.freepik.com/premium-vector/image-icon-design-vector-template_1309674-943.jpg";
+                        }}
+                      />
+                    );
+                  })()}
                 </div>
 
                 <div className="p-4 space-y-3">

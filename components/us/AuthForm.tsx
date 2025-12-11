@@ -61,10 +61,40 @@ export function AuthForm({
     }
   };
 
-  // A placeholder for signup logic
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Signup functionality not implemented yet.");
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/signUp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Signup failed");
+      }
+
+      console.log("Signup response data:", data);
+
+      // Store the token
+      localStorage.setItem("token", data.token);
+
+      // Pass user data to the parent component (Header) which will handle redirect
+      console.log("About to call onLoginSuccess with:", data.user);
+      console.log("onLoginSuccess function is:", onLoginSuccess);
+      console.log("Calling onLoginSuccess now...");
+      onLoginSuccess(data.user);
+      console.log("onLoginSuccess called successfully");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isLoginView = view === "login";
