@@ -4,9 +4,12 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Header } from "@/components/us/Header";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
   const [form, setForm] = useState<any[]>([]);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const router = useRouter();
 
   const [modalState, setModalState] = useState<{
     images: string[];
@@ -17,6 +20,41 @@ export default function AdminDashboard() {
     action: "accept" | "decline";
   } | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/home");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) {
+          router.push("/home");
+          return;
+        }
+
+        const data = await res.json();
+        if (data.user.role !== "admin") {
+          router.push("/home");
+          return;
+        }
+
+        setIsAdmin(true);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        router.push("/home");
+      }
+    };
+
+    checkAdmin();
+  }, [router]);
 
   const getUserBookings = async () => {
     try {
@@ -29,8 +67,10 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    getUserBookings();
-  }, []);
+    if (isAdmin) {
+      getUserBookings();
+    }
+  }, [isAdmin]);
 
   const handleActionClick = (id: string, action: "accept" | "decline") => {
     setSelectedRequest({ id, action });
@@ -65,6 +105,18 @@ export default function AdminDashboard() {
   const handleCancel = () => {
     setSelectedRequest(null);
   };
+
+  // Show loading while checking admin status
+  if (isAdmin === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!form) return <div>Loading...</div>;
   const openModal = (images: string[], index: number) => {

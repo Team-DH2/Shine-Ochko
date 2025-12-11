@@ -96,12 +96,43 @@ export default function SelectedEventHall() {
           setApi={setApi}
         >
           <CarouselContent>
-            {eventHallData?.images?.map((src: string, index: number) => (
-              <CarouselItem key={index}>
+            {eventHallData?.images && eventHallData.images.length > 0 ? (
+              eventHallData.images.map((src: string, index: number) => {
+                const imageUrl = src || "https://img.freepik.com/premium-vector/image-icon-design-vector-template_1309674-943.jpg";
+                const isFacebookImage = imageUrl.includes('fbcdn.net');
+                
+                return (
+                  <CarouselItem key={index}>
+                    <div className="relative w-full h-[70vh] overflow-hidden flex items-center justify-center">
+                      <Image
+                        fill
+                        src={imageUrl}
+                        alt={eventHallData?.name || "Event Hall Image"}
+                        className="object-cover animate-fadeIn"
+                        unoptimized={isFacebookImage}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "https://img.freepik.com/premium-vector/image-icon-design-vector-template_1309674-943.jpg";
+                        }}
+                      />
+
+                      <div className="absolute inset-0 bg-black/40 animate-fadeIn" />
+
+                      <div className="absolute z-10 bg-black/30 backdrop-blur-[2px] px-8 py-4 rounded-lg border border-white/20">
+                        <h1 className="text-white text-4xl md:text-6xl font-bold text-center tracking-wide">
+                          {eventHallData?.name}
+                        </h1>
+                      </div>
+                    </div>
+                  </CarouselItem>
+                );
+              })
+            ) : (
+              <CarouselItem>
                 <div className="relative w-full h-[70vh] overflow-hidden flex items-center justify-center">
                   <Image
                     fill
-                    src={src}
+                    src="https://img.freepik.com/premium-vector/image-icon-design-vector-template_1309674-943.jpg"
                     alt={eventHallData?.name || "Event Hall Image"}
                     className="object-cover animate-fadeIn"
                   />
@@ -115,7 +146,7 @@ export default function SelectedEventHall() {
                   </div>
                 </div>
               </CarouselItem>
-            ))}
+            )}
           </CarouselContent>
 
           {/* Navigation arrows */}

@@ -10,6 +10,7 @@ import {
 import "./globals.css";
 import { Header } from "@/components/us/Header";
 import { LayoutFooter } from "@/components/us/LayoutFooter";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,6 +64,7 @@ export default function RootLayout({
         </header>
         {children}
         <LayoutFooter />
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );

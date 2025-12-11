@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { FaStar, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Image from "next/image";
 import { Filter } from "lucide-react";
+import { toast } from "sonner";
 
 export default function PerformersPage() {
   const router = useRouter();
@@ -46,28 +47,23 @@ export default function PerformersPage() {
     fetchPerformers();
     fetchGenres();
   }, []);
+
   useEffect(() => {
     setIsLoadingBookings(true);
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.log("User not logged in → first booking cannot auto-select");
-    }
-    fetch("/api/bookings", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    fetch("/api/bookings")
       .then((res) => res.json())
       .then((data) => {
         const bookingsData = data.bookings || [];
-
+        console.log("All bookings fetched:", bookingsData);
+        console.log(
+          "Bookings with performer IDs:",
+          bookingsData.filter((b: any) => b.performersid)
+        );
         setBookings(bookingsData);
-        setAllBookings(bookingsData);
-        setBookings(data.bookings);
-
-        if (bookingsData.length > 0 && token) {
+        setAllBookings(bookingsData); // Store all bookings for availability check
+        // Automatically select first booking if available
+        if (bookingsData.length === 1) {
           setSelectedBooking(bookingsData[0]);
-          console.log("Auto-selected first booking:", bookingsData[0]);
         }
       })
       .finally(() => setIsLoadingBookings(false));
@@ -160,13 +156,13 @@ export default function PerformersPage() {
       setBookingPerformer(performerId);
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
+        toast.error("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
         setBookingPerformer(null);
         return;
       }
 
       if (!selectedBooking) {
-        alert("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
+        toast.error("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
         setBookingPerformer(null);
         return;
       }
@@ -177,27 +173,30 @@ export default function PerformersPage() {
       const bookeddate = selectedBooking.date;
       console.log({ bookeddate });
 
-      const res = await fetch("/api/performer-bookings", {
+      const bookingPromise = fetch("/api/performer-bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ performerId, hallId, starttime, bookeddate }),
+      }).then(async (res) => {
+        const data = await res.json();
+        if (!data.success) {
+          throw new Error(data.message || "Захиалга амжилтгүй боллоо.");
+        }
+        return data;
       });
 
-      const data = await res.json();
+      toast.promise(bookingPromise, {
+        loading: "Захиалга явуулж байна...",
+        success: "Уран бүтээлчийг захиалах хүсэлт явууллаа. Таньд мэдэгдэл ирнэ, Dashboard хэсгээс харна уу!",
+        error: (err) => err.message || "Серверийн алдаа.",
+      });
 
-      if (data.success) {
-        alert(
-          "Уран бүтээлчийг захиалах хүсэлт явууллаа. Таньд мэдэгдэл ирнэ, Dashboard хэсгээс харна уу!"
-        );
-      } else {
-        alert(data.message || "Захиалга амжилтгүй боллоо.");
-      }
+      await bookingPromise;
     } catch (error) {
       console.error("Error booking performer:", error);
-      alert("Серверийн алдаа.");
     } finally {
       setBookingPerformer(null);
     }
@@ -306,21 +305,21 @@ export default function PerformersPage() {
             Array.from({ length: 2 }).map((_, index) => (
               <div
                 key={index}
-                className="rounded-xl bg-neutral-800/60 border border-neutral-700/40 p-4"
+                className="rounded-xl bg-neutral-800 border border-neutral-700 p-4"
               >
                 <div className="flex justify-between items-center mb-3">
-                  <Skeleton className="h-6 w-32" />
-                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-6 w-32 bg-neutral-600" />
+                  <Skeleton className="h-6 w-20 bg-neutral-600" />
                 </div>
                 <div className="space-y-2 mb-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-full bg-neutral-600" />
+                  <Skeleton className="h-4 w-3/4 bg-neutral-600" />
                 </div>
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-3 w-2/3 mt-2" />
+                <Skeleton className="h-4 w-full bg-neutral-600" />
+                <Skeleton className="h-3 w-2/3 mt-2 bg-neutral-600" />
               </div>
             ))
-          : bookings?.map((b: any) => (
+          : bookings.map((b: any) => (
               <div
                 key={b.id}
                 ref={(el) => {
@@ -625,19 +624,19 @@ export default function PerformersPage() {
               Array.from({ length: 8 }).map((_, index) => (
                 <div
                   key={index}
-                  className="bg-neutral-900 rounded-lg overflow-hidden"
+                  className="bg-neutral-800 rounded-lg overflow-hidden"
                 >
-                  <Skeleton className="h-60 w-full" />
+                  <Skeleton className="h-60 w-full bg-neutral-600" />
                   <div className="p-4 space-y-3">
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-6 w-3/4 bg-neutral-600" />
+                    <Skeleton className="h-4 w-1/2 bg-neutral-600" />
                     <div className="space-y-2">
-                      <Skeleton className="h-5 w-full" />
-                      <Skeleton className="h-6 w-1/3" />
+                      <Skeleton className="h-5 w-full bg-neutral-600" />
+                      <Skeleton className="h-6 w-1/3 bg-neutral-600" />
                     </div>
                     <div className="flex gap-2">
-                      <Skeleton className="h-10 flex-1" />
-                      <Skeleton className="h-10 flex-1" />
+                      <Skeleton className="h-10 flex-1 bg-neutral-600" />
+                      <Skeleton className="h-10 flex-1 bg-neutral-600" />
                     </div>
                   </div>
                 </div>

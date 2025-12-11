@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const DateForm = ({
   hallId,
@@ -51,7 +52,7 @@ const DateForm = ({
     // 2️⃣ Token шалгах
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
+      toast.error("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
       return;
     }
 
@@ -72,11 +73,11 @@ const DateForm = ({
       });
 
       if (res.ok) {
-        alert("Захиалга амжилттай илгээгдлээ");
+        toast.success("Захиалга амжилттай илгээгдлээ");
         router.push(`/dashboard`);
       } else {
         const errData = await res.json();
-        alert("Алдаа гарлаа: " + (errData.error || "Серверийн алдаа"));
+        toast.error("Алдаа гарлаа: " + (errData.error || "Серверийн алдаа"));
       }
     } catch (error) {
       console.error(error);
