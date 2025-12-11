@@ -93,22 +93,22 @@ export default function Dashboard() {
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           {[
             {
-              title: "Your Active Events",
+              title: "Таны захиалсан эвент",
               value: Object.keys(grouped).length,
-              sub: "Managed halls",
+              sub: "Эвентүүд",
               color: "from-blue-500/20 to-blue-600/20",
             },
             {
-              title: "Pending Requests",
+              title: "Хүлээгдэж буй",
               value: bookings.filter((b: any) => b.status === "pending").length,
-              sub: "Performers & Hosts",
+              sub: "Дуучид & Хөтлөгч",
               color: "from-purple-500/20 to-purple-600/20",
             },
             {
-              title: "Approved Performers",
+              title: "Зөвшөөрсөн ",
               value: bookings.filter((b: any) => b.status === "approved")
                 .length,
-              sub: "Ready to perform",
+              sub: "Дуучид & Хөтлөгч",
               color: "from-green-500/20 to-green-600/20",
             },
           ].map((kpi, i) => (
@@ -124,18 +124,10 @@ export default function Dashboard() {
         </div>
 
         {/* BOOKINGS GRID */}
-        <h2 className="text-2xl text-white font-bold mb-6">
-          Your Booked Event Halls
+        <h2 className="text-2xl text-white font-bold ml-2 mb-10">
+          Таны захиалсан эвент
         </h2>
 
-        {/* Search */}
-        <div className="relative hidden md:block mb-6">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
-          <Input
-            placeholder="Search events, performers..."
-            className="w-72 rounded-2xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus:shadow-[0_0_20px_rgba(76,139,255,0.3)]"
-          />
-        </div>
         <div className="space-y-6">
           {Object.entries(grouped).map(([key, group]: any) => {
             const hallBooking = group.hallBooking;

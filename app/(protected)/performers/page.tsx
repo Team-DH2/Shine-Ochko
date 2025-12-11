@@ -30,6 +30,7 @@ export default function PerformersPage() {
     []
   );
   const [minPopularity, setMinPopularity] = useState<number>(0);
+  const [popularity, setPopularity] = useState([2000000, 10000000]);
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(100000000);
   const [sortBy, setSortBy] = useState<string>("popularity");
@@ -49,9 +50,11 @@ export default function PerformersPage() {
   useEffect(() => {
     setIsLoadingBookings(true);
     const token = localStorage.getItem("token");
+
     if (!token) {
       console.log("User not logged in → first booking cannot auto-select");
     }
+
     fetch("/api/bookings", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -61,13 +64,32 @@ export default function PerformersPage() {
       .then((data) => {
         const bookingsData = data.bookings || [];
 
-        setBookings(bookingsData);
-        setAllBookings(bookingsData);
-        setBookings(data.bookings);
+        // --- Давхардсан booking-ийг хасах filter ---
+        const uniqueBookings = bookingsData.filter(
+          (
+            b: { date: any; starttime: any; hallid: any },
+            index: any,
+            self: any[]
+          ) => {
+            return (
+              index ===
+              self.findIndex(
+                (x) =>
+                  x.date === b.date &&
+                  x.starttime === b.starttime &&
+                  x.hallid === b.hallid
+              )
+            );
+          }
+        );
 
-        if (bookingsData.length > 0 && token) {
-          setSelectedBooking(bookingsData[0]);
-          console.log("Auto-selected first booking:", bookingsData[0]);
+        console.log("Filtered bookings:", uniqueBookings);
+
+        setBookings(uniqueBookings);
+        setAllBookings(uniqueBookings);
+
+        if (uniqueBookings.length > 0 && token) {
+          setSelectedBooking(uniqueBookings[0]);
         }
       })
       .finally(() => setIsLoadingBookings(false));
@@ -114,22 +136,6 @@ export default function PerformersPage() {
     });
 
     // Debug logging - log ALL bookings for this performer
-    const allPerformerBookings = allBookings.filter(
-      (b) => b.performersid === performerId
-    );
-    if (allPerformerBookings.length > 0) {
-      console.log(
-        `Performer ID ${performerId} all bookings:`,
-        allPerformerBookings
-      );
-      console.log(`Selected booking date/time:`, {
-        date: selectedBooking?.date,
-        dateFormatted: new Date(selectedBooking?.date)
-          .toISOString()
-          .split("T")[0],
-        starttime: selectedBooking?.starttime,
-      });
-    }
 
     if (!performerBooking) return "Боломжтой";
 
@@ -453,22 +459,19 @@ export default function PerformersPage() {
       </div>
 
       {/* Popularity */}
-      <div className="mb-6">
-        <h3 className="font-semibold text-white mb-3">Алдартай байдал</h3>
-        <div className="px-2 py-4">
-          <Slider
-            min={0}
-            max={100000}
-            step={5000}
-            value={[minPopularity]}
-            onValueChange={(value) => setMinPopularity(value[0])}
-            className="w-full"
-          />
-        </div>
-        <div className="text-sm text-gray-400 mt-3 flex justify-between px-2">
-          <span>Хамгийн бага: {minPopularity.toLocaleString()}</span>
-          <span className="text-xs text-gray-500">Макс: 100,000</span>
-        </div>
+      <div className="flex-1 min-w-[280px]">
+        <label className="mb-3 block text-sm font-medium text-white/70">
+          Алдартай байдал: {popularity[0].toLocaleString()}₮ –{" "}
+          {popularity[1].toLocaleString()}₮
+        </label>
+
+        <Slider
+          value={popularity}
+          onValueChange={setPopularity}
+          min={2000000}
+          max={10000000}
+          step={10000}
+        />
       </div>
 
       {/* Price */}

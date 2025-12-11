@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import EventHallsPage from "./EventHallFilter";
+import OrderEventHall from "./OrderEventHall";
 
 export default function EventHalls() {
   const [originalHalls, setOriginalHalls] = useState<any[]>([]);
@@ -105,6 +106,7 @@ export default function EventHalls() {
               originalData={originalHalls}
               onFilterChange={setFilteredHalls}
             />
+            <OrderEventHall></OrderEventHall>
           </div>
         </div>
 
