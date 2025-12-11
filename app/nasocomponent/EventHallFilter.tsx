@@ -62,7 +62,7 @@ export default function EventHallsPage({
     if (capacity) {
       filtered = filtered.filter((hall) => {
         const [maxCap] = String(hall.capacity).split("-").map(Number);
-        return maxCap >= Number(capacity);
+        return maxCap <= Number(capacity);
       });
     }
 
@@ -143,7 +143,8 @@ export default function EventHallsPage({
               <div
                 key={p}
                 onClick={() => {
-                  setPrice(parsePrice(p));
+                  const numericPrice = parsePrice(p);
+                  setPrice(numericPrice);
                   setOpenPrice(false);
                 }}
                 className="px-4 py-2 cursor-pointer hover:bg-white/10 flex justify-between items-center"
