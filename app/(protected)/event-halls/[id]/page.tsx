@@ -1,308 +1,192 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
+import * as React from "react";
+import Image from "next/image";
+import Autoplay from "embla-carousel-autoplay";
+import { Card, CardContent } from "@/components/ui/card";
+import { Carousel as CarouselDefault } from "@/components/ui/carousel"; // default export
+import type { CarouselApi } from "@/components/ui/carousel"; // type only
 import {
-  Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
-} from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
-import { FaMapMarkerAlt, FaPhone, FaParking } from "react-icons/fa";
-import { FaPeopleGroup } from "react-icons/fa6";
-import { IoMdCheckmarkCircleOutline } from "react-icons/io";
-import { MdOutlineRestaurantMenu } from "react-icons/md";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
-import { Header } from "@/components/us/Header";
-import MonthlyCalendar from "@/components/event-halls/DayCalendar";
-import Image from "next/image";
+} from "@/components/ui/carousel"; // named exports
 
-interface EventHall {
+interface HallType {
   id: number;
   name: string;
-  location?: string | null;
-  capacity?: string | null;
-  description?: string | null;
-  suitable_events: string[];
-  created_at?: Date | string | null;
+  description: string;
+  duureg: string;
+  title: string;
+  rating: number;
   images: string[];
-  phonenumber?: string | null;
-  menu: string[];
-  parking_capacity?: number | null;
-  additional_informations: string[];
-  informations_about_hall: string[];
-  advantages: string[];
-  localtion_link?: string | undefined;
 }
 
-export default function SelectedEventHall() {
-  const params = useParams();
-  const eventHallId = params.id as string;
+interface CarouselMyProps {
+  halls?: HallType[];
+}
 
-  const [eventHallData, setEventHallData] = useState<EventHall | null>(null);
+export const CarouselMy = ({ halls }: CarouselMyProps) => {
+  const [api, setApi] = React.useState<CarouselApi>();
+  const [current, setCurrent] = React.useState(0);
+  const [count, setCount] = React.useState(0);
+  const [originalHalls, setOriginalHalls] = React.useState<HallType[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const plugin = React.useRef(Autoplay({ delay: 2000 }));
 
-  const [api, setApi] = useState<CarouselApi>();
-  const autoplayPlugin = useRef(
-    Autoplay({
-      delay: 3000,
-      stopOnInteraction: true,
-      stopOnMouseEnter: true,
-    })
-  );
+  React.useEffect(() => {
+    if (halls && halls.length > 0) {
+      setOriginalHalls(halls);
+      setLoading(false);
+      return;
+    }
 
-  useEffect(() => {
+    const getData = async () => {
+      try {
+        const res = await fetch("/api/event-halls");
+        const data = await res.json();
+        if (data) {
+          setOriginalHalls(data.data);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      setLoading(false);
+    };
+
+    getData();
+  }, [halls]);
+
+  React.useEffect(() => {
     if (!api) return;
 
-    api.on("select", () => {
-      autoplayPlugin.current?.reset();
-      autoplayPlugin.current?.play();
-    });
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => setCurrent(api.selectedScrollSnap() + 1));
   }, [api]);
 
-  const getSelectedEventHall = useCallback(async () => {
-    if (!eventHallId) return;
-    try {
-      const res = await fetch(`http://localhost:3000/api/selected-event-hall`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ eventHallId }),
-      });
-      const data = await res.json();
-      console.log("selectedEventHallData", data);
-
-      setEventHallData(data.data);
-    } catch (error) {
-      console.error("Error fetching event hall:", error);
-    }
-  }, [eventHallId]);
-
-  useEffect(() => {
-    getSelectedEventHall();
-  }, [getSelectedEventHall]);
+  if (loading) return <div className="text-white">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-black pb-20">
-      <Header />
-      <div className="w-full relative">
-        <Carousel
-          className="w-full"
-          opts={{
-            loop: true,
-          }}
-          plugins={[autoplayPlugin.current]}
-          setApi={setApi}
-        >
-          <CarouselContent>
-            {eventHallData?.images?.map((src: string, index: number) => (
-              <CarouselItem key={index}>
-                <div className="relative w-full h-[70vh] overflow-hidden flex items-center justify-center">
-                  <Image
-                    fill
-                    src={src}
-                    alt={eventHallData?.name || "Event Hall Image"}
-                    className="object-cover animate-fadeIn"
-                  />
+    <div className="relative w-full h-[60vh] sm:h-screen snap-start">
+      <CarouselDefault
+        setApi={setApi}
+        plugins={[plugin.current]}
+        className="w-full h-full"
+      >
+        <CarouselContent className="w-full h-full">
+          {originalHalls.slice(0, 5).map((el: HallType) => (
+            <CarouselCard key={el.id} el={el} />
+          ))}
+        </CarouselContent>
 
-                  <div className="absolute inset-0 bg-black/40 animate-fadeIn" />
+        <CarouselPrevious className="hidden sm:flex absolute top-1/2 left-6 lg:left-10 -translate-y-1/2 items-center justify-center z-20" />
+        <CarouselNext className="hidden sm:flex absolute top-1/2 right-6 lg:right-10 -translate-y-1/2 items-center justify-center z-20" />
+      </CarouselDefault>
 
-                  <div className="absolute z-10 bg-black/30 backdrop-blur-[2px] px-8 py-4 rounded-lg border border-white/20">
-                    <h1 className="text-white text-4xl md:text-6xl font-bold text-center tracking-wide">
-                      {eventHallData?.name}
-                    </h1>
-                  </div>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-
-          {/* Navigation arrows */}
-          <CarouselPrevious className="left-4" />
-          <CarouselNext className="right-4" />
-        </Carousel>
-      </div>
-
-      <div className="max-w-6xl mx-auto space-y-6 text-white">
-        {/* Location and Contact Info */}
-        <div className="bg-neutral-900 rounded-lg p-6 my-20">
-          <div className="space-y-1">
-            <div className="text-white-100 flex gap-5 items-center">
-              <FaMapMarkerAlt size={24} color="blue" />
-              {eventHallData?.location}
-              <a
-                href={eventHallData?.localtion_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 underline cursor-pointer transition-colors"
-              >
-                Show on map
-              </a>
-            </div>
-          </div>
-
-          <div>
-            <div className="p-4 flex gap-16">
-              <div className="flex items-center gap-2">
-                <FaPhone color="blue" />
-                <strong> Утас:</strong> {eventHallData?.phonenumber}
-              </div>
-              <div className="flex items-center gap-2">
-                <FaPeopleGroup size={24} color="blue" />
-                <strong>Хүчин чадал:</strong> {eventHallData?.capacity}
-              </div>
-              <div className="flex items-center gap-2">
-                <MdOutlineRestaurantMenu size={24} color="blue" />
-                <strong>Меню:</strong> {eventHallData?.menu}
-              </div>
-              <div className="flex items-center gap-2">
-                <FaParking size={24} color="blue" />
-                <strong>Машины зогсоол:</strong>{" "}
-                {eventHallData?.parking_capacity}
-              </div>
-            </div>
-          </div>
+      <div className="absolute hidden lg:flex bottom-6 left-0 right-0 justify-center z-30">
+        <div className="flex gap-2">
+          {Array.from({ length: count }).map((_, index) => (
+            <button
+              onClick={() => api?.scrollTo(index)}
+              key={index}
+              aria-label={`Go to slide ${index + 1}`}
+              className={`rounded-full h-3 w-3 sm:h-4 sm:w-4 ${
+                index + 1 === current ? "bg-white" : "bg-white/70"
+              }`}
+            />
+          ))}
         </div>
-
-        {/* Main Info */}
-        <div className="bg-neutral-900 rounded-lg">
-          <div className="p-6 space-y-4">
-            <p>{eventHallData?.description}</p>
-
-            <ul className="pl-6 space-y-1">
-              {eventHallData?.advantages?.map(
-                (advantage: string, index: number) => (
-                  <li key={index} className="flex gap-2 items-center">
-                    <IoMdCheckmarkCircleOutline className="text-green-400 shrink-0" />
-                    {advantage}
-                  </li>
-                )
-              )}
-            </ul>
-
-            <p>
-              <strong>Хаяг:</strong> {eventHallData?.location}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex  justify-between my-20">
-          <div className="p-6 space-y-4 bg-neutral-900 rounded-lg">
-            <h3 className="text-2xl font-bold text-white border-b-2 border-blue-500 pb-2 mb-4">
-              Нэмэлт мэдээлэл
-            </h3>
-            <ul className="pl-6 space-y-1">
-              {eventHallData?.additional_informations?.map(
-                (info: string, index: number) => (
-                  <li key={index} className="flex gap-2 items-center">
-                    <IoMdCheckmarkCircleOutline className="text-green-400 shrink-0" />
-                    {info}
-                  </li>
-                )
-              )}
-            </ul>
-          </div>
-
-          {/* Suitable Events */}
-          <div className="bg-neutral-900 rounded-lg">
-            <div className="p-6 space-y-4">
-              <h3 className="text-2xl font-bold text-white border-b-2 border-blue-500 pb-2 mb-4">
-                Тохиромжтой хүлээн авалтууд
-              </h3>
-              <ul className="pl-6 space-y-1">
-                {eventHallData?.suitable_events?.map(
-                  (suitable_event: string, index: number) => (
-                    <li key={index} className="flex gap-2 items-center">
-                      <IoMdCheckmarkCircleOutline className="text-green-400 shrink-0" />
-                      {suitable_event}
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-          </div>
-
-          {/* Hall Specs */}
-          <div className="p-6 space-y-3 bg-neutral-900 rounded-lg ">
-            <h3 className="text-2xl font-bold text-white border-b-2 border-blue-500 pb-2 mb-4">
-              Танхимын мэдээлэл
-            </h3>
-            <ul className="list-disc pl-6 space-y-1">
-              {eventHallData?.informations_about_hall?.map(
-                (info: string, index: number) => (
-                  <li key={index} className="flex gap-2 items-center">
-                    <IoMdCheckmarkCircleOutline className="text-green-400 shrink-0" />
-
-                    {info}
-                  </li>
-                )
-              )}
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto my-20">
-        <h2 className="text-3xl font-bold text-white text-center border-b-2 border-blue-500 pb-4 mb-8">
-          Манай үйлчлүүлэгчдийн сэтгэгдэл
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-neutral-900 rounded-lg p-6 space-y-4">
-            <div className="flex gap-2 text-yellow-400">
-              {[...Array(5)].map((_, i) => (
-                <span key={i}>★</span>
-              ))}
-            </div>
-            <p className="text-white italic">
-              {`Гайхалтай орчин, мэргэжлийн үйлчилгээ. Хуримын баярыг маань
-              дурсамжтай болгосонд баярлалаа!`}
-            </p>
-            <div className="border-t border-gray-400 pt-4">
-              <p className="text-white font-semibold">Батболд Б.</p>
-              <p className="text-gray-300 text-sm">Хурим</p>
-            </div>
-          </div>
-
-          {/* Testimonial 2 */}
-          <div className="bg-neutral-900 rounded-lg p-6 space-y-4">
-            <div className="flex gap-2 text-yellow-400">
-              {[...Array(5)].map((_, i) => (
-                <span key={i}>★</span>
-              ))}
-            </div>
-            <p className="text-white italic">
-              {`"Компанийн арга хэмжээ зохион байгуулахад тохиромжтой. Техник
-              хэрэгсэл, сандал ширээ бүгд гоё байсан."`}
-            </p>
-            <div className="border-t border-gray-400 pt-4">
-              <p className="text-white font-semibold">Сарантуяа Ч.</p>
-              <p className="text-gray-300 text-sm">Корпорац арга хэмжээ</p>
-            </div>
-          </div>
-
-          {/* Testimonial 3 */}
-          <div className="bg-neutral-900 rounded-lg p-6 space-y-4">
-            <div className="flex gap-2 text-yellow-400">
-              {[...Array(5)].map((_, i) => (
-                <span key={i}>★</span>
-              ))}
-            </div>
-            <p className="text-white italic">
-              {`Төгс байршил, үйлчилгээ сайхан. Хүүгийнхээ төрсөн өдрийг энд
-              тэмдэглэсэн нь маш таатай байлаа!`}
-            </p>
-            <div className="border-t border-gray-400 pt-4">
-              <p className="text-white font-semibold">Эрдэнэ М.</p>
-              <p className="text-gray-300 text-sm">Төрсөн өдөр</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <MonthlyCalendar hallId={eventHallId}></MonthlyCalendar>
       </div>
     </div>
   );
-}
+};
+
+const CarouselCard = ({ el }: { el: HallType }) => {
+  return (
+    <CarouselItem className="relative w-full h-[60vh] sm:h-screen p-0">
+      <Card className="w-full h-full p-0 border-0 ml-[16] shadow-none rounded-none relative">
+        <Image
+          src={
+            el.images[0] ||
+            "https://img.freepik.com/premium-vector/image-icon-design-vector-template_1309674-943.jpg"
+          }
+          alt={el.name}
+          fill={true}
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+
+        <div className="absolute inset-0 bg-black/40" />
+
+        <CardContent className="hidden sm:flex flex-col absolute top-8/17 left-[6%] lg:left-[12%] -translate-y-1/3 text-white">
+          <p className="mb-0 font-medium text-sm lg:text-base [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
+            Event Hall:
+          </p>
+          <h1 className="font-extrabold text-4xl lg:text-6xl [text-shadow:0_2px_4px_rgb(0_0_0/0.5)]">
+            {el.name}
+          </h1>
+          <div className="flex items-center text-base mt-2 [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
+            <svg
+              className="w-6 h-6 text-yellow-400 mr-1"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 26 25"
+              fill="none"
+            >
+              <path
+                d="M12.9999 1.33337L16.6049 8.63671L24.6666 9.81504L18.8333 15.4967L20.2099 23.5234L12.9999 19.7317L5.78992 23.5234L7.16658 15.4967L1.33325 9.81504L9.39492 8.63671L12.9999 1.33337Z"
+                fill="#FDE047"
+                stroke="#FDE047"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>{el.rating}</span>
+            <span className="text-gray-300 ml-1">/10</span>
+          </div>
+          <p className="mt-2 lg:mt-4 text-base lg:text-lg max-w-[320px] lg:max-w-[500px] [text-shadow:0_1px_3px_rgb(0_0_0/0.5)] truncate">
+            {el.description}
+          </p>
+          <button className="mt-4 w-fit bg-white/90 text-black font-bold py-2 px-6 rounded-md hover:bg-white transition-colors">
+            More Info
+          </button>
+        </CardContent>
+
+        <CardContent className="sm:hidden absolute inset-0 mt-0 flex flex-col justify-center p-6 text-white z-10">
+          <p className="mb-1 font-medium text-[14px] [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
+            Event Hall:
+          </p>
+          <h1 className="font-bold text-2xl mb-1 [text-shadow:0_2px_4px_rgb(0_0_0/0.5)]">
+            {el.title}
+          </h1>
+          <div className="flex items-center text-[14px] mb-2 [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
+            <svg
+              className="w-5 h-5 text-yellow-400 mr-1"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 26 25"
+              fill="none"
+            >
+              <path
+                d="M12.9999 1.33337L16.6049 8.63671L24.6666 9.81504L18.8333 15.4967L20.2099 23.5234L12.9999 19.7317L5.78992 23.5234L7.16658 15.4967L1.33325 9.81504L9.39492 8.63671L12.9999 1.33337Z"
+                fill="#FDE047"
+                stroke="#FDE047"
+              />
+            </svg>
+            <span>{el.rating}</span>
+            <span className="text-gray-300 ml-1">/10</span>
+          </div>
+          <p className="text-[14px] line-clamp-3 [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
+            {el.description}
+          </p>
+          <button className="mt-3 w-fit bg-white/90 text-black font-bold py-1.5 px-4 rounded-md text-sm hover:bg-white transition-colors">
+            More Info
+          </button>
+        </CardContent>
+      </Card>
+    </CarouselItem>
+  );
+};

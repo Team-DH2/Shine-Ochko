@@ -88,7 +88,7 @@ export const WhyChooseUs = () => {
 
       {/* Background Music */}
       <audio ref={audioRef} loop playsInline>
-        <source src="/music.mp3" type="audio/mpeg" />
+        <source src="/song" type="audio/mpeg" />
       </audio>
 
       <div className="container mx-auto px-4 relative z-10">

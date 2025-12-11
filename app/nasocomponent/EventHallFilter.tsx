@@ -1,6 +1,16 @@
+/* eslint-disable react-hooks/immutability */
 "use client";
+
 import { useEffect, useState } from "react";
 import { Users } from "lucide-react";
+
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Hall {
   id: number;
@@ -14,12 +24,19 @@ interface Hall {
 }
 
 const PRICE = [
+  "0",
+  "30,000",
+  "50,000",
+  "80,000",
+  "100,000",
+  "150,000",
+  "200,000",
+  "250,000",
+  "300,000",
+  "400,000",
   "500,000",
-  "1,000,000",
-  "1,500,000",
-  "2,000,000",
-  "3,000,000",
-  "5,000,000",
+
+  "Хязгааргүй",
 ];
 
 interface EventHallsPageProps {
@@ -31,16 +48,15 @@ export default function EventHallsPage({
   originalData,
   onFilterChange,
 }: EventHallsPageProps) {
-  const MIN = 500;
-  const MAX = 10000000;
+  const MAX = 10000000; // max price for "Хязгааргүй"
 
-  const [district, setDistrict] = useState("");
+  const [district, setDistrict] = useState("all");
   const [capacity, setCapacity] = useState("");
-  const [price, setPrice] = useState<number>(MAX);
-  const [openPrice, setOpenPrice] = useState(false);
-  const [openDistrict, setOpenDistrict] = useState(false);
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(MAX);
   const [districts, setDistricts] = useState<string[]>([]);
 
+  // get unique districts
   useEffect(() => {
     const uniqueDistricts = Array.from(
       new Set(originalData.map((hall) => hall.duureg))
@@ -48,17 +64,24 @@ export default function EventHallsPage({
     setDistricts(uniqueDistricts);
   }, [originalData]);
 
+  // apply filters whenever inputs change
   useEffect(() => {
     applyFilters();
-  }, [district, price, capacity]);
+  }, [district, minPrice, maxPrice, capacity]);
+
+  // parse price string to number
+  const parsePrice = (str: string) =>
+    str === "Хязгааргүй" ? MAX : Number(str.replace(/,/g, ""));
 
   const applyFilters = () => {
     let filtered = [...originalData];
 
-    if (district) {
+    // DISTRICT FILTER
+    if (district !== "all") {
       filtered = filtered.filter((hall) => hall.duureg === district);
     }
 
+    // CAPACITY FILTER
     if (capacity) {
       filtered = filtered.filter((hall) => {
         const [maxCap] = String(hall.capacity).split("-").map(Number);
@@ -66,128 +89,121 @@ export default function EventHallsPage({
       });
     }
 
-    if (price < MAX) {
-      filtered = filtered.filter((hall) => {
-        const hallPrice = Array.isArray(hall.price)
-          ? Math.min(...hall.price)
-          : hall.price;
-        return hallPrice <= price;
-      });
-    }
+    // PRICE FILTER (use second price if exists)
+    filtered = filtered.filter((hall) => {
+      const hallPrice = Array.isArray(hall.price)
+        ? hall.price[1] ?? hall.price[0]
+        : hall.price;
+
+      return hallPrice >= minPrice && hallPrice <= maxPrice;
+    });
 
     onFilterChange(filtered);
   };
 
   const resetFilters = () => {
-    setDistrict("");
+    setDistrict("all");
     setCapacity("");
-    setPrice(MAX);
+    setMinPrice(0);
+    setMaxPrice(MAX);
     onFilterChange(originalData);
   };
 
-  const parsePrice = (str: string) => Number(str.replace(/,/g, ""));
-
   return (
-    <aside className="w-100 bg-neutral-900 text-gray-200 mt-[-15] rounded-2xl p-6 shadow-lg relative">
+    <aside className="w-full bg-neutral-900 text-gray-200 rounded-lg p-6 shadow-lg">
       <h2 className="text-2xl font-semibold mb-6">Filter Event Halls</h2>
 
-      {/* Дүүрэг */}
-      <div className="mb-4 relative">
-        <label className="block mb-1">Дүүрэг</label>
-        <div
-          className="bg-[#2A2B2F] rounded-xl p-3 cursor-pointer"
-          onClick={() => setOpenDistrict(!openDistrict)}
-        >
-          {district || "Дүүрэг сонгох…"}
+      <div className="space-y-6">
+        {/* DISTRICT */}
+        <div>
+          <label className="block mb-1">Дүүрэг</label>
+          <Select value={district} onValueChange={setDistrict}>
+            <SelectTrigger className="filter-input w-full">
+              <SelectValue placeholder="Дүүрэг сонгох…" />
+            </SelectTrigger>
+
+            <SelectContent className="filter-dropdown bg-neutral-900 w-52">
+              <SelectItem value="all">Бүх дүүрэг</SelectItem>
+              {districts.map((d) => (
+                <SelectItem key={d} value={d}>
+                  {d}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        {openDistrict && (
-          <div className="absolute z-20 mt-2 w-full bg-[#444548] rounded-xl shadow-xl py-2">
-            {districts.map((d) => (
-              <div
-                key={d}
-                onClick={() => {
-                  setDistrict(d);
-                  setOpenDistrict(false);
-                }}
-                className="px-4 py-2 cursor-pointer hover:bg-white/10 flex justify-between items-center"
-              >
-                <span>{d}</span>
-                {district === d && (
-                  <svg
-                    className="w-4 h-4 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeWidth="3" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </div>
-            ))}
+
+        {/* MIN PRICE */}
+        <div>
+          <label className="block mb-1">Хамгийн бага үнэ</label>
+          <Select
+            value={PRICE.find((p) => parsePrice(p) === minPrice) || ""}
+            onValueChange={(v) => {
+              const value = parsePrice(v);
+              setMinPrice(value);
+              if (value > maxPrice) setMaxPrice(MAX); // reset max if min > max
+            }}
+          >
+            <SelectTrigger className="filter-input w-full">
+              <SelectValue placeholder="Доод үнэ…" />
+            </SelectTrigger>
+
+            <SelectContent className="filter-dropdown bg-neutral-900 w-52">
+              {PRICE.filter((p) => p !== "Хязгааргүй").map((p) => (
+                <SelectItem key={p} value={p}>
+                  {p}₮
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* MAX PRICE */}
+        <div>
+          <label className="block mb-1">Хамгийн их үнэ</label>
+          <Select
+            value={PRICE.find((p) => parsePrice(p) === maxPrice) || ""}
+            onValueChange={(v) => {
+              const value = parsePrice(v);
+              setMaxPrice(value);
+              if (value < minPrice) setMinPrice(0); // reset min if max < min
+            }}
+          >
+            <SelectTrigger className="filter-input w-full">
+              <SelectValue placeholder="Дээд үнэ…" />
+            </SelectTrigger>
+
+            <SelectContent className="filter-dropdown bg-neutral-900 w-52">
+              {PRICE.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {p}₮
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* CAPACITY */}
+        <div>
+          <label className="block mb-1">Багтаамж</label>
+          <div className="filter-input flex items-center gap-2">
+            <Users className="text-gray-400" />
+            <input
+              type="number"
+              value={capacity}
+              onChange={(e) => setCapacity(e.target.value)}
+              placeholder="Min. guests"
+              className="bg-transparent outline-none w-full text-gray-200"
+            />
           </div>
-        )}
-      </div>
-
-      {/* Үнэ */}
-      <div className="mb-4 relative">
-        <label className="block mb-1">Хамгийн их</label>
-        <div
-          className="bg-[#2A2B2F] rounded-xl p-3 cursor-pointer"
-          onClick={() => setOpenPrice(!openPrice)}
-        >
-          {price === MAX ? "Үнэ сонгох" : `${price.toLocaleString()}₮`}
         </div>
-        {openPrice && (
-          <div className="absolute z-20 mt-2 w-full bg-[#444548] rounded-xl shadow-xl py-2">
-            {PRICE.map((p) => (
-              <div
-                key={p}
-                onClick={() => {
-                  const numericPrice = parsePrice(p);
-                  setPrice(numericPrice);
-                  setOpenPrice(false);
-                }}
-                className="px-4 py-2 cursor-pointer hover:bg-white/10 flex justify-between items-center"
-              >
-                <span>{p}₮</span>
-                {price === parsePrice(p) && (
-                  <svg
-                    className="w-4 h-4 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeWidth="3" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* Багтаамж */}
-      <div className="mb-6">
-        <label className="block mb-1">Багтаамж</label>
-        <div className="flex items-center gap-2 bg-[#2A2B2F] p-2 rounded-[13px]">
-          <Users className="text-gray-400" />
-          <input
-            type="number"
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
-            placeholder="Min. guests"
-            className="bg-transparent outline-none w-full text-gray-200"
-          />
-        </div>
-      </div>
-
-      {/* RESET BUTTON */}
-      <div className="flex gap-3 mt-6">
+        {/* RESET */}
         <button
-          className="bg-neutral-800 text-white py-3 rounded-xl w-full hover:bg-neutral-700"
           onClick={resetFilters}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
         >
-          Reset
+          Шүүлтүүр цэвэрлэх
         </button>
       </div>
     </aside>

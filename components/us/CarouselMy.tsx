@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import * as React from "react";
@@ -24,15 +25,18 @@ interface HallType {
   images: string[];
 }
 
-export const CarouselMy = () => {
+export const CarouselMy = ({ halls }: { halls?: HallType[] }) => {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
-  const [originalHalls, setOriginalHalls] = useState<any[]>([]);
-  const [filteredHalls, setFilteredHalls] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [originalHalls, setOriginalHalls] = useState<any[]>(halls || []);
+  const [filteredHalls, setFilteredHalls] = useState<any[]>(halls || []);
+  const [loading, setLoading] = useState(!halls?.length);
   const plugin = React.useRef(Autoplay({ delay: 2000 }));
+
   useEffect(() => {
+    if (originalHalls.length > 0) return; // Already have halls, no need to fetch
+
     const getData = async () => {
       try {
         const res = await fetch("/api/event-halls");
@@ -49,7 +53,7 @@ export const CarouselMy = () => {
     };
 
     getData();
-  }, []);
+  }, [originalHalls]);
 
   React.useEffect(() => {
     if (!api) return;
@@ -59,6 +63,8 @@ export const CarouselMy = () => {
 
     api.on("select", () => setCurrent(api.selectedScrollSnap() + 1));
   }, [api]);
+
+  if (loading) return <div className="text-white">Loading...</div>;
 
   return (
     <div className="relative w-full h-[60vh] sm:h-screen snap-start">
@@ -98,9 +104,7 @@ export const CarouselMy = () => {
 const CarouselCard = ({ el }: { el: HallType }) => {
   return (
     <CarouselItem className="relative w-full h-[60vh] sm:h-screen p-0">
-      {/* Card wrapper */}
-      <Card className="w-full h-full p-0 border-0 ml-[16] shadow-none rounded-none  relative">
-        {/* Image */}
+      <Card className="w-full h-full p-0 border-0 ml-[16] shadow-none rounded-none relative">
         <Image
           src={
             el.images[0] ||
@@ -112,11 +116,8 @@ const CarouselCard = ({ el }: { el: HallType }) => {
           sizes="100vw"
           className="object-cover"
         />
-
-        {/* Background overlay */}
         <div className="absolute inset-0 bg-black/40" />
 
-        {/* Desktop overlay */}
         <CardContent className="hidden sm:flex flex-col absolute top-8/17 left-[6%] lg:left-[12%] -translate-y-1/3 text-white">
           <p className="mb-0 font-medium text-sm lg:text-base [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
             Event Hall:
@@ -145,18 +146,13 @@ const CarouselCard = ({ el }: { el: HallType }) => {
           <p className="mt-2 lg:mt-4 text-base lg:text-lg max-w-[320px] lg:max-w-[500px] [text-shadow:0_1px_3px_rgb(0_0_0/0.5)] truncate">
             {el.description}
           </p>
-          {/* TODO: Replace with <Link> to details page */}
           <button className="mt-4 w-fit bg-white/90 text-black font-bold py-2 px-6 rounded-md hover:bg-white transition-colors">
             More Info
           </button>
         </CardContent>
 
-        {/* Mobile overlay */}
         <CardContent className="sm:hidden absolute inset-0 mt-0 flex flex-col justify-center p-6 text-white z-10">
-          <p
-            style={{ animationDelay: "200ms" }}
-            className="mb-1 font-medium text-[14px] [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]"
-          >
+          <p className="mb-1 font-medium text-[14px] [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
             Event Hall:
           </p>
           <h1 className="font-bold text-2xl mb-1 [text-shadow:0_2px_4px_rgb(0_0_0/0.5)]">
@@ -181,7 +177,6 @@ const CarouselCard = ({ el }: { el: HallType }) => {
           <p className="text-[14px] line-clamp-3 [text-shadow:0_1px_3px_rgb(0_0_0/0.5)]">
             {el.description}
           </p>
-          {/* TODO: Replace with <Link> to details page */}
           <button className="mt-3 w-fit bg-white/90 text-black font-bold py-1.5 px-4 rounded-md text-sm hover:bg-white transition-colors">
             More Info
           </button>

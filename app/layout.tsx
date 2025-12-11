@@ -9,7 +9,6 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/us/Header";
-import { LayoutFooter } from "@/components/us/LayoutFooter";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,11 +57,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} ${lora.variable} ${dmSerifText.variable} ${notoSansMongolian.variable} antialiased bg-black`}
       >
-        <header className="absolute top-0 left-0 right-0 z-50">
+        <header className=" fixed top-0 left-0 right-0 z-1000">
           <Header />
         </header>
         {children}
-        <LayoutFooter />
       </body>
     </html>
   );

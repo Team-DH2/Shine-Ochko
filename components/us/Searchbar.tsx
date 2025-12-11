@@ -82,7 +82,7 @@ export default function SearchFunction({
       <PopoverContent
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => e.preventDefault()}
-        className="w-[300px] bg-neutral-900 border border-neutral-700 text-white shadow-none rounded-lg p-2"
+        className="w-[300px] bg-neutral-900 border border-neutral-700 text-white shadow-none rounded-lg p-2 z-1001"
       >
         {!searchValue && firstOpen && (
           <p className="text-gray-400 text-center text-sm font-light py-3">

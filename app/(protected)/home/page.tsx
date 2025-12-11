@@ -8,9 +8,10 @@ import { LayoutFooter } from "@/components/us/LayoutFooter";
 export default function Page() {
   return (
     <main className="h-screen overflow-y-scroll snap-y snap-mandatory">
-      <CarouselMy />
+      <CarouselMy halls={[]} />
       <Hero />
       <WhyChooseUs />
+      <LayoutFooter />
     </main>
   );
 }
