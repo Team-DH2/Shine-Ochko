@@ -93,22 +93,22 @@ export default function Dashboard() {
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           {[
             {
-              title: "Your Active Events",
+              title: "Таны захиалсан эвент",
               value: Object.keys(grouped).length,
-              sub: "Managed halls",
+              sub: "Эвентүүд",
               color: "from-blue-500/20 to-blue-600/20",
             },
             {
-              title: "Pending Requests",
+              title: "Хүлээгдэж буй",
               value: bookings.filter((b: any) => b.status === "pending").length,
-              sub: "Performers & Hosts",
+              sub: "Дуучид & Хөтлөгч",
               color: "from-purple-500/20 to-purple-600/20",
             },
             {
-              title: "Approved Performers",
+              title: "Зөвшөөрсөн уран бүтээлчид",
               value: bookings.filter((b: any) => b.status === "approved")
                 .length,
-              sub: "Ready to perform",
+              sub: "Бэлэн болсон",
               color: "from-green-500/20 to-green-600/20",
             },
           ].map((kpi, i) => (
