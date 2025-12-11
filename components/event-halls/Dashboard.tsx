@@ -5,21 +5,7 @@ import { Button } from "../ui/button";
 import useSWR from "swr";
 import Image from "next/image";
 import HallCarousel from "./Hallcarousel";
-
-async function fetcher(url: string) {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error("No token found");
-
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!res.ok) throw new Error("Failed to fetch");
-
-  const data = await res.json();
-  console.log({ data });
-  return data.bookings;
-}
+import { authFetcher } from "@/lib/fetcher";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -27,8 +13,8 @@ export default function Dashboard() {
     data: bookings,
     isLoading,
     mutate,
-  } = useSWR("/api/dashboard-backend", fetcher);
-
+  } = useSWR("/api/dashboard-backend", authFetcher);
+  console.log({ bookings });
   if (isLoading) return <p className="text-white text-4xl">Loading...</p>;
   if (!bookings) return <p className="text-white">No data</p>;
 
@@ -76,19 +62,24 @@ export default function Dashboard() {
   }
   // ---- Group bookings ----
   const groupedBookings = bookings.reduce((acc: any, curr: any) => {
-    const key = `${curr.hallid}-${curr.starttime}`;
-    if (!acc[key])
-      acc[key] = { hall: curr.event_halls, hallBooking: null, performers: [] };
+    const key = `${curr.hallid}-${curr.starttime}-${curr.date}`; // 👉 DATE нэмж өглөө!
+
+    if (!acc[key]) {
+      acc[key] = {
+        hall: curr.event_halls,
+        hallBooking: null,
+        performers: [],
+      };
+    }
+
     if (!curr.performersid) acc[key].hallBooking = curr;
     else acc[key].performers.push(curr);
+
     return acc;
   }, {});
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-      <h1 className="text-2xl text-white font-bold mb-5">
-        Таны захиалсан Event hall
-      </h1>
       {Object.entries(groupedBookings).map(([key, group]: any) => {
         const hallBooking = group.hallBooking;
         const performers = group.performers;

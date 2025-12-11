@@ -4,14 +4,16 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import DateForm from "./DateForm";
 import generateCalendar from "@/lib/utilfunction/GenerateCalendar";
+import useSWR from "swr";
+import { publicFetcher } from "@/lib/fetcherpublic";
 
 export default function BookingCalendar({
   hallId,
 }: {
   hallId: number | string;
 }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [bookings, setBookings] = useState<any[]>([]);
+  const { data, isLoading } = useSWR("/api/booking-all", publicFetcher);
+
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
@@ -20,17 +22,9 @@ export default function BookingCalendar({
     { date: string; type: "am" | "pm" | "udur" }[]
   >([]);
 
-  useEffect(() => {
-    fetch("/api/bookings")
-      .then((res) => res.json())
-      .then((data) => {
-        const hallBookings = data.bookings.filter(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (b: any) => b.hallid == hallId
-        );
-        setBookings(hallBookings);
-      });
-  }, [hallId]);
+  const bookings = data?.filter((b: any) => b.hallid == hallId) || [];
+
+  if (isLoading) return <p className="text-white">Уншиж байна...</p>;
 
   const nextMonth = () => {
     if (currentMonth === 11) {
@@ -60,17 +54,17 @@ export default function BookingCalendar({
 
     const isPast = new Date(dateStr).getTime() < new Date(todayStr).getTime();
     const dayBookings = bookings.filter(
-      (b) => new Date(b.date).toISOString().split("T")[0] === dateStr
+      (b: any) => new Date(b.date).toISOString().split("T")[0] === dateStr
     );
 
     const isAmBooked = dayBookings.some(
-      (b) => parseInt(b.starttime.split(":")[0], 10) === 8
+      (b: any) => parseInt(b.starttime.split(":")[0], 10) === 8
     );
     const isPmBooked = dayBookings.some(
-      (b) => parseInt(b.starttime.split(":")[0], 10) === 18
+      (b: any) => parseInt(b.starttime.split(":")[0], 10) === 18
     );
     const isUdureBooked = dayBookings.some(
-      (b) => parseInt(b.starttime.split(":")[0], 10) === 9
+      (b: any) => parseInt(b.starttime.split(":")[0], 10) === 9
     );
 
     // Захиалга эсвэл өнгөрсөн өдөр шалгах
@@ -176,17 +170,18 @@ export default function BookingCalendar({
               const isPast =
                 new Date(dateStr).getTime() < new Date(todayStr).getTime();
               const dayBookings = bookings.filter(
-                (b) => new Date(b.date).toISOString().split("T")[0] === dateStr
+                (b: any) =>
+                  new Date(b.date).toISOString().split("T")[0] === dateStr
               );
 
               const isAmBooked = dayBookings.some(
-                (b) => parseInt(b.starttime.split(":")[0], 10) === 8
+                (b: any) => parseInt(b.starttime.split(":")[0], 10) === 8
               );
               const isPmBooked = dayBookings.some(
-                (b) => parseInt(b.starttime.split(":")[0], 10) === 18
+                (b: any) => parseInt(b.starttime.split(":")[0], 10) === 18
               );
               const isUdureBooked = dayBookings.some(
-                (b) => parseInt(b.starttime.split(":")[0], 10) === 9
+                (b: any) => parseInt(b.starttime.split(":")[0], 10) === 9
               );
               const isPartial = isAmBooked || isPmBooked;
               console.log(isPartial);
