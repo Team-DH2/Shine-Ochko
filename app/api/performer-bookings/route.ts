@@ -45,6 +45,8 @@ export async function POST(req: NextRequest) {
       where: {
         hallid: hallId,
         performersid: performerId,
+        date: new Date(bookeddate),
+        starttime, // эсвэл >=, <= нөхцлөөр цаг давхардлыг шалгах
       },
     });
 
@@ -53,7 +55,7 @@ export async function POST(req: NextRequest) {
         {
           success: false,
           message:
-            "Энэ Event Hall дээр энэ уран бүтээлч аль хэдийн захиалагдсан байна.",
+            "Энэ Event Hall дээр энэ уран бүтээлч тухайн өдөр аль хэдийн захиалагдсан байна.",
         },
         { status: 409 }
       );
