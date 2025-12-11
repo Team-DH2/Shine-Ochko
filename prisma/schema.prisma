@@ -58,6 +58,8 @@ model hosts {
   status                         String?
   booking                        Int?
   price                          Int?     @default(0)
+  intro                          String?
+  experience                     String?
   booking_hosts_bookingTobooking booking? @relation("hosts_bookingTobooking", fields: [booking], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 

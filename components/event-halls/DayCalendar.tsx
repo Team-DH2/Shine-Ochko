@@ -21,10 +21,10 @@ export default function BookingCalendar({
   >([]);
 
   useEffect(() => {
-    fetch("/api/bookings")
+    fetch("/api/booking-all")
       .then((res) => res.json())
       .then((data) => {
-        const hallBookings = data.bookings.filter(
+        const hallBookings = data?.bookings.filter(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (b: any) => b.hallid == hallId
         );
