@@ -114,32 +114,38 @@ export function SelectItem({
       )}
       {...props}
     >
+      <span className="absolute right-2 flex size-3.5 items-center justify-center">
+        <SelectPrimitive.ItemIndicator>
+          <CheckIcon className="size-4" />
+        </SelectPrimitive.ItemIndicator>
+      </span>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
-  );
+  )
 }
 
-export function SelectSeparator({
+function SelectSeparator({
   className,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Separator>) {
   return (
     <SelectPrimitive.Separator
       data-slot="select-separator"
-      className={cn("bg-white/10 my-1 h-px", className)}
+      className={cn("bg-border pointer-events-none -mx-1 my-1 h-px", className)}
       {...props}
     />
-  );
+  )
 }
 
-export function SelectScrollUpButton({
+function SelectScrollUpButton({
   className,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.ScrollUpButton>) {
   return (
     <SelectPrimitive.ScrollUpButton
+      data-slot="select-scroll-up-button"
       className={cn(
-        "flex items-center justify-center py-1 text-white/40",
+        "flex cursor-default items-center justify-center py-1",
         className
       )}
       {...props}
