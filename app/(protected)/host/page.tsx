@@ -36,7 +36,7 @@ type HostDB = {
 
 export default function Host() {
   const searchParams = useSearchParams();
-  const hallIdFromUrl = searchParams.get("hall"); // Get hall ID from URL
+  const bookingIdFromUrl = searchParams.get("booking"); // Get booking ID from URL
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,15 +70,18 @@ export default function Host() {
         const bookingsData = data.bookings || [];
         setBookings(bookingsData);
 
-        // If hall ID is in URL, find and select that specific booking
-        if (hallIdFromUrl && bookingsData.length > 0) {
+        // If booking ID is in URL, find and select that specific booking
+        if (bookingIdFromUrl && bookingsData.length > 0) {
           const matchingBooking = bookingsData.find(
-            (b: any) => b.hallid === parseInt(hallIdFromUrl)
+            (b: any) => b.id === parseInt(bookingIdFromUrl)
           );
 
           if (matchingBooking) {
             setSelectedBooking(matchingBooking);
-            console.log("✅ Auto-selected booking for host page:", matchingBooking);
+            console.log(
+              "✅ Auto-selected booking for host page:",
+              matchingBooking
+            );
           } else {
             setSelectedBooking(bookingsData[0]);
           }
@@ -86,7 +89,7 @@ export default function Host() {
           setSelectedBooking(bookingsData[0]);
         }
       });
-  }, [hallIdFromUrl]);
+  }, [bookingIdFromUrl]);
 
   // FETCH HOSTS
   useEffect(() => {
@@ -270,7 +273,11 @@ export default function Host() {
       {/* RESULTS */}
       <div className="pt-12 pb-8 flex gap-4 flex-wrap">
         {filteredHosts.map((host) => (
-          <HostCard key={host.id} host={host} selectedBooking={selectedBooking} />
+          <HostCard
+            key={host.id}
+            host={host}
+            selectedBooking={selectedBooking}
+          />
         ))}
       </div>
     </div>

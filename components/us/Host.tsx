@@ -20,44 +20,46 @@ interface HostCardProps {
 }
 
 const handleBooking = async (hostId: number, selectedBooking: any) => {
-  try {
-    // Check if user is logged in
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
-      return;
-    }
-
-    // Check if booking is selected
-    if (!selectedBooking) {
-      toast.error("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
-      return;
-    }
-
-    const res = await fetch("/api/hosts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        hostId,
-        hallId: selectedBooking.hallid,
-        starttime: selectedBooking.starttime,
-        bookeddate: selectedBooking.date,
-      }),
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      toast.success("Хөтлөгч захиалах хүсэлт явууллаа. Таньд мэдэгдэл ирнэ, Dashboard хэсгээс харна уу!");
-    } else {
-      toast.error(data.message || "Алдаа гарлаа!");
-    }
-  } catch (err) {
-    console.error(err);
-    toast.error("Захиалга илгээхэд алдаа гарлаа.");
+  // Check if user is logged in
+  const token = localStorage.getItem("token");
+  if (!token) {
+    toast.error("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
+    return;
   }
+
+  // Check if booking is selected
+  if (!selectedBooking) {
+    toast.error("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
+    return;
+  }
+
+  const bookingPromise = fetch("/api/hosts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      hostId,
+      hallId: selectedBooking.hallid,
+      starttime: selectedBooking.starttime,
+      bookeddate: selectedBooking.date,
+    }),
+  }).then(async (res) => {
+    const data = await res.json();
+    
+    if (!data.success) {
+      throw new Error(data.message || "Алдаа гарлаа!");
+    }
+    
+    return data;
+  });
+
+  toast.promise(bookingPromise, {
+    loading: "Захиалга илгээж байна...",
+    success: "Хөтлөгч захиалах хүсэлт явууллаа. Таньд мэдэгдэл ирнэ, Dashboard хэсгээс харна уу!",
+    error: (err) => err.message || "Захиалга илгээхэд алдаа гарлаа.",
+  });
 };
 
 export default function HostCard({ host, selectedBooking }: HostCardProps) {

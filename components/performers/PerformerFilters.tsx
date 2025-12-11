@@ -10,11 +10,7 @@ import {
 } from "@/components/ui/select";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
-const availabilityOptions = [
-  "Боломжтой",
-  "Хүлээгдэж байна",
-  "Захиалагдсан",
-];
+const availabilityOptions = ["Боломжтой", "Хүлээгдэж байна", "Захиалагдсан"];
 
 interface PerformerFiltersProps {
   genres: string[];

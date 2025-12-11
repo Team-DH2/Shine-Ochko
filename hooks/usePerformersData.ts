@@ -46,7 +46,7 @@ export function useGenres() {
   return genres;
 }
 
-export function useBookings(hallIdFromUrl: string | null) {
+export function useBookings(bookingIdFromUrl: string | null) {
   const [bookings, setBookings] = useState<any[]>([]);
   const [allBookings, setAllBookings] = useState<any[]>([]);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -70,9 +70,9 @@ export function useBookings(hallIdFromUrl: string | null) {
         setAllBookings(bookingsData);
 
         // Auto-select booking based on URL parameter
-        if (hallIdFromUrl && bookingsData.length > 0) {
+        if (bookingIdFromUrl && bookingsData.length > 0) {
           const matchingBooking = bookingsData.find(
-            (b: any) => b.hallid === parseInt(hallIdFromUrl)
+            (b: any) => b.id === parseInt(bookingIdFromUrl)
           );
 
           if (matchingBooking) {
@@ -95,7 +95,7 @@ export function useBookings(hallIdFromUrl: string | null) {
         }
       })
       .finally(() => setIsLoadingBookings(false));
-  }, [hallIdFromUrl]);
+  }, [bookingIdFromUrl]);
 
   const handleBookingSelect = (booking: any) => {
     setSelectedBooking(booking);
@@ -124,51 +124,54 @@ export function usePerformerBooking() {
   const [bookingPerformer, setBookingPerformer] = useState<number | null>(null);
 
   const bookPerformer = async (performerId: number, selectedBooking: any) => {
-    try {
-      setBookingPerformer(performerId);
-      const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-      if (!token) {
-        toast.error("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
+    if (!token) {
+      toast.error("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
+      return;
+    }
+
+    if (!selectedBooking) {
+      toast.error("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
+      return;
+    }
+
+    setBookingPerformer(performerId);
+
+    const bookingPromise = fetch("/api/performer-bookings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        performerId,
+        hallId: selectedBooking.hallid,
+        starttime: selectedBooking.starttime,
+        bookeddate: selectedBooking.date,
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+
+        if (!data.success) {
+          throw new Error(data.message || "Захиалга амжилтгүй боллоо.");
+        }
+
         setBookingPerformer(null);
-        return;
-      }
-
-      if (!selectedBooking) {
-        toast.error("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
+        return data;
+      })
+      .catch((error) => {
         setBookingPerformer(null);
-        return;
-      }
-
-      const res = await fetch("/api/performer-bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          performerId,
-          hallId: selectedBooking.hallid,
-          starttime: selectedBooking.starttime,
-          bookeddate: selectedBooking.date,
-        }),
+        throw error;
       });
 
-      const data = await res.json();
-
-      if (data.success) {
-        toast.success(
-          "Уран бүтээлчийг захиалах хүсэлт явууллаа. Таньд мэдэгдэл ирнэ, Dashboard хэсгээс харна уу!"
-        );
-      } else {
-        toast.error(data.message || "Захиалга амжилтгүй боллоо.");
-      }
-    } catch (error) {
-      console.error("Error booking performer:", error);
-      toast.error("Серверийн алдаа.");
-    } finally {
-      setBookingPerformer(null);
-    }
+    toast.promise(bookingPromise, {
+      loading: "Захиалга илгээж байна...",
+      success:
+        "Уран бүтээлчийг захиалах хүсэлт явууллаа. Таньд мэдэгдэл ирнэ, Dashboard хэсгээс харна уу!",
+      error: (err) => err.message || "Серверийн алдаа гарлаа.",
+    });
   };
 
   return { bookingPerformer, bookPerformer };

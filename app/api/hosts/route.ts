@@ -38,6 +38,26 @@ export async function POST(req: Request) {
 
     const userId = decoded.id;
 
+    // Check if this host is already booked for this event hall, date, and time
+    const existingBooking = await prisma.booking.findFirst({
+      where: {
+        hostid: hostId,
+        hallid: hallId,
+        date: new Date(bookeddate),
+        starttime: starttime,
+      },
+    });
+
+    if (existingBooking) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Энэ Event Hall дээр энэ хөтлөгч тухайн өдөр аль хэдийн захиалагдсан байна.",
+        },
+        { status: 400 }
+      );
+    }
+
     const booking = await prisma.booking.create({
       data: {
         hostid: hostId,

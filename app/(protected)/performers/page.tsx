@@ -34,7 +34,7 @@ import {
 
 export default function PerformersPage() {
   const searchParams = useSearchParams();
-  const hallIdFromUrl = searchParams.get("hall");
+  const bookingIdFromUrl = searchParams.get("booking");
   const { performers, isLoading } = usePerformers();
   const genres = useGenres();
   const {
@@ -44,7 +44,7 @@ export default function PerformersPage() {
     isLoadingBookings,
     bookingRefs,
     handleBookingSelect,
-  } = useBookings(hallIdFromUrl);
+  } = useBookings(bookingIdFromUrl);
   const { bookingPerformer, bookPerformer } = usePerformerBooking();
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedAvailability, setSelectedAvailability] = useState<string[]>(

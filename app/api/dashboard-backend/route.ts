@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       include: {
         event_halls: true,
         performers: true,
-        hosts_hosts_bookingTobooking: true,
+        hosts: true,
       },
       orderBy: { date: "asc" },
     });
