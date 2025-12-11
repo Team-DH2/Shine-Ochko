@@ -36,11 +36,9 @@ export const Header = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [user, setUser] = useState<{
-    name: string;
-    email: string;
-    role?: string;
-  } | null>(null);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(
+    null
+  );
   const [hasMounted, setHasMounted] = useState(false);
 
   const styleDesktop =
@@ -92,11 +90,7 @@ export const Header = () => {
           <ButtonOfNav href="/event-halls" text="Event Halls" />
           <ButtonOfNav href="/performers" text="Performers" />
           <ButtonOfNav href="/host" text="Hosts" />
-          {isLoggedIn && user?.role === "admin" ? (
-            <ButtonOfNav href="/adminpanel" text="Admin Panel" />
-          ) : isLoggedIn ? (
-            <ButtonOfNav href="/dashboard" text="Dashboard" />
-          ) : null}
+          <ButtonOfNav href="/dashboard" text="Dashboard" />
         </div>
 
         <div className="flex-1 flex justify-end items-center">
@@ -327,19 +321,11 @@ export const Header = () => {
           label="Hosts"
           icon={<Users className="w-5 h-5" />}
         />
-        {isLoggedIn && user?.role === "admin" ? (
-          <BottomNavButton
-            href="/adminpanel"
-            label="Admin Panel"
-            icon={<LayoutDashboard className="w-5 h-5" />}
-          />
-        ) : isLoggedIn ? (
-          <BottomNavButton
-            href="/dashboard"
-            label="Dashboard"
-            icon={<LayoutDashboard className="w-5 h-5" />}
-          />
-        ) : null}
+        <BottomNavButton
+          href="/dashboard"
+          label="Dashboard"
+          icon={<LayoutDashboard className="w-5 h-5" />}
+        />
       </div>
 
       {/* AUTH MODAL (NO STRUCTURE BREAKING) */}
@@ -353,16 +339,7 @@ export const Header = () => {
           <AuthForm
             view={authView}
             onViewChange={setAuthView}
-            onLoginSuccess={(userData: any) => {
-              setIsLoggedIn(true);
-              setUser(userData);
-              setIsAuthModalOpen(false);
-              if (userData.role === "admin") {
-                window.location.href = "/adminpanel";
-              } else {
-                window.location.href = "/home";
-              }
-            }}
+            onLoginSuccess={(userData: any) => setUser(userData)}
           />
         </DialogContent>
       </Dialog>

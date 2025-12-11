@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { use, useEffect, useState } from "react";
 
 interface Booking {
   id: number;
@@ -9,32 +8,20 @@ interface Booking {
   event_halls: { name: string };
   User: { name: string };
   performers: { name: string };
+  date: string;
+  starttime: string;
 }
 
-const BookingResponseDetails: React.FC<{ bookingId: string | null }> = ({
-  bookingId,
-}) => (
-  <div className="mt-4">
-    <h2 className="text-xl font-semibold mb-2">Booking Confirmation</h2>
-    {bookingId ? (
-      <p>Your booking ID is: {bookingId}</p>
-    ) : (
-      <p>No booking ID found.</p>
-    )}
-  </div>
-);
+const BookingResponsePage = ({
+  searchParams,
+}: {
+  searchParams: Promise<{ bookingId?: string; action?: string }>;
+}) => {
+  const params = use(searchParams);
+  console.log("BookingResponsePage params:", params);
 
-export function ClientSearch() {
-  const searchParams = useSearchParams();
-  const query = searchParams.get("q");
-  return <div>Query: {query}</div>;
-}
-
-const BookingResponsePage: React.FC = () => {
-  const searchParams = useSearchParams();
-  const bookingIdParam = searchParams.get("bookingId");
-  const actionParam = searchParams.get("action");
-
+  const bookingIdParam = params.bookingId;
+  const actionParam = params.action;
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(
@@ -86,8 +73,12 @@ const BookingResponsePage: React.FC = () => {
   };
 
   if (loading)
-    return <div className="p-6 text-center text-white">Loading...</div>;
-
+    return (
+      <div className="p-6 text-center text-white mt-50 text-5xl">
+        Loading...
+      </div>
+    );
+  console.log({ booking });
   return (
     <div className="max-w-xl mx-auto mt-[70px] p-6 bg-gray-800 text-white rounded-xl shadow-lg">
       <h1 className="text-2xl font-bold mb-4">Захиалгын мэдээлэл</h1>
@@ -98,16 +89,28 @@ const BookingResponsePage: React.FC = () => {
       >
         <p className="font-semibold mb-2">{message}</p>
         {booking && (
-          <div className="mt-2 text-sm">
+          <div className="mt-2 text-sm space-y-1">
             <p>Event Hall: {booking.event_halls.name}</p>
+
+            {/* Огноо */}
+            <p>
+              Өдөр:{" "}
+              {new Date(booking.date).toLocaleDateString("mn-MN", {
+                weekday: "long", // Даваа, Мягмар ...
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+
+            {/* Эхлэх цаг */}
+            <p>Эхлэх цаг: {booking.starttime}</p>
+
             <p>Хэрэглэгч: {booking.User.name}</p>
             <p>Performer: {booking.performers.name}</p>
           </div>
         )}
       </div>
-
-      <BookingResponseDetails bookingId={bookingIdParam} />
-      <ClientSearch />
     </div>
   );
 };

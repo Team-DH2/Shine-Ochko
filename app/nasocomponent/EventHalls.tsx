@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 
 import { useRouter } from "next/navigation";
 import EventHallsSkeleton from "@/components/us/EventHallSkeleton";
-
+import useSWR from "swr";
+import { publicFetcherEventHalls } from "@/lib/fetcherpublic";
 import {
   Popover,
   PopoverTrigger,
@@ -33,11 +34,11 @@ export default function EventHalls() {
 
   const router = useRouter();
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const res = await fetch("/api/event-halls");
-        const data = await res.json();
+  // --- SWR fetch ---
+  const { data, isLoading } = useSWR(
+    "/api/event-halls",
+    publicFetcherEventHalls
+  );
 
         if (data) {
           setOriginalHalls(data.data);
@@ -50,8 +51,8 @@ export default function EventHalls() {
       setLoading(false);
     };
 
-    getData();
-  }, []);
+  // data ирсний дараа анхдагч filter set хийх
+  const halls = data || [];
 
   // SORTING
   useEffect(() => {
@@ -92,7 +93,7 @@ export default function EventHalls() {
 
               <PopoverContent className="w-80 max-w-[90vw] bg-neutral-900 text-white border border-neutral-800 p-4 rounded-lg shadow-lg flex flex-col max-h-[80vh] overflow-y-auto mx-auto z-100">
                 <EventHallsPage
-                  originalData={originalHalls}
+                  originalData={halls}
                   onFilterChange={setFilteredHalls}
                 />
               </PopoverContent>
@@ -102,7 +103,7 @@ export default function EventHalls() {
           {/* DESKTOP FILTER */}
           <div className="hidden md:block w-80">
             <EventHallsPage
-              originalData={originalHalls}
+              originalData={halls}
               onFilterChange={setFilteredHalls}
             />
           </div>

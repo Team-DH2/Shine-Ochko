@@ -9,6 +9,11 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/us/Header";
+<<<<<<< HEAD
+=======
+import { LayoutFooter } from "@/components/us/LayoutFooter";
+import { Toaster } from "sonner";
+>>>>>>> origin/main
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,6 +66,11 @@ export default function RootLayout({
           <Header />
         </header>
         {children}
+<<<<<<< HEAD
+=======
+        <LayoutFooter />
+        <Toaster position="top-center" richColors />
+>>>>>>> origin/main
       </body>
     </html>
   );

@@ -2,11 +2,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface AuthFormProps {
   view: "login" | "signup";
   onViewChange: (view: "login" | "signup") => void;
-  onLoginSuccess: (user: { name: string }) => void;
+  onLoginSuccess: (user: { name: string; role: string; email: string }) => void;
 }
 
 export function AuthForm({
@@ -14,11 +15,14 @@ export function AuthForm({
   onViewChange,
   onLoginSuccess,
 }: AuthFormProps) {
+  console.log("🎯 AuthForm rendered with onLoginSuccess:", typeof onLoginSuccess, onLoginSuccess);
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,14 +42,18 @@ export function AuthForm({
         throw new Error(data.error || "Login failed");
       }
 
+      console.log("Login response data:", data);
+      console.log("User role:", data.user.role);
+
       // Store the token
       localStorage.setItem("token", data.token);
 
-      // Pass user data to the parent component (Header)
+      // Pass user data to the parent component (Header) which will handle redirect
+      console.log("About to call onLoginSuccess with:", data.user);
+      console.log("onLoginSuccess function is:", onLoginSuccess);
+      console.log("Calling onLoginSuccess now...");
       onLoginSuccess(data.user);
-
-      // Reload to reflect logged-in state across the app
-      window.location.reload();
+      console.log("onLoginSuccess called successfully");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -53,10 +61,40 @@ export function AuthForm({
     }
   };
 
-  // A placeholder for signup logic
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Signup functionality not implemented yet.");
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/signUp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Signup failed");
+      }
+
+      console.log("Signup response data:", data);
+
+      // Store the token
+      localStorage.setItem("token", data.token);
+
+      // Pass user data to the parent component (Header) which will handle redirect
+      console.log("About to call onLoginSuccess with:", data.user);
+      console.log("onLoginSuccess function is:", onLoginSuccess);
+      console.log("Calling onLoginSuccess now...");
+      onLoginSuccess(data.user);
+      console.log("onLoginSuccess called successfully");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isLoginView = view === "login";
