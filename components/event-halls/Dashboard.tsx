@@ -5,21 +5,7 @@ import { Button } from "../ui/button";
 import useSWR from "swr";
 import Image from "next/image";
 import HallCarousel from "./Hallcarousel";
-
-async function fetcher(url: string) {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error("No token found");
-
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!res.ok) throw new Error("Failed to fetch");
-
-  const data = await res.json();
-  console.log({ data });
-  return data.bookings;
-}
+import { authFetcher } from "@/lib/fetcher";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -27,7 +13,7 @@ export default function Dashboard() {
     data: bookings,
     isLoading,
     mutate,
-  } = useSWR("/api/dashboard-backend", fetcher);
+  } = useSWR("/api/dashboard-backend", authFetcher);
   console.log({ bookings });
   if (isLoading) return <p className="text-white text-4xl">Loading...</p>;
   if (!bookings) return <p className="text-white">No data</p>;

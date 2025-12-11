@@ -148,45 +148,37 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState, useEffect } from "react";
-import Image from "next/image";
+
+import { useState } from "react";
+
 import { MapPin, Star, Users, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EventHallsPage from "./EventHallFilter";
 import { useRouter } from "next/navigation";
 import EventHallsSkeleton from "@/components/us/EventHallSkeleton";
-
+import useSWR from "swr";
+import { publicFetcherEventHalls } from "@/lib/fetcherpublic";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "@radix-ui/react-popover";
+import ImageWithFallback from "@/components/us/Fallback";
 
 export default function EventHalls() {
-  const [originalHalls, setOriginalHalls] = useState<any[]>([]);
-  const [filteredHalls, setFilteredHalls] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const router = useRouter();
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const res = await fetch("/api/event-halls");
-        const data = await res.json();
+  // --- SWR fetch ---
+  const { data, isLoading } = useSWR(
+    "/api/event-halls",
+    publicFetcherEventHalls
+  );
 
-        if (data) {
-          setOriginalHalls(data.data);
-          setFilteredHalls(data.data);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-      setLoading(false);
-    };
+  // Шүүлтүүр state
+  const [filteredHalls, setFilteredHalls] = useState<any[]>([]);
 
-    getData();
-  }, []);
+  // data ирсний дараа анхдагч filter set хийх
+  const halls = data || [];
 
   return (
     <div className="flex mt-8">
@@ -206,7 +198,7 @@ export default function EventHalls() {
 
               <PopoverContent className="w-80 max-w-[90vw] bg-neutral-900 text-white border border-neutral-800 p-4 rounded-lg shadow-lg flex flex-col max-h-[80vh] overflow-y-auto mx-auto z-100">
                 <EventHallsPage
-                  originalData={originalHalls}
+                  originalData={halls}
                   onFilterChange={setFilteredHalls}
                 />
               </PopoverContent>
@@ -216,71 +208,68 @@ export default function EventHalls() {
           {/* DESKTOP FILTER */}
           <div>
             <EventHallsPage
-              originalData={originalHalls}
+              originalData={halls}
               onFilterChange={setFilteredHalls}
             />
           </div>
         </div>
 
-        {/* EVENT HALLS GRID */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {/* LOADING */}
-          {loading && <EventHallsSkeleton />}
+        {/* LIST SECTION */}
+        <div className="flex flex-wrap justify-center gap-5 flex-1">
+          {/* SKELETON LOADING */}
+          {isLoading && <EventHallsSkeleton />}
 
-          {/* CARDS */}
-          {!loading &&
-            filteredHalls.map((hall) => (
-              <div
-                key={hall.id}
-                className="h-fit w-80
-                           bg-neutral-900 rounded-2xl overflow-hidden shadow-xl
-                           hover:scale-[1.02] transition-transform duration-200
-                           flex flex-col"
-              >
-                <div className="relative w-full h-56">
-                  <Image
-                    src={
-                      hall.images[0] ||
-                      "https://img.freepik.com/premium-vector/image-icon-design-vector-template_1309674-943.jpg"
-                    }
-                    alt={hall.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-
-                <div className="p-4 space-y-3">
-                  <h2 className="text-xl font-semibold">{hall.name}</h2>
-
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2 text-gray-400 flex-1 min-w-0">
-                      <MapPin size={18} />
-                      <p className="truncate w-[90%]">{hall.location}</p>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-yellow-400 ml-2">
-                      <Star size={18} />
-                      <p>{hall.rating}</p>
-                    </div>
+          {/* Хэрэв isLoading false → шүүлтүүртэй дата ашиглах */}
+          {!isLoading &&
+            (filteredHalls.length > 0 ? filteredHalls : halls).map(
+              (hall: any) => (
+                <div
+                  key={hall.id}
+                  className="w-[40%] flex-1 min-w-[280px] max-w-[400px]
+                           bg-neutral-900 rounded-2xl overflow-hidden shadow-xl 
+                           hover:scale-[1.02] transition-transform duration-200 flex flex-col"
+                >
+                  <div className="relative w-full h-56">
+                    <ImageWithFallback
+                      src={hall.images[0]}
+                      fallbackSrc="/eventhalldefault.jpg"
+                      alt={hall.name}
+                    />
                   </div>
 
-                  <div className="flex justify-between h-10 text-gray-400 items-center">
-                    <div className="flex items-center gap-2">
-                      <Users size={18} />
-                      <p>{hall.capacity} хүн</p>
-                    </div>
-                    <p className="truncate w-[40%]">$ {hall.price}</p>
-                  </div>
+                  <div className="p-4 space-y-3">
+                    <h2 className="text-xl font-semibold">{hall.name}</h2>
 
-                  <Button
-                    onClick={() => router.push(`/event-halls/${hall.id}`)}
-                    className="w-full rounded-xl mt-3 bg-neutral-800 hover:bg-neutral-700"
-                  >
-                    Дэлгэрэнгүй
-                  </Button>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <MapPin size={18} />
+                        <p className="truncate w-[90%]">{hall.location}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-yellow-400">
+                        <Star size={18} />
+                        <p>{hall.rating}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between text-gray-400 items-center h-10">
+                      <div className="flex items-center gap-2">
+                        <Users size={18} />
+                        <p>{hall.capacity} хүн</p>
+                      </div>
+                      <p className="truncate w-[40%]">$ {hall.price}</p>
+                    </div>
+
+                    <Button
+                      onClick={() => router.push(`/event-halls/${hall.id}`)}
+                      className="w-full rounded-xl mt-3 bg-neutral-800 hover:bg-neutral-700"
+                    >
+                      Дэлгэрэнгүй
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            )}
 
           {/* EMPTY STATE */}
           {!loading && filteredHalls.length === 0 && (
