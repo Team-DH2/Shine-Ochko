@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { toast } from "sonner";
 
 type HostType = {
   id: number;
@@ -13,31 +14,53 @@ type HostType = {
   price: number;
 };
 
-const handleBooking = async (hostId: number) => {
+interface HostCardProps {
+  host: HostType;
+  selectedBooking?: any;
+}
+
+const handleBooking = async (hostId: number, selectedBooking: any) => {
   try {
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
+      return;
+    }
+
+    // Check if booking is selected
+    if (!selectedBooking) {
+      toast.error("Та эхлээд Event Hall-оос сонголт хийнэ үү.");
+      return;
+    }
+
     const res = await fetch("/api/hosts", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
         hostId,
-        userId: 1,
-        date: new Date(),
+        hallId: selectedBooking.hallid,
+        starttime: selectedBooking.starttime,
+        bookeddate: selectedBooking.date,
       }),
     });
 
     const data = await res.json();
     if (data.success) {
-      alert("Booking request sent!");
+      toast.success("Хөтлөгч захиалах хүсэлт явууллаа. Таньд мэдэгдэл ирнэ, Dashboard хэсгээс харна уу!");
     } else {
-      alert("Something went wrong!");
+      toast.error(data.message || "Алдаа гарлаа!");
     }
   } catch (err) {
     console.error(err);
-    alert("Error sending booking request.");
+    toast.error("Захиалга илгээхэд алдаа гарлаа.");
   }
 };
 
-export default function HostCard({ host }: { host: HostType }) {
+export default function HostCard({ host, selectedBooking }: HostCardProps) {
   const isBooked = host.status === "Захиалагдсан";
   return (
     <div className="bg-[#1E2128FF] p-6 rounded-xl h-[478px] w-[374px] border border-gray-800 text-white hover:border-gray-600 transition">
@@ -93,7 +116,7 @@ export default function HostCard({ host }: { host: HostType }) {
         <div className="relative flex-1 group">
           <button
             disabled={isBooked}
-            onClick={() => !isBooked && handleBooking(host.id)}
+            onClick={() => !isBooked && handleBooking(host.id, selectedBooking)}
             className={`w-full py-2 rounded-lg text-sm text-center transition
             ${
               isBooked

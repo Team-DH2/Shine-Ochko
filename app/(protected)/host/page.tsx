@@ -3,6 +3,7 @@
 import HostCard from "@/components/us/Host";
 import { Header } from "@/components/us/Header";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 // DESIGN COMPONENTS
 import { RotateCcw } from "lucide-react";
@@ -34,6 +35,9 @@ type HostDB = {
 };
 
 export default function Host() {
+  const searchParams = useSearchParams();
+  const hallIdFromUrl = searchParams.get("hall"); // Get hall ID from URL
+
   // Filter States
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState<string>("all");
@@ -46,6 +50,43 @@ export default function Host() {
   // Data States
   const [hosts, setHosts] = useState<HostDB[]>([]);
   const [filteredHosts, setFilteredHosts] = useState<HostDB[]>([]);
+
+  // Booking states
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+
+  // FETCH BOOKINGS
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("/api/bookings", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const bookingsData = data.bookings || [];
+        setBookings(bookingsData);
+
+        // If hall ID is in URL, find and select that specific booking
+        if (hallIdFromUrl && bookingsData.length > 0) {
+          const matchingBooking = bookingsData.find(
+            (b: any) => b.hallid === parseInt(hallIdFromUrl)
+          );
+
+          if (matchingBooking) {
+            setSelectedBooking(matchingBooking);
+            console.log("✅ Auto-selected booking for host page:", matchingBooking);
+          } else {
+            setSelectedBooking(bookingsData[0]);
+          }
+        } else if (bookingsData.length > 0) {
+          setSelectedBooking(bookingsData[0]);
+        }
+      });
+  }, [hallIdFromUrl]);
 
   // FETCH HOSTS
   useEffect(() => {
@@ -229,7 +270,7 @@ export default function Host() {
       {/* RESULTS */}
       <div className="pt-12 pb-8 flex gap-4 flex-wrap">
         {filteredHosts.map((host) => (
-          <HostCard key={host.id} host={host} />
+          <HostCard key={host.id} host={host} selectedBooking={selectedBooking} />
         ))}
       </div>
     </div>

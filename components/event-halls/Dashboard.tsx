@@ -73,11 +73,13 @@ export default function Dashboard() {
         hall: curr.event_halls,
         hallBooking: null,
         performers: [],
+        hosts: [],
       };
     }
 
-    if (!curr.performersid) acc[key].hallBooking = curr;
-    else acc[key].performers.push(curr);
+    if (!curr.performersid && !curr.hostid) acc[key].hallBooking = curr;
+    else if (curr.performersid) acc[key].performers.push(curr);
+    else if (curr.hostid) acc[key].hosts.push(curr);
 
     return acc;
   }, {});
@@ -140,15 +142,18 @@ export default function Dashboard() {
           {Object.entries(grouped).map(([key, group]: any) => {
             const hallBooking = group.hallBooking;
             const performers = group.performers;
+            const hosts = group.hosts;
             const hallId = group.hall?.id;
 
             const date =
               hallBooking?.date ||
-              (performers.length > 0 ? performers[0].date : null);
+              (performers.length > 0 ? performers[0].date : null) ||
+              (hosts.length > 0 ? hosts[0].date : null);
 
             const startTime =
               hallBooking?.starttime ||
-              (performers.length > 0 ? performers[0].starttime : null);
+              (performers.length > 0 ? performers[0].starttime : null) ||
+              (hosts.length > 0 ? hosts[0].starttime : null);
 
             return (
               <div
@@ -280,6 +285,71 @@ export default function Dashboard() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Hosts Section */}
+                  <div className="mt-8">
+                    <h4 className="mb-4 text-lg font-semibold text-white">
+                      Урьсан хөтлөгчид
+                    </h4>
+
+                    {/* If no hosts */}
+                    {hosts.length === 0 && (
+                      <p className="text-white/50 text-sm">
+                        Одоогоор урьсан хөтлөгч байхгүй байна.
+                      </p>
+                    )}
+
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      {hosts.map((h: any) => {
+                        // Get the first host from the array since it's a relation
+                        const host = h.hosts_hosts_bookingTobooking?.[0];
+                        
+                        return (
+                          <div
+                            key={h.id}
+                            className="rounded-2xl border border-white/10 bg-white/5 p-4 transition-all hover:border-purple-400/40 hover:bg-white/10 "
+                          >
+                            <div className="mb-3 flex items-center gap-3">
+                              <Avatar className="h-12 w-12 border border-white/20">
+                                <AvatarImage src={host?.image} />
+                                <AvatarFallback>HT</AvatarFallback>
+                              </Avatar>
+
+                              <div className="flex-1 overflow-hidden">
+                                <p className="truncate text-sm font-semibold text-white">
+                                  {host?.name}
+                                </p>
+                                <p className="text-xs text-white/50">
+                                  {host?.genre}
+                                </p>
+                              </div>
+                            </div>
+
+                            <span
+                              className={`mb-3 inline-block rounded-lg px-3 py-1 text-xs font-medium ${
+                                h.status === "approved"
+                                  ? "bg-emerald-500/20 text-emerald-400"
+                                  : h.status === "pending"
+                                  ? "bg-amber-500/20 text-amber-400"
+                                  : "bg-red-500/20 text-red-400"
+                              }`}
+                            >
+                              {h.status}
+                            </span>
+
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full rounded-xl border-white/10 bg-white/5 text-xs text-white hover:border-purple-500/40 hover:bg-purple-500/10"
+                            >
+                              View Profile
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   <div className="flex gap-3 pt-6">
                     {hallId && (
                       <Button

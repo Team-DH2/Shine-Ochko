@@ -13,21 +13,47 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { hostId, userId, date } = body;
+    const { hostId, hallId, starttime, bookeddate } = body;
+
+    // Get user ID from token
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { success: false, message: "Token байхгүй байна" },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.split(" ")[1];
+    let decoded: any;
+    try {
+      const jwt = require("jsonwebtoken");
+      decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    } catch (err) {
+      return NextResponse.json(
+        { success: false, message: "Token буруу эсвэл хүчингүй" },
+        { status: 403 }
+      );
+    }
+
+    const userId = decoded.id;
 
     const booking = await prisma.booking.create({
       data: {
         hostid: hostId,
         userid: userId,
-        date: new Date(date),
+        hallid: hallId,
+        date: new Date(bookeddate),
+        starttime: starttime,
         status: "pending",
       },
     });
 
     return NextResponse.json({ success: true, booking });
   } catch (error: any) {
+    console.error("Host booking error:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, message: error.message },
       { status: 500 }
     );
   }
