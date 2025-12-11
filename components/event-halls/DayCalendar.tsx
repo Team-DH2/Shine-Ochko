@@ -58,13 +58,16 @@ export default function BookingCalendar({
     );
 
     const isAmBooked = dayBookings.some(
-      (b: any) => parseInt(b.starttime.split(":")[0], 10) === 8
+      (b: { starttime: string }) =>
+        parseInt(b.starttime.split(":")[0], 10) === 8
     );
     const isPmBooked = dayBookings.some(
-      (b: any) => parseInt(b.starttime.split(":")[0], 10) === 18
+      (b: { starttime: string }) =>
+        parseInt(b.starttime.split(":")[0], 10) === 18
     );
     const isUdureBooked = dayBookings.some(
-      (b: any) => parseInt(b.starttime.split(":")[0], 10) === 9
+      (b: { starttime: string }) =>
+        parseInt(b.starttime.split(":")[0], 10) === 9
     );
 
     // Захиалга эсвэл өнгөрсөн өдөр шалгах
@@ -170,18 +173,21 @@ export default function BookingCalendar({
               const isPast =
                 new Date(dateStr).getTime() < new Date(todayStr).getTime();
               const dayBookings = bookings.filter(
-                (b: any) =>
+                (b: { date: string }) =>
                   new Date(b.date).toISOString().split("T")[0] === dateStr
               );
 
               const isAmBooked = dayBookings.some(
-                (b: any) => parseInt(b.starttime.split(":")[0], 10) === 8
+                (b: { starttime: string }) =>
+                  parseInt(b.starttime.split(":")[0], 10) === 8
               );
               const isPmBooked = dayBookings.some(
-                (b: any) => parseInt(b.starttime.split(":")[0], 10) === 18
+                (b: { starttime: string }) =>
+                  parseInt(b.starttime.split(":")[0], 10) === 18
               );
               const isUdureBooked = dayBookings.some(
-                (b: any) => parseInt(b.starttime.split(":")[0], 10) === 9
+                (b: { starttime: string }) =>
+                  parseInt(b.starttime.split(":")[0], 10) === 9
               );
               const isPartial = isAmBooked || isPmBooked;
               console.log(isPartial);
