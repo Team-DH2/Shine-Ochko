@@ -147,7 +147,6 @@ export default function EventHalls() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading && <EventHallsSkeleton />}
-
             {!loading &&
               filteredHalls.map((hall) => (
                 <div
@@ -205,6 +204,7 @@ export default function EventHalls() {
                 Илэрц олдсонгүй.
               </div>
             )}
+            ``
           </div>
         </div>
       </div>
