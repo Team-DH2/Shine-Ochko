@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Header } from "@/components/us/Header";
 import { useRouter } from "next/navigation";
 
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
       const res = await fetch(`http://localhost:3000/api/form/form-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selectedRequest.id }), // <== object болгож дамжуулах
+        body: JSON.stringify({ id: selectedRequest.id }),
       });
 
       if (res.ok) {
@@ -146,25 +146,27 @@ export default function AdminDashboard() {
   return (
     <div className="bg-black min-h-screen">
       <Header />
-      <main className=" text-white p-4 md:p-10 mx-auto">
-        <div className="mx-auto max-w-4xl">
+      <main className="text-white p-4 md:p-10 mx-auto">
+        <div className="mx-auto max-w-6xl">
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-8 bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
               Таньд ирсэн хүсэлтүүд :
             </h1>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Responsive Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {form.map((item) => (
               <Card
                 key={item.id}
-                className="bg-neutral-900/60 border border-neutral-800 shadow-xl transition-transform hover:scale-[1.02] duration-200 text-white rounded-xl overflow-hidden flex flex-col"
+                className="bg-neutral-900/70 w-full border border-neutral-800 shadow-xl transition-transform hover:scale-[1.02] duration-200 text-white rounded-xl"
               >
                 <CardContent className="p-5 flex flex-col flex-1">
                   <div className="flex-1">
                     <h2 className="text-xl font-semibold mb-1">
                       {item.hallname}
                     </h2>
+
                     <p className="text-sm text-gray-400 mb-1">
                       Нэр: {item.name}
                     </p>
@@ -178,8 +180,8 @@ export default function AdminDashboard() {
                       Байршил: {item.location}
                     </p>
 
-                    {item.images && item.images.length > 0 && (
-                      <div className="flex gap-2 overflow-x-auto py-2">
+                    {item.images?.length > 0 && (
+                      <div className="flex gap-2 overflow-x-auto py-2 max-w-full">
                         {item.images.map((img: string, idx: number) => (
                           <img
                             key={idx}
@@ -193,7 +195,6 @@ export default function AdminDashboard() {
                     )}
                   </div>
 
-                  {/* Buttons pinned to bottom */}
                   <div className="flex gap-3 mt-4">
                     <button
                       onClick={() => handleActionClick(item.id, "accept")}
@@ -214,10 +215,10 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Modal */}
+        {/* Image Modal */}
         {modalState && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm ">
-            <div className="relative max-w-[90vw] max-h-[90vh]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="relative w-full max-w-3xl max-h-[90vh]">
               <button
                 className="absolute top-3 right-3 text-white text-3xl hover:text-red-400"
                 onClick={closeModal}
@@ -226,16 +227,18 @@ export default function AdminDashboard() {
               </button>
 
               <button
-                className="absolute left-3 top-1/2 -transition-y-1/2 text-white text-4xl"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-white text-4xl"
                 onClick={prevImage}
               >
                 <ChevronLeft />
               </button>
+
               <img
                 src={modalState.images[modalState.currentIndex]}
                 alt="Modal"
                 className="max-h-[90vh] mx-auto object-contain rounded-xl shadow-2xl"
               />
+
               <button
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-white text-4xl"
                 onClick={nextImage}
@@ -245,14 +248,16 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+
         {/* Confirm Modal */}
         {selectedRequest && (
-          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
             <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl shadow-2xl max-w-sm w-full text-white">
               <h2 className="text-lg font-semibold mb-4">
-                Та энэ хүсэлтийг
-                {selectedRequest.action} баталгаажуулахдаа итгэлтэй байна уу?
+                Та энэ хүсэлтийг {selectedRequest.action} баталгаажуулахдаа
+                итгэлтэй байна уу?
               </h2>
+
               <div className="flex justify-end gap-2">
                 <button
                   onClick={handleCancel}
