@@ -66,8 +66,28 @@ export function useBookings(bookingIdFromUrl: string | null) {
       .then((data) => {
         const bookingsData = data.bookings || [];
 
-        setBookings(bookingsData);
-        setAllBookings(bookingsData);
+        const uniqueBookings = bookingsData.filter(
+          (
+            b: { date: any; starttime: any; hallid: any },
+            index: any,
+            self: any[]
+          ) => {
+            return (
+              index ===
+              self.findIndex(
+                (x) =>
+                  x.date === b.date &&
+                  x.starttime === b.starttime &&
+                  x.hallid === b.hallid
+              )
+            );
+          }
+        );
+
+        console.log("Filtered bookings:", uniqueBookings);
+
+        setBookings(uniqueBookings);
+        setAllBookings(uniqueBookings);
 
         // Auto-select booking based on URL parameter
         if (bookingIdFromUrl && bookingsData.length > 0) {

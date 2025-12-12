@@ -37,6 +37,7 @@ async function fetcher(url: string) {
   if (!res.ok) throw new Error("Failed to fetch");
 
   const data = await res.json();
+
   return data.bookings;
 }
 
@@ -67,7 +68,7 @@ export default function Dashboard() {
       </div>
     );
   }
-
+  console.log({ bookings });
   if (!bookings || bookings.length === 0)
     return (
       <div className="p-10">

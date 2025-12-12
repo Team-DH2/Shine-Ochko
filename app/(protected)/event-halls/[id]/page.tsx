@@ -12,6 +12,7 @@ import BookingCalendar from "@/components/event-halls/DayCalendar";
 import { LayoutFooter } from "@/components/us/LayoutFooter";
 
 interface EventHall {
+  rating: number;
   id: number;
   name: string;
   location?: string | null;
@@ -45,6 +46,7 @@ export default function SelectedEventHall() {
       });
       const data = await res.json();
       setEventHallData(data.data);
+      console.log(data.data);
     } catch (error) {
       console.error("Error fetching event hall:", error);
     }

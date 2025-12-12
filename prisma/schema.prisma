@@ -19,8 +19,8 @@ model booking {
   endtime                      String?
   status                       bookingstatus
   event_halls                  event_halls?  @relation(fields: [hallid], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  performers                   performers?   @relation(fields: [performersid], references: [id], onDelete: NoAction, onUpdate: NoAction)
   hosts                        hosts?        @relation("booking_hostid", fields: [hostid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  performers                   performers?   @relation(fields: [performersid], references: [id], onDelete: NoAction, onUpdate: NoAction)
   User                         mruser        @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
   hosts_hosts_bookingTobooking hosts[]       @relation("hosts_bookingTobooking")
 }
@@ -61,8 +61,8 @@ model hosts {
   price                          Int?      @default(0)
   intro                          String?
   experience                     String?
-  booking_hosts_bookingTobooking booking?  @relation("hosts_bookingTobooking", fields: [booking], references: [id], onDelete: NoAction, onUpdate: NoAction)
   bookings                       booking[] @relation("booking_hostid")
+  booking_hosts_bookingTobooking booking?  @relation("hosts_bookingTobooking", fields: [booking], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model performers {

@@ -145,4 +145,50 @@ input:-webkit-autofill:active {
   .animate-fade-in-up {
     animation: fade-in-up 0.8s ease-out forwards;
   }
+
+  /* Snow Effect */
+  @keyframes snowfall {
+    0% {
+      transform: translateY(-10vh) translateX(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(110vh) translateX(100px);
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes snowfall-left {
+    0% {
+      transform: translateY(-10vh) translateX(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(110vh) translateX(-100px);
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes snowfall-straight {
+    0% {
+      transform: translateY(-10vh);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(110vh);
+      opacity: 0.3;
+    }
+  }
+
+  .snowflake {
+    position: fixed;
+    top: -10vh;
+    color: white;
+    font-size: 1em;
+    font-family: Arial, sans-serif;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+    z-index: 9999;
+    user-select: none;
+  }
 }
