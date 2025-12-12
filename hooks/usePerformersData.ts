@@ -46,7 +46,7 @@ export function useGenres() {
   return genres;
 }
 
-export function useBookings(bookingIdFromUrl: string | null) {
+export function useBookings(bookingIdFromUrl: string | null | undefined) {
   const [bookings, setBookings] = useState<any[]>([]);
   const [allBookings, setAllBookings] = useState<any[]>([]);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
