@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -7,9 +7,9 @@ import { FaPeopleGroup } from "react-icons/fa6";
 import { IoMdCheckmarkCircleOutline } from "react-icons/io";
 import { MdOutlineRestaurantMenu } from "react-icons/md";
 
-import { Header } from "@/components/us/Header";
-import MonthlyCalendar from "@/components/event-halls/DayCalendar";
 import { CarouselMy } from "@/components/us/CarouselMy";
+import BookingCalendar from "@/components/event-halls/DayCalendar";
+import { LayoutFooter } from "@/components/us/LayoutFooter";
 
 interface EventHall {
   id: number;
@@ -26,6 +26,7 @@ interface EventHall {
   informations_about_hall: string[];
   advantages: string[];
   localtion_link?: string;
+  rating?: number;
 }
 
 export default function SelectedEventHall() {
@@ -37,14 +38,13 @@ export default function SelectedEventHall() {
   const getSelectedEventHall = useCallback(async () => {
     if (!eventHallId) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/selected-event-hall`, {
+      const res = await fetch(`/api/selected-event-hall`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ eventHallId }),
       });
       const data = await res.json();
       setEventHallData(data.data);
-      console.log(data.data);
     } catch (error) {
       console.error("Error fetching event hall:", error);
     }
@@ -55,134 +55,154 @@ export default function SelectedEventHall() {
   }, [getSelectedEventHall]);
 
   return (
-    <div className="min-h-screen bg-black pb-20 overflow-y-scroll snap-y snap-mandatory">
-      {/* === Carousel Section using your CarouselMy === */}
+    <div className="h-screen w-screen overflow-y-scroll snap-y snap-mandatory">
+      {/* Carousel Section */}
       {eventHallData && eventHallData.images.length > 0 && (
-        <CarouselMy
-          halls={[
-            {
-              id: eventHallData.id,
-              name: eventHallData.name,
-              title: eventHallData.name,
-              description: eventHallData.description || "",
-              duureg: "",
-              rating: eventHallData.rating || 0,
-              images: eventHallData.images,
-            },
-          ]}
-        />
+        <section className="h-screen snap-start">
+          <CarouselMy
+            halls={[
+              {
+                id: eventHallData.id,
+                name: eventHallData.name,
+                title: eventHallData.name,
+                description: eventHallData.description || "",
+                duureg: "",
+                rating: eventHallData.rating || 0,
+                images: eventHallData.images,
+              },
+            ]}
+          />
+        </section>
       )}
 
-      <div className="max-w-6xl mx-auto space-y-6 text-white">
-        {/* Location and Contact Info */}
-        <div className="bg-neutral-900 rounded-lg p-6 my-20">
-          <div className="space-y-1">
-            <div className="text-white-100 flex gap-5 items-center">
-              <FaMapMarkerAlt size={24} color="blue" />
-              {eventHallData?.location}
-              {eventHallData?.localtion_link && (
-                <a
-                  href={eventHallData.localtion_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 underline cursor-pointer transition-colors"
-                >
-                  Show on map
-                </a>
-              )}
+      {/* Basic Info Section */}
+      <section className="min-h-screen snap-start bg-black flex items-center justify-center flex-col py-12">
+        <div className="max-w-6xl w-full px-6 space-y-6 text-white">
+          {/* Location & Contact Info */}
+          <div className="bg-neutral-900 rounded-lg p-6 border border-blue-600/20 hover:border-blue-600/40 transition-colors">
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-5 items-center">
+                <FaMapMarkerAlt size={24} className="text-blue-600" />
+                <span>{eventHallData?.location}</span>
+                {eventHallData?.localtion_link && (
+                  <a
+                    href={eventHallData.localtion_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-500 underline transition-colors"
+                  >
+                    Show on map
+                  </a>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-10 mt-2">
+                <div className="flex items-center gap-2">
+                  <FaPhone className="text-blue-600" />
+                  <strong>Утас:</strong> {eventHallData?.phonenumber}
+                </div>
+                <div className="flex items-center gap-2">
+                  <FaPeopleGroup size={24} className="text-blue-600" />
+                  <strong>Хүчин чадал:</strong> {eventHallData?.capacity}
+                </div>
+                <div className="flex items-center gap-2">
+                  <MdOutlineRestaurantMenu
+                    size={24}
+                    className="text-blue-600"
+                  />
+                  <strong>Меню:</strong> {eventHallData?.menu.join(", ")}
+                </div>
+                <div className="flex items-center gap-2">
+                  <FaParking size={24} className="text-blue-600" />
+                  <strong>Машины зогсоол:</strong>{" "}
+                  {eventHallData?.parking_capacity}
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="p-4 flex gap-16 flex-wrap">
-            <div className="flex items-center gap-2">
-              <FaPhone color="blue" />
-              <strong>Утас:</strong> {eventHallData?.phonenumber}
-            </div>
-            <div className="flex items-center gap-2">
-              <FaPeopleGroup size={24} color="blue" />
-              <strong>Хүчин чадал:</strong> {eventHallData?.capacity}
-            </div>
-            <div className="flex items-center gap-2">
-              <MdOutlineRestaurantMenu size={24} color="blue" />
-              <strong>Меню:</strong> {eventHallData?.menu.join(", ")}
-            </div>
-            <div className="flex items-center gap-2">
-              <FaParking size={24} color="blue" />
-              <strong>Машины зогсоол:</strong> {eventHallData?.parking_capacity}
-            </div>
-          </div>
-        </div>
-
-        {/* Main Info */}
-        <div className="bg-neutral-900 rounded-lg">
-          <div className="p-6 space-y-4">
-            <p>{eventHallData?.description}</p>
-
-            <ul className="pl-6 space-y-1">
-              {eventHallData?.advantages?.map((advantage, index) => (
-                <li key={index} className="flex gap-2 items-center">
-                  <IoMdCheckmarkCircleOutline className="text-green-400 shrink-0" />
-                  {advantage}
+          {/* Description & Advantages */}
+          <div className="bg-neutral-900 rounded-lg p-6 border border-blue-600/20 hover:border-blue-600/40 transition-colors">
+            <p className="text-gray-200">{eventHallData?.description}</p>
+            <ul className="pl-6 space-y-2 mt-4">
+              {eventHallData?.advantages?.map((adv, idx) => (
+                <li key={idx} className="flex gap-2 items-center">
+                  <IoMdCheckmarkCircleOutline
+                    className="text-blue-600 shrink-0"
+                    size={20}
+                  />
+                  <span className="text-gray-200">{adv}</span>
                 </li>
               ))}
             </ul>
-
-            <p>
-              <strong>Хаяг:</strong> {eventHallData?.location}
-            </p>
           </div>
         </div>
 
-        {/* Additional Info & Suitable Events */}
-        <div className="flex flex-col lg:flex-row justify-between my-20 gap-6">
-          <div className="p-6 space-y-4 bg-neutral-900 rounded-lg flex-1">
-            <h3 className="text-2xl font-bold text-white border-b-2 border-blue-500 pb-2 mb-4">
+        {/* Three Column Info Section */}
+        <div className="max-w-6xl w-full px-6 mt-6 flex flex-col lg:flex-row gap-6 text-white">
+          {/* Additional Info */}
+          <div className="flex-1 bg-neutral-900 rounded-lg p-6 border border-blue-600/20 hover:border-blue-600/40 transition-colors">
+            <h3 className="text-2xl font-bold border-b-2 border-blue-600 pb-2 mb-4">
               Нэмэлт мэдээлэл
             </h3>
-            <ul className="pl-6 space-y-1">
+            <ul className="space-y-2">
               {eventHallData?.additional_informations?.map((info, idx) => (
-                <li key={idx} className="flex gap-2 items-center">
-                  <IoMdCheckmarkCircleOutline className="text-green-400 shrink-0" />
-                  {info}
+                <li key={idx} className="flex gap-2 items-start">
+                  <IoMdCheckmarkCircleOutline
+                    className="text-blue-600 shrink-0 mt-0.5"
+                    size={20}
+                  />
+                  <span className="text-gray-200">{info}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="p-6 space-y-4 bg-neutral-900 rounded-lg flex-1">
-            <h3 className="text-2xl font-bold text-white border-b-2 border-blue-500 pb-2 mb-4">
+          {/* Suitable Events */}
+          <div className="flex-1 bg-neutral-900 rounded-lg p-6 border border-blue-600/20 hover:border-blue-600/40 transition-colors">
+            <h3 className="text-2xl font-bold border-b-2 border-blue-600 pb-2 mb-4">
               Тохиромжтой хүлээн авалтууд
             </h3>
-            <ul className="pl-6 space-y-1">
+            <ul className="space-y-2">
               {eventHallData?.suitable_events?.map((event, idx) => (
-                <li key={idx} className="flex gap-2 items-center">
-                  <IoMdCheckmarkCircleOutline className="text-green-400 shrink-0" />
-                  {event}
+                <li key={idx} className="flex gap-2 items-start">
+                  <IoMdCheckmarkCircleOutline
+                    className="text-blue-600 shrink-0 mt-0.5"
+                    size={20}
+                  />
+                  <span className="text-gray-200">{event}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="p-6 space-y-3 bg-neutral-900 rounded-lg flex-1">
-            <h3 className="text-2xl font-bold text-white border-b-2 border-blue-500 pb-2 mb-4">
+          {/* Hall Info */}
+          <div className="flex-1 bg-neutral-900 rounded-lg p-6 border border-blue-600/20 hover:border-blue-600/40 transition-colors">
+            <h3 className="text-2xl font-bold border-b-2 border-blue-600 pb-2 mb-4">
               Танхимын мэдээлэл
             </h3>
-            <ul className="list-disc pl-6 space-y-1">
+            <ul className="space-y-2">
               {eventHallData?.informations_about_hall?.map((info, idx) => (
-                <li key={idx} className="flex gap-2 items-center">
-                  <IoMdCheckmarkCircleOutline className="text-green-400 shrink-0" />
-                  {info}
+                <li key={idx} className="flex gap-2 items-start">
+                  <IoMdCheckmarkCircleOutline
+                    className="text-blue-600 shrink-0 mt-0.5"
+                    size={20}
+                  />
+                  <span className="text-gray-200">{info}</span>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Calendar */}
-      <div className="max-w-6xl mx-auto my-20">
-        <MonthlyCalendar hallId={eventHallId} />
-      </div>
+      {/* Calendar Section */}
+      <section className="min-h-screen snap-start flex items-center justify-center bg-black py-12">
+        <div className="w-full max-w-7xl px-6 mt-3">
+          <BookingCalendar hallId={eventHallId} />
+        </div>
+      </section>
+      <LayoutFooter />
     </div>
   );
 }

@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import DateForm from "./DateForm";
-import generateCalendar from "@/lib/utilfunction/GenerateCalendar";
+
 import useSWR from "swr";
 import { publicFetcher } from "@/lib/fetcherpublic";
+import generateCalendar from "@/lib/utilfunction/GenerateCalendar";
 
 export default function BookingCalendar({
   hallId,
@@ -33,6 +35,13 @@ export default function BookingCalendar({
     } else setCurrentMonth(currentMonth + 1);
   };
 
+  const prevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else setCurrentMonth(currentMonth - 1);
+  };
+
   const TimeBox = ({
     type,
     day,
@@ -46,9 +55,9 @@ export default function BookingCalendar({
     )}-${String(day).padStart(2, "0")}`;
 
     const labelMap = {
-      am: "08:00 - 12:00",
-      pm: "18:00 - 22:00",
-      udur: "09:00 - 18:00",
+      am: "08:00-12:00",
+      pm: "18:00-22:00",
+      udur: "09:00-18:00",
     };
     const label = labelMap[type];
 
@@ -59,18 +68,17 @@ export default function BookingCalendar({
 
     const isAmBooked = dayBookings.some(
       (b: { starttime: string }) =>
-        parseInt(b.starttime.split(":")[0], 10) === 8
+        Number.parseInt(b.starttime.split(":")[0], 10) === 8
     );
     const isPmBooked = dayBookings.some(
       (b: { starttime: string }) =>
-        parseInt(b.starttime.split(":")[0], 10) === 18
+        Number.parseInt(b.starttime.split(":")[0], 10) === 18
     );
     const isUdureBooked = dayBookings.some(
       (b: { starttime: string }) =>
-        parseInt(b.starttime.split(":")[0], 10) === 9
+        Number.parseInt(b.starttime.split(":")[0], 10) === 9
     );
 
-    // Захиалга эсвэл өнгөрсөн өдөр шалгах
     let isAvailable = !isPast;
     if (
       (type === "am" && (isAmBooked || isUdureBooked)) ||
@@ -80,45 +88,34 @@ export default function BookingCalendar({
       isAvailable = false;
     }
 
-    if (isPast) return null;
-
     const isSelected = selected.some(
       (sel) => sel.date === dateStr && sel.type === type
     );
 
-    const handleSelect = (day: number, type: "am" | "pm" | "udur") => {
-      const newDate = `${currentYear}-${String(currentMonth + 1).padStart(
-        2,
-        "0"
-      )}-${String(day).padStart(2, "0")}`;
+    const handleSelect = () => {
+      if (!isAvailable || isPast) return;
       setSelected((prev) => {
-        const exists = prev.find((s) => s.date === newDate && s.type === type);
-        if (exists)
-          return prev.filter((s) => !(s.date === newDate && s.type === type));
-        const newSelected = prev.filter((s) => !(s.date === newDate));
-        return [...newSelected, { date: newDate, type }];
+        const exists = prev.find((s) => s.date === dateStr && s.type === type);
+        if (exists) {
+          return prev.filter((s) => !(s.date === dateStr && s.type === type));
+        }
+        return [...prev, { date: dateStr, type }];
       });
     };
 
-    if (!isAvailable) {
-      return (
-        <div className="text-red-700 bg-red-400 w-full rounded-xl border p-2 text-center text-sm font-medium">
-          Захиалгатай
-        </div>
-      );
-    }
-
     return (
       <button
-        onClick={() => handleSelect(day, type)}
-        disabled={!isAvailable}
-        className={`w-full rounded-xl border p-2 text-center text-sm font-medium transition-all ${
+        onClick={handleSelect}
+        disabled={!isAvailable || isPast}
+        className={`w-full rounded-lg border p-1 text-center text-xs font-medium h-8 sm:h-9 flex items-center justify-center transition-all ${
           isSelected
-            ? "bg-blue-600 text-white shadow-md scale-[1.05]"
-            : "bg-white hover:bg-blue-50"
+            ? "bg-blue-600 text-white shadow-lg scale-[1.02] border-blue-600"
+            : isAvailable
+            ? "bg-neutral-800 border-neutral-700 text-white hover:bg-neutral-700 hover:border-blue-600 hover:shadow-sm"
+            : "bg-red-900 text-red-200 border-red-800 cursor-not-allowed"
         }`}
       >
-        {label}
+        {isPast ? "Дууссан" : isAvailable ? label : "Захиалгатай"}
       </button>
     );
   };
@@ -135,37 +132,53 @@ export default function BookingCalendar({
   const weeks = generateCalendar(currentYear, currentMonth);
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 p-6">
-      <div className="w-full md:w-2/3 border-2 rounded-md p-4 bg-neutral-800">
-        <div className="flex justify-between items-center mb-4 text-white">
-          <h2 className="text-2xl font-bold">
+    <div className="flex flex-col lg:flex-row gap-4 p-4 lg:p-6 w-full max-w-screen-2xl mx-auto">
+      {/* Calendar Section */}
+      <div className="w-full lg:w-2/3 border border-neutral-700 rounded-lg p-4 lg:p-6 bg-neutral-900 shadow-lg overflow-x-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 lg:mb-6 gap-2">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
             {currentYear} – {currentMonth + 1} сар
           </h2>
-          <Button variant="outline" className="text-black" onClick={nextMonth}>
-            ›
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={prevMonth}
+              className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white bg-transparent text-sm sm:text-base py-2"
+            >
+              ‹ Өмнөх сар
+            </Button>
+            <Button
+              variant="outline"
+              onClick={nextMonth}
+              className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white bg-transparent text-sm sm:text-base py-2"
+            >
+              Дараах сар ›
+            </Button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-7 text-center font-semibold text-white mb-2">
+        <div className="grid grid-cols-7 text-center font-semibold text-gray-300 mb-2 text-xs sm:text-sm lg:text-sm">
           {daysOfWeek.map((d) => (
-            <div key={d}>{d}</div>
+            <div key={d} className="py-1 lg:py-2">
+              {d}
+            </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-2">
-          {weeks.map((week) =>
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
+          {weeks.map((week: any[], i: number) =>
             week.map((dayObj, j) => {
               const { day, current } = dayObj;
-
-              if (!current)
+              if (!current) {
                 return (
                   <div
                     key={j}
-                    className="min-h-[110px] bg-gray-300 rounded-xl p-2"
+                    className="min-h-[100px] sm:min-h-[110px] bg-neutral-800 rounded-lg p-1 sm:p-2 text-neutral-500 text-xs sm:text-sm"
                   >
-                    {day}
+                    <div className="text-sm font-medium">{day}</div>
                   </div>
                 );
+              }
 
               const dateStr = `${currentYear}-${String(
                 currentMonth + 1
@@ -176,40 +189,29 @@ export default function BookingCalendar({
                 (b: { date: string }) =>
                   new Date(b.date).toISOString().split("T")[0] === dateStr
               );
-
-              const isAmBooked = dayBookings.some(
-                (b: { starttime: string }) =>
-                  parseInt(b.starttime.split(":")[0], 10) === 8
-              );
-              const isPmBooked = dayBookings.some(
-                (b: { starttime: string }) =>
-                  parseInt(b.starttime.split(":")[0], 10) === 18
-              );
               const isUdureBooked = dayBookings.some(
                 (b: { starttime: string }) =>
-                  parseInt(b.starttime.split(":")[0], 10) === 9
+                  Number.parseInt(b.starttime.split(":")[0], 10) === 9
               );
-              const isPartial = isAmBooked || isPmBooked;
-              console.log(isPartial);
 
               return (
                 <div
                   key={j}
-                  className={`min-h-[110px] border rounded-xl p-2 flex flex-col gap-2 ${
+                  className={`min-h-[100px] sm:min-h-[120px] border rounded-lg p-1 sm:p-2 flex flex-col gap-1.5 transition-colors ${
                     isPast
-                      ? "bg-gray-400"
+                      ? "bg-neutral-900 border-neutral-700"
                       : isUdureBooked
-                      ? "bg-red-300"
-                      : "bg-gray-50"
+                      ? "bg-red-950/30 border-red-800"
+                      : "bg-neutral-800 border-neutral-700 hover:border-blue-600"
                   }`}
                 >
                   <div
-                    className={`text-sm font-medium ${
+                    className={`text-xs sm:text-sm font-semibold mb-0.5 ${
                       isPast
-                        ? "text-black"
+                        ? "text-neutral-500"
                         : isUdureBooked
-                        ? "text-red-700"
-                        : "text-black"
+                        ? "text-red-400"
+                        : "text-white"
                     }`}
                   >
                     {day}
@@ -224,7 +226,14 @@ export default function BookingCalendar({
         </div>
       </div>
 
-      <DateForm selected={selected} hallId={hallId} />
+      {/* DateForm Section */}
+      <div className="w-full lg:w-1/3">
+        <DateForm
+          selected={selected}
+          setSelected={setSelected}
+          hallId={hallId}
+        />
+      </div>
     </div>
   );
 }
