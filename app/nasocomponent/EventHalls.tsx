@@ -76,7 +76,7 @@ export default function EventHalls() {
 
   return (
     <div className="flex mt-3">
-      <div className="w-full min-h-screen mt-25 bg-black text-white flex flex-col md:flex-row gap-6 md:px-8 px-5">
+      <div className="w-full min-h-screen mt-16 md:mt-25 bg-black text-white flex flex-col md:flex-row gap-6 md:px-8 px-5">
         {/* FILTER SECTION */}
         <div className="w-full md:w-fit">
           {/* MOBILE FILTER */}
@@ -111,11 +111,13 @@ export default function EventHalls() {
         {/* EVENT HALLS GRID */}
         <div className="flex-1">
           <div className="flex justify-between items-center">
-            <h1 className="text-4xl font-bold mb-4">Эвэнт халл хайх</h1>
+            <h1 className="text-4xl font-bold mb-0 md:mb-4 md:flex hidden">
+              Эвэнт халл хайх
+            </h1>
 
             {/* SORT DROPDOWN ABOVE GRID */}
 
-            <div className="flex items-center gap-3">
+            <div className=" items-center gap-3 md:flex hidden">
               <label className="text-sm text-gray-400">Эрэмбэлэх:</label>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="filter-input w-52 bg-neutral-900">
@@ -192,7 +194,7 @@ export default function EventHalls() {
 
                     <Button
                       onClick={() => router.push(`/event-halls/${hall.id}`)}
-                      className="mt-auto w-full bg-neutral-600 hover:bg-neutral-700 text-white py-2 rounded-lg"
+                      className="mt-auto w-full bg-neutral-800 hover:bg-neutral-700 text-white py-2 rounded-lg"
                     >
                       Дэлгэрэнгүй
                     </Button>
@@ -204,7 +206,6 @@ export default function EventHalls() {
                 Илэрц олдсонгүй.
               </div>
             )}
-            ``
           </div>
         </div>
       </div>
