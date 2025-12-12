@@ -118,10 +118,12 @@ export default function PerformersPage() {
             </button>
           </div>
         </div>
-        <div className="flex-1 w-full">
+        <div className="flex-1 w-full flex-row">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold">Уран бүтээлчид хайх</h1>
-            <div className="hidden sm:flex items-center gap-3">
+            <h1 className="text-2xl font-bold md:text-4xl">
+              Уран бүтээлчид хайх
+            </h1>
+            <div className=" sm:hidden items-center gap-3 md:hidden hidden lg:flex">
               <label className="text-sm text-gray-400">Эрэмбэлэх:</label>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-[200px] bg-neutral-800 text-white border-neutral-700">
@@ -135,47 +137,41 @@ export default function PerformersPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="lg:hidden items-center">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button className="gap-2 bg-white text-black hover:bg-neutral-200">
+                    <Filter className="h-4 w-4" />
+                    Шүүлтүүр
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 bg-neutral-900 text-white border border-neutral-800 p-0">
+                  <FilterSidebar
+                    bookings={bookings}
+                    isLoadingBookings={isLoadingBookings}
+                    selectedBooking={selectedBooking}
+                    onBookingSelect={handleBookingSelect}
+                    bookingRefs={bookingRefs}
+                    genres={genres}
+                    selectedGenres={selectedGenres}
+                    setSelectedGenres={setSelectedGenres}
+                    selectedAvailability={selectedAvailability}
+                    setSelectedAvailability={setSelectedAvailability}
+                    minPopularity={minPopularity}
+                    setMinPopularity={setMinPopularity}
+                    minPrice={minPrice}
+                    setMinPrice={setMinPrice}
+                    maxPrice={maxPrice}
+                    setMaxPrice={setMaxPrice}
+                    isGenreOpen={isGenreOpen}
+                    setIsGenreOpen={setIsGenreOpen}
+                    isPopover={true}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
-          <div className="lg:hidden mb-6">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button className="gap-2 bg-white text-black hover:bg-neutral-200">
-                  <Filter className="h-4 w-4" />
-                  Шүүлтүүр
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 bg-neutral-900 text-white border border-neutral-800 p-0">
-                <FilterSidebar
-                  bookings={bookings}
-                  isLoadingBookings={isLoadingBookings}
-                  selectedBooking={selectedBooking}
-                  onBookingSelect={handleBookingSelect}
-                  bookingRefs={bookingRefs}
-                  genres={genres}
-                  selectedGenres={selectedGenres}
-                  setSelectedGenres={setSelectedGenres}
-                  selectedAvailability={selectedAvailability}
-                  setSelectedAvailability={setSelectedAvailability}
-                  minPopularity={minPopularity}
-                  setMinPopularity={setMinPopularity}
-                  minPrice={minPrice}
-                  setMinPrice={setMinPrice}
-                  maxPrice={maxPrice}
-                  setMaxPrice={setMaxPrice}
-                  isGenreOpen={isGenreOpen}
-                  setIsGenreOpen={setIsGenreOpen}
-                  isPopover={true}
-                />
-                <button
-                  onClick={clearFilters}
-                  className="w-full mt-2 mb-3 mx-3 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
-                  style={{ width: "calc(100% - 24px)" }}
-                >
-                  Шүүлтүүр цэвэрлэх
-                </button>
-              </PopoverContent>
-            </Popover>
-          </div>
+
           <div className="mb-4 text-gray-400 text-sm">
             {isLoading ? (
               <Skeleton className="h-5 w-40" />
