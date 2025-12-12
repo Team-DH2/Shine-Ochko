@@ -33,36 +33,29 @@ export default function OrderEventHall() {
         // Performer booking → performersid байгаа
         // Event Hall booking → performersid null
         // ----------------------------
-        const onlyHallBookings = bookingsData.filter(
-          (b: any) =>
-            b.event_halls !== undefined &&
-            b.event_halls !== null &&
-            (b.performersid === null || b.performersid === undefined)
+        const uniqueBookings = bookingsData.filter(
+          (
+            b: { date: any; starttime: any; hallid: any },
+            index: any,
+            self: any[]
+          ) => {
+            return (
+              index ===
+              self.findIndex(
+                (x) =>
+                  x.date === b.date &&
+                  x.starttime === b.starttime &&
+                  x.hallid === b.hallid
+              )
+            );
+          }
         );
 
-        console.log("ONLY HALL BOOKINGS:", onlyHallBookings);
+        setBookings(uniqueBookings);
+        setAllBookings(uniqueBookings);
 
-        // ----------------------------
-        // REMOVE DUPLICATES
-        // ----------------------------
-        const unique = onlyHallBookings.filter(
-          (b: any, index: number, self: any[]) =>
-            index ===
-            self.findIndex(
-              (x) =>
-                x.hallid === b.hallid &&
-                x.date === b.date &&
-                x.starttime === b.starttime
-            )
-        );
-
-        console.log("UNIQUE HALL BOOKINGS:", unique);
-
-        setBookings(unique);
-        setAllBookings(unique);
-
-        if (unique.length > 0) {
-          setSelectedBooking(unique[0]); // auto-select first booking
+        if (uniqueBookings.length > 0) {
+          setSelectedBooking(uniqueBookings[0]); // auto-select first booking
         }
       })
       .finally(() => setIsLoadingBookings(false));

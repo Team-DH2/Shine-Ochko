@@ -12,6 +12,7 @@ import MonthlyCalendar from "@/components/event-halls/DayCalendar";
 import { CarouselMy } from "@/components/us/CarouselMy";
 
 interface EventHall {
+  rating: number;
   id: number;
   name: string;
   location?: string | null;
