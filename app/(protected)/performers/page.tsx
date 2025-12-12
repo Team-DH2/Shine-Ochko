@@ -31,6 +31,7 @@ import {
   filterPerformers,
   sortPerformers,
 } from "@/lib/performersUtils";
+import { LayoutFooter } from "@/components/us/LayoutFooter";
 
 export default function PerformersPage() {
   const searchParams = useSearchParams();
@@ -189,6 +190,9 @@ export default function PerformersPage() {
             onBook={handleBookPerformer}
           />
         </div>
+      </div>
+      <div className="mt-3">
+        <LayoutFooter />
       </div>
     </div>
   );
