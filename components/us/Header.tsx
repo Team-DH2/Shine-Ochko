@@ -94,6 +94,8 @@ export const Header = () => {
           <ButtonOfNav href="/host" text="Hosts" />
           {isLoggedIn && user?.role === "admin" ? (
             <ButtonOfNav href="/adminpanel" text="Admin Panel" />
+          ) : isLoggedIn && user?.role === "hallowner" ? (
+            <ButtonOfNav href="/hallowner-dashboard" text="Танхим засах" />
           ) : isLoggedIn ? (
             <ButtonOfNav href="/dashboard" text="Dashboard" />
           ) : null}
@@ -256,11 +258,19 @@ export const Header = () => {
                         </button>
 
                         <button
-                          onClick={() => router.push("/dashboard")}
+                          onClick={() =>
+                            router.push(
+                              user?.role === "hallowner"
+                                ? "/hallowner-dashboard"
+                                : "/dashboard"
+                            )
+                          }
                           className="w-full text-left px-4 py-2.5 text-sm rounded-lg 
                  hover:bg-neutral-800/60 transition-all duration-150"
                         >
-                          📦 Миний захиалгууд
+                          {user?.role === "hallowner"
+                            ? "🏢 Танхим засах"
+                            : "📦 Миний захиалгууд"}
                         </button>
                       </div>
 
@@ -333,6 +343,12 @@ export const Header = () => {
             label="Admin Panel"
             icon={<LayoutDashboard className="w-5 h-5" />}
           />
+        ) : isLoggedIn && user?.role === "hallowner" ? (
+          <BottomNavButton
+            href="/hallowner-dashboard"
+            label="Танхим засах"
+            icon={<LayoutDashboard className="w-5 h-5" />}
+          />
         ) : isLoggedIn ? (
           <BottomNavButton
             href="/dashboard"
@@ -359,6 +375,8 @@ export const Header = () => {
               setIsAuthModalOpen(false);
               if (userData.role === "admin") {
                 window.location.href = "/adminpanel";
+              } else if (userData.role === "hallowner") {
+                window.location.href = "/hallowner-dashboard";
               } else {
                 window.location.href = "/home";
               }

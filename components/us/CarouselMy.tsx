@@ -47,7 +47,6 @@ export const CarouselMy = ({ halls }: { halls?: HallType[] }) => {
         if (data) {
           setOriginalHalls(data.data);
           setFilteredHalls(data.data);
-          console.log(data.data);
         }
       } catch (e) {
         console.error(e);

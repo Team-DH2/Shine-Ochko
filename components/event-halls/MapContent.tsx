@@ -74,7 +74,6 @@ const extractCoordinates = (
         lat: parseFloat(preciseLatMatch[1]),
         lng: parseFloat(preciseLngMatch[1]),
       };
-      console.log("Extracted coordinates using !3d/!4d pattern:", coords);
       return coords;
     }
 

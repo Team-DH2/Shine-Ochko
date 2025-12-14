@@ -15,8 +15,6 @@ export function AuthForm({
   onViewChange,
   onLoginSuccess,
 }: AuthFormProps) {
-  console.log("🎯 AuthForm rendered with onLoginSuccess:", typeof onLoginSuccess, onLoginSuccess);
-  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
