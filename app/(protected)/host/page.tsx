@@ -1,15 +1,5 @@
 "use client";
 
-import HostCard from "@/components/us/Host";
-import { Header } from "@/components/us/Header";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-
-// DESIGN COMPONENTS
-import { RotateCcw } from "lucide-react";
-import { MdOutlinePersonSearch } from "react-icons/md";
-import { IoMdSearch } from "react-icons/io";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,6 +10,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import HostCard from "@/components/us/Host";
+import { RotateCcw } from "lucide-react";
+import { use, useEffect, useState } from "react";
+import { IoMdSearch } from "react-icons/io";
+import { MdOutlinePersonSearch } from "react-icons/md";
+
+// DESIGN COMPONENTS
 
 type HostDB = {
   id: number;
@@ -34,9 +31,14 @@ type HostDB = {
   price: number;
 };
 
-export default function Host() {
-  const searchParams = useSearchParams();
-  const bookingIdFromUrl = searchParams.get("booking"); // Get booking ID from URL
+const Host = ({
+  searchParams,
+}: {
+  searchParams: Promise<{ booking?: string }>;
+}) => {
+  const params = use(searchParams);
+
+  const bookingIdFromUrl = params?.booking; // Get booking ID from URL
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState("");
@@ -282,4 +284,5 @@ export default function Host() {
       </div>
     </div>
   );
-}
+};
+export default Host;

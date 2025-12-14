@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { use, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -31,11 +31,16 @@ import {
   filterPerformers,
   sortPerformers,
 } from "@/lib/performersUtils";
-import { LayoutFooter } from "@/components/us/LayoutFooter";
 
-export default function PerformersPage() {
-  const searchParams = useSearchParams();
-  const bookingIdFromUrl = searchParams.get("booking");
+const PerformersPage = ({
+  searchParams,
+}: {
+  searchParams: Promise<{ booking?: string }>;
+}) => {
+  const params = use(searchParams);
+
+  const bookingIdFromUrl = params?.booking;
+
   const { performers, isLoading } = usePerformers();
   const genres = useGenres();
   const {
@@ -45,7 +50,7 @@ export default function PerformersPage() {
     isLoadingBookings,
     bookingRefs,
     handleBookingSelect,
-  } = useBookings(bookingIdFromUrl);
+  } = useBookings(bookingIdFromUrl ?? null);
   const { bookingPerformer, bookPerformer } = usePerformerBooking();
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedAvailability, setSelectedAvailability] = useState<string[]>(
@@ -191,9 +196,7 @@ export default function PerformersPage() {
           />
         </div>
       </div>
-      <div className="mt-3">
-        <LayoutFooter />
-      </div>
     </div>
   );
-}
+};
+export default PerformersPage;

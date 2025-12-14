@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { use, useEffect, useState } from "react";
+
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
 interface Booking {
@@ -44,16 +44,23 @@ const Info = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-const BookingResponsePage = () => {
-  const params = useSearchParams();
+const BookingResponsePage = ({
+  searchParams,
+}: {
+  searchParams: Promise<{ bookingId?: string; action?: string }>;
+}) => {
+  const params = use(searchParams);
+  console.log("BookingResponsePage params:", params);
 
-  const bookingIdParam = params.get("bookingId") ?? undefined;
-  const actionParam = params.get("action") ?? undefined;
-
+  const bookingIdParam = params.bookingId;
+  const actionParam = params.action;
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<"loading" | "accepted" | "declined">(
     "loading"
+  );
+  const [message, setMessage] = useState(
+    "Захиалгын статус өөрчлөгдөж байна..."
   );
 
   const Skeleton = ({ lines = 4 }: { lines?: number }) => {
