@@ -58,7 +58,7 @@ export default function AdminDashboard() {
 
   const getUserBookings = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/getforms`);
+      const res = await fetch(`/api/getforms`);
       const data = await res.json();
       setForm(data.data || []);
     } catch (error) {
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
     setLoadingId(selectedRequest.id);
 
     try {
-      const res = await fetch(`http://localhost:3000/api/form/form-request`, {
+      const res = await fetch(`/api/form/form-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: selectedRequest.id }), // <== object болгож дамжуулах
