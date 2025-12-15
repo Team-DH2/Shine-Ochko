@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Edit } from "lucide-react";
 import DateForm from "./DateForm";
 
 import useSWR from "swr";
@@ -11,8 +12,12 @@ import generateCalendar from "@/lib/utilfunction/GenerateCalendar";
 
 export default function BookingCalendar({
   hallId,
+  isOwner = false,
+  onEditCalendar,
 }: {
   hallId: number | string;
+  isOwner?: boolean;
+  onEditCalendar?: () => void;
 }) {
   const { data, isLoading } = useSWR("/api/booking-all", publicFetcher);
 
@@ -134,7 +139,16 @@ export default function BookingCalendar({
   return (
     <div className="flex flex-col lg:flex-row gap-4 p-4 lg:p-6 w-full max-w-screen-2xl mx-auto">
       {/* Calendar Section */}
-      <div className="w-full lg:w-2/3 border border-neutral-700 rounded-lg p-4 lg:p-6 bg-neutral-900 shadow-lg overflow-x-auto">
+      <div className="w-full lg:w-2/3 border border-neutral-700 rounded-lg p-4 lg:p-6 bg-neutral-900 shadow-lg overflow-x-auto relative">
+        {isOwner && (
+          <button
+            onClick={onEditCalendar}
+            className="absolute bottom-4 right-4 z-50 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 shadow-lg"
+          >
+            <Edit className="w-4 h-4" />
+            Засах
+          </button>
+        )}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 lg:mb-6 gap-2">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
             {currentYear} – {currentMonth + 1} сар

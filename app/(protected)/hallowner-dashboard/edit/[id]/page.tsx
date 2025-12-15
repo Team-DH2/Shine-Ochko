@@ -99,89 +99,100 @@ export default function EditHallPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-[#0A0A0F] via-[#0F0F14] to-[#0A0A0F] text-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p>Уншиж байна...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-r-2 border-blue-400/30 mx-auto mb-6"></div>
+          <p className="text-white/40 text-sm animate-pulse">Уншиж байна...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="bg-linear-to-b from-[#0A0A0F] via-[#0F0F14] to-[#0A0A0F] min-h-screen text-white">
       <Header />
-      <main className="container mx-auto p-4 md:p-8 max-w-4xl">
+      <main className="container mx-auto p-4 md:p-8 max-w-4xl pt-24">
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-gray-400 hover:text-white mb-4"
+            className="flex items-center gap-2 text-gray-500 hover:text-gray-400 transition-all duration-300 mb-6 group"
           >
-            <ArrowLeft className="w-5 h-5" />
-            Буцах
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm">Буцах</span>
           </button>
-          <h1 className="text-4xl font-bold bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl font-bold text-white/80 mb-2">
             Танхим засах
           </h1>
+          <p className="text-white/40 text-sm">
+            Танхимынхаа мэдээллийг шинэчлэх
+          </p>
         </div>
 
-        <div className="bg-neutral-900 rounded-2xl p-6 border border-neutral-800">
+        <div className="bg-white/2 rounded-3xl p-6 md:p-8 border border-white/5 backdrop-blur-md shadow-2xl shadow-black/50">
           <div className="space-y-6">
             {/* Name */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Нэр *</label>
+            <div className="group">
+              <label className="block text-sm font-medium mb-2 text-white/50 group-focus-within:text-white/70 transition-colors">
+                Нэр *
+              </label>
               <Input
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="bg-neutral-800 border-neutral-700"
+                className="bg-white/3 border-white/8 text-white placeholder:text-white/25 focus:border-blue-500/30 focus:bg-white/5 transition-all"
                 placeholder="Танхимын нэр"
               />
             </div>
 
             {/* Location */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Байршил</label>
+            <div className="group">
+              <label className="block text-sm font-medium mb-2 text-white/50 group-focus-within:text-white/70 transition-colors">
+                Байршил
+              </label>
               <Input
                 value={formData.location}
                 onChange={(e) =>
                   setFormData({ ...formData, location: e.target.value })
                 }
-                className="bg-neutral-800 border-neutral-700"
+                className="bg-white/3 border-white/8 text-white placeholder:text-white/25 focus:border-blue-500/30 focus:bg-white/5 transition-all"
                 placeholder="Хаяг"
               />
             </div>
 
             {/* Capacity */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Багтаамж</label>
+            <div className="group">
+              <label className="block text-sm font-medium mb-2 text-white/50 group-focus-within:text-white/70 transition-colors">
+                Багтаамж
+              </label>
               <Input
                 value={formData.capacity}
                 onChange={(e) =>
                   setFormData({ ...formData, capacity: e.target.value })
                 }
-                className="bg-neutral-800 border-neutral-700"
+                className="bg-white/3 border-white/8 text-white placeholder:text-white/25 focus:border-blue-500/30 focus:bg-white/5 transition-all"
                 placeholder="Хүний тоо"
               />
             </div>
 
             {/* Description */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Тайлбар</label>
+            <div className="group">
+              <label className="block text-sm font-medium mb-2 text-white/50 group-focus-within:text-white/70 transition-colors">
+                Тайлбар
+              </label>
               <Textarea
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                className="bg-neutral-800 border-neutral-700 min-h-32"
+                className="bg-white/3 border-white/8 text-white placeholder:text-white/25 focus:border-blue-500/30 focus:bg-white/5 transition-all min-h-32 resize-none"
                 placeholder="Танхимын тухай дэлгэрэнгүй мэдээлэл"
               />
             </div>
 
             {/* Phone */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
+            <div className="group">
+              <label className="block text-sm font-medium mb-2 text-white/50 group-focus-within:text-white/70 transition-colors">
                 Утасны дугаар
               </label>
               <Input
@@ -189,27 +200,29 @@ export default function EditHallPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, phonenumber: e.target.value })
                 }
-                className="bg-neutral-800 border-neutral-700"
+                className="bg-white/3 border-white/8 text-white placeholder:text-white/25 focus:border-blue-500/30 focus:bg-white/5 transition-all"
                 placeholder="99001122"
               />
             </div>
 
             {/* District */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Дүүрэг</label>
+            <div className="group">
+              <label className="block text-sm font-medium mb-2 text-white/50 group-focus-within:text-white/70 transition-colors">
+                Дүүрэг
+              </label>
               <Input
                 value={formData.duureg}
                 onChange={(e) =>
                   setFormData({ ...formData, duureg: e.target.value })
                 }
-                className="bg-neutral-800 border-neutral-700"
+                className="bg-white/3 border-white/8 text-white placeholder:text-white/25 focus:border-blue-500/30 focus:bg-white/5 transition-all"
                 placeholder="Дүүргийн нэр"
               />
             </div>
 
             {/* Parking */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
+            <div className="group">
+              <label className="block text-sm font-medium mb-2 text-white/50 group-focus-within:text-white/70 transition-colors">
                 Зогсоолын багтаамж
               </label>
               <Input
@@ -221,14 +234,14 @@ export default function EditHallPage() {
                     parking_capacity: parseInt(e.target.value) || 0,
                   })
                 }
-                className="bg-neutral-800 border-neutral-700"
+                className="bg-white/3 border-white/8 text-white placeholder:text-white/25 focus:border-blue-500/30 focus:bg-white/5 transition-all"
                 placeholder="0"
               />
             </div>
 
             {/* Location Link */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
+            <div className="group">
+              <label className="block text-sm font-medium mb-2 text-white/50 group-focus-within:text-white/70 transition-colors">
                 Байршлын холбоос
               </label>
               <Input
@@ -236,17 +249,17 @@ export default function EditHallPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, location_link: e.target.value })
                 }
-                className="bg-neutral-800 border-neutral-700"
+                className="bg-white/3 border-white/8 text-white placeholder:text-white/25 focus:border-blue-500/30 focus:bg-white/5 transition-all"
                 placeholder="Google Maps линк"
               />
             </div>
 
             {/* Actions */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-4 pt-6 border-t border-white/5 mt-8">
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 bg-blue-600 hover:bg-blue-500 py-6 text-lg"
+                className="flex-1 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/30 py-6 text-base transition-all duration-300 shadow-lg shadow-blue-500/5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save className="w-5 h-5 mr-2" />
                 {saving ? "Хадгалж байна..." : "Хадгалах"}
@@ -254,7 +267,7 @@ export default function EditHallPage() {
               <Button
                 onClick={() => router.back()}
                 variant="outline"
-                className="bg-neutral-800 border-neutral-700 py-6"
+                className="bg-white/3 border-white/8 hover:bg-white/5 hover:border-white/10 py-6 transition-all duration-300 min-w-[120px]"
               >
                 Цуцлах
               </Button>

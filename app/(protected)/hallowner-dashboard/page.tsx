@@ -87,12 +87,6 @@ export default function HallOwnerDashboard() {
         console.log("🔵 Halls data:", data);
         console.log("🔵 Number of halls:", data.halls?.length);
 
-        // Redirect to edit page of first hall if they have any halls
-        if (data.halls && data.halls.length > 0) {
-          console.log("🔵 Redirecting to hall:", data.halls[0].id);
-          router.push(`/hallowner-dashboard/edit/${data.halls[0].id}`);
-          return;
-        }
         console.log("🔴 No halls found - staying on dashboard");
         setHalls(data.halls || []);
 
@@ -297,16 +291,16 @@ export default function HallOwnerDashboard() {
                     {/* Actions */}
                     <div className="flex gap-2">
                       <button
-                        onClick={() =>
-                          router.push(`/hallowner-dashboard/edit/${hall.id}`)
-                        }
+                        onClick={() => router.push(`/event-halls/${hall.id}`)}
                         className="flex-1 bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                       >
                         <Edit className="w-4 h-4" />
                         Засах
                       </button>
                       <button
-                        onClick={() => router.push(`/event-halls/${hall.id}`)}
+                        onClick={() =>
+                          router.push(`/hallowner-dashboard/edit/${hall.id}`)
+                        }
                         className="bg-neutral-700 hover:bg-neutral-600 px-4 py-2 rounded-lg transition-colors"
                       >
                         <Eye className="w-4 h-4" />
