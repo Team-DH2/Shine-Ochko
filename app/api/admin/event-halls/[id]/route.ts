@@ -4,10 +4,11 @@ import prisma from "@/lib/prisma";
 // Update event hall
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
+
     const body = await request.json();
 
     const updatedHall = await prisma.event_halls.update({
@@ -31,10 +32,10 @@ export async function PATCH(
 // Delete event hall
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
 
     // Delete associated bookings first
     await prisma.booking.deleteMany({

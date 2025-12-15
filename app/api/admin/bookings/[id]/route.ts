@@ -1,13 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-// Update booking
-export async function PATCH(
+// GET booking by id
+export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
+    const booking = await prisma.booking.findUnique({
+      where: { id },
+    });
+
+    if (!booking) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: booking });
+  } catch (error) {
+    console.error("Error fetching booking:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch booking" },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH update booking
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const id = parseInt((await params).id);
     const body = await request.json();
 
     const updatedBooking = await prisma.booking.update({
@@ -15,10 +40,7 @@ export async function PATCH(
       data: body,
     });
 
-    return NextResponse.json({
-      success: true,
-      data: updatedBooking,
-    });
+    return NextResponse.json({ success: true, data: updatedBooking });
   } catch (error) {
     console.error("Error updating booking:", error);
     return NextResponse.json(
@@ -28,17 +50,15 @@ export async function PATCH(
   }
 }
 
-// Delete booking
+// DELETE booking
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
 
-    await prisma.booking.delete({
-      where: { id },
-    });
+    await prisma.booking.delete({ where: { id } });
 
     return NextResponse.json({
       success: true,

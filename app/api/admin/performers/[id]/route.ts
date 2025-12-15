@@ -4,10 +4,10 @@ import prisma from "@/lib/prisma";
 // Update performer
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
     const body = await request.json();
 
     const updatedPerformer = await prisma.performers.update({
@@ -31,10 +31,10 @@ export async function PATCH(
 // Delete performer
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
 
     // Delete associated bookings first
     await prisma.booking.deleteMany({
