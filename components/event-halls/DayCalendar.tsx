@@ -111,21 +111,23 @@ export function BookingCalendar({
 
     // Check if this slot has a sale
     const hasSale = salePrice !== undefined && salePrice > 0;
-
-    const handleSelect = () => {
-      if (!isAvailable || isPast) return;
+    const handleSelect = (day: number, type: "am" | "pm" | "udur") => {
+      const newDate = `${currentYear}-${String(currentMonth + 1).padStart(
+        2,
+        "0"
+      )}-${String(day).padStart(2, "0")}`;
       setSelected((prev) => {
-        const exists = prev.find((s) => s.date === dateStr && s.type === type);
-        if (exists) {
-          return prev.filter((s) => !(s.date === dateStr && s.type === type));
-        }
-        return [...prev, { date: dateStr, type }];
+        const exists = prev.find((s) => s.date === newDate && s.type === type);
+        if (exists)
+          return prev.filter((s) => !(s.date === newDate && s.type === type));
+        const newSelected = prev.filter((s) => !(s.date === newDate));
+        return [...newSelected, { date: newDate, type }];
       });
     };
 
     return (
       <button
-        onClick={handleSelect}
+        onClick={() => handleSelect(day, type)}
         disabled={!isAvailable || isPast}
         className={`w-full rounded-md border p-1 text-center text-[10px] sm:text-xs font-medium h-7 sm:h-8 flex items-center justify-center transition-all ${
           isSelected
