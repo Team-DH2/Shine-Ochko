@@ -79,7 +79,7 @@ export default function OrderEventHall() {
   };
 
   return (
-    <div className="p-6 rounded-2xl mt-20 bg-neutral-900">
+    <div className="p-6 rounded-2xl mt-5 bg-neutral-900">
       <h2 className="text-xl font-bold text-white mb-4">
         Таны захиалсан Event Hall
       </h2>
