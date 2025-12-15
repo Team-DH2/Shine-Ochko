@@ -75,9 +75,9 @@ export function BookingCalendar({
     )}-${String(day).padStart(2, "0")}`;
 
     const labelMap = {
-      am: "08:00-12:00",
-      pm: "18:00-22:00",
-      udur: "09:00-18:00",
+      am: "Өглөө",
+      pm: "Орой",
+      udur: "Өдөрөөр нь",
     };
     const label = labelMap[type];
 
