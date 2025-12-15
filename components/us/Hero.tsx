@@ -28,7 +28,7 @@ export const Hero = () => {
   }, []);
 
   return (
-    <section className="bg-black text-white w-full min-h-screen flex flex-col justify-start snap-start overflow-hidden py-16 lg:py-24">
+    <section className="bg-black text-white w-full min-h-screen flex flex-col justify-start \ overflow-hidden py-16 lg:py-20">
       <div className="container mx-auto px-4 text-center">
         {/* Main Hero Text */}
         <h2

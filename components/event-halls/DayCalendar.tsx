@@ -3,16 +3,27 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+import generateCalendar from "@/lib/generate-calendar";
 import DateForm from "./DateForm";
-
-import useSWR from "swr";
 import { publicFetcher } from "@/lib/fetcherpublic";
-import generateCalendar from "@/lib/utilfunction/GenerateCalendar";
+import useSWR from "swr";
 
-export default function BookingCalendar({
+interface TimeSlotBooking {
+  date: string;
+  starttime: string;
+  hallid: number | string;
+  price?: number;
+  salePrice?: number;
+}
+
+export function BookingCalendar({
   hallId,
+  eventHallData,
 }: {
   hallId: number | string;
+  eventHallData: any;
 }) {
   const { data, isLoading } = useSWR("/api/booking-all", publicFetcher);
 
@@ -24,9 +35,16 @@ export default function BookingCalendar({
     { date: string; type: "am" | "pm" | "udur" }[]
   >([]);
 
-  const bookings = data?.filter((b: any) => b.hallid == hallId) || [];
+  const bookings: TimeSlotBooking[] =
+    data?.filter((b: TimeSlotBooking) => b.hallid == hallId) || [];
 
-  if (isLoading) return <p className="text-white">Уншиж байна...</p>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
+      </div>
+    );
+  }
 
   const nextMonth = () => {
     if (currentMonth === 11) {
@@ -45,9 +63,11 @@ export default function BookingCalendar({
   const TimeBox = ({
     type,
     day,
+    salePrice,
   }: {
     type: "am" | "pm" | "udur";
     day: number;
+    salePrice?: number;
   }) => {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(
       2,
@@ -63,20 +83,17 @@ export default function BookingCalendar({
 
     const isPast = new Date(dateStr).getTime() < new Date(todayStr).getTime();
     const dayBookings = bookings.filter(
-      (b: any) => new Date(b.date).toISOString().split("T")[0] === dateStr
+      (b) => new Date(b.date).toISOString().split("T")[0] === dateStr
     );
 
     const isAmBooked = dayBookings.some(
-      (b: { starttime: string }) =>
-        Number.parseInt(b.starttime.split(":")[0], 10) === 8
+      (b) => Number.parseInt(b.starttime.split(":")[0], 10) === 8
     );
     const isPmBooked = dayBookings.some(
-      (b: { starttime: string }) =>
-        Number.parseInt(b.starttime.split(":")[0], 10) === 18
+      (b) => Number.parseInt(b.starttime.split(":")[0], 10) === 18
     );
     const isUdureBooked = dayBookings.some(
-      (b: { starttime: string }) =>
-        Number.parseInt(b.starttime.split(":")[0], 10) === 9
+      (b) => Number.parseInt(b.starttime.split(":")[0], 10) === 9
     );
 
     let isAvailable = !isPast;
@@ -91,6 +108,9 @@ export default function BookingCalendar({
     const isSelected = selected.some(
       (sel) => sel.date === dateStr && sel.type === type
     );
+
+    // Check if this slot has a sale
+    const hasSale = salePrice !== undefined && salePrice > 0;
 
     const handleSelect = () => {
       if (!isAvailable || isPast) return;
@@ -107,75 +127,109 @@ export default function BookingCalendar({
       <button
         onClick={handleSelect}
         disabled={!isAvailable || isPast}
-        className={`w-full rounded-lg border p-1 text-center text-xs font-medium h-8 sm:h-9 flex items-center justify-center transition-all ${
+        className={`w-full rounded-md border p-1 text-center text-[10px] sm:text-xs font-medium h-7 sm:h-8 flex items-center justify-center transition-all ${
           isSelected
-            ? "bg-blue-600 text-white shadow-lg scale-[1.02] border-blue-600"
+            ? "bg-white text-black border-white"
+            : hasSale && isAvailable
+            ? "bg-emerald-500/20 border-emerald-500 text-emerald-400 hover:bg-emerald-500/30"
             : isAvailable
-            ? "bg-neutral-800 border-neutral-700 text-white hover:bg-neutral-700 hover:border-blue-600 hover:shadow-sm"
-            : "bg-red-900 text-red-200 border-red-800 cursor-not-allowed"
+            ? "bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-800 hover:border-neutral-600"
+            : "bg-neutral-950 text-neutral-700 border-neutral-900 cursor-not-allowed line-through"
         }`}
       >
-        {isPast ? "Дууссан" : isAvailable ? label : "Захиалгатай"}
+        {label}
       </button>
     );
   };
 
-  const daysOfWeek = [
-    "Даваа",
-    "Мягмар",
-    "Лхагва",
-    "Пүрэв",
-    "Баасан",
-    "Бямба",
-    "Ням",
-  ];
+  const daysOfWeek = ["Да", "Мя", "Лха", "Пү", "Ба", "Бя", "Ня"];
   const weeks = generateCalendar(currentYear, currentMonth);
 
+  const monthNames = [
+    "1-р сар",
+    "2-р сар",
+    "3-р сар",
+    "4-р сар",
+    "5-р сар",
+    "6-р сар",
+    "7-р сар",
+    "8-р сар",
+    "9-р сар",
+    "10-р сар",
+    "11-р сар",
+    "12-р сар",
+  ];
+
   return (
-    <div className="flex flex-col lg:flex-row gap-4 p-4 lg:p-6 w-full max-w-screen-2xl mx-auto">
+    <div className="flex flex-col lg:flex-row gap-6 w-full">
       {/* Calendar Section */}
-      <div className="w-full lg:w-2/3 border border-neutral-700 rounded-lg p-4 lg:p-6 bg-neutral-900 shadow-lg overflow-x-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 lg:mb-6 gap-2">
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
-            {currentYear} – {currentMonth + 1} сар
+      <div className="w-full lg:flex-1 border border-neutral-800 rounded-xl p-4 lg:p-6 bg-black">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-white">
+            {currentYear} оны {monthNames[currentMonth]}
           </h2>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <Button
-              variant="outline"
+              variant="ghost"
+              size="icon"
               onClick={prevMonth}
-              className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white bg-transparent text-sm sm:text-base py-2"
+              className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-800"
             >
-              ‹ Өмнөх сар
+              <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
+              size="icon"
               onClick={nextMonth}
-              className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white bg-transparent text-sm sm:text-base py-2"
+              className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-800"
             >
-              Дараах сар ›
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-7 text-center font-semibold text-gray-300 mb-2 text-xs sm:text-sm lg:text-sm">
+        {/* Legend */}
+        <div className="flex flex-wrap gap-4 mb-4 text-xs text-neutral-400">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-neutral-900 border border-neutral-800" />
+            <span>Сул</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-white" />
+            <span>Сонгосон</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-neutral-950 border border-neutral-900" />
+            <span>Боломжгүй</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500" />
+            <span className="text-emerald-400">Хямдралтай</span>
+          </div>
+        </div>
+
+        {/* Days of week header */}
+        <div className="grid grid-cols-7 text-center font-medium text-neutral-500 mb-2 text-xs">
           {daysOfWeek.map((d) => (
-            <div key={d} className="py-1 lg:py-2">
+            <div key={d} className="py-2">
               {d}
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-1 sm:gap-2">
-          {weeks.map((week: any[], i: number) =>
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-1">
+          {weeks.map((week: { day: number; current: boolean }[], i: number) =>
             week.map((dayObj, j) => {
               const { day, current } = dayObj;
               if (!current) {
                 return (
                   <div
-                    key={j}
-                    className="min-h-[100px] sm:min-h-[110px] bg-neutral-800 rounded-lg p-1 sm:p-2 text-neutral-500 text-xs sm:text-sm"
+                    key={`${i}-${j}`}
+                    className="min-h-[90px] sm:min-h-[100px] bg-neutral-950 rounded-lg p-1.5 text-neutral-700 text-xs"
                   >
-                    <div className="text-sm font-medium">{day}</div>
+                    <div className="font-medium">{day}</div>
                   </div>
                 );
               }
@@ -185,36 +239,34 @@ export default function BookingCalendar({
               ).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
               const isPast =
                 new Date(dateStr).getTime() < new Date(todayStr).getTime();
-              const dayBookings = bookings.filter(
-                (b: { date: string }) =>
-                  new Date(b.date).toISOString().split("T")[0] === dateStr
-              );
-              const isUdureBooked = dayBookings.some(
-                (b: { starttime: string }) =>
-                  Number.parseInt(b.starttime.split(":")[0], 10) === 9
-              );
+              const isToday = dateStr === todayStr;
 
               return (
                 <div
-                  key={j}
-                  className={`min-h-[100px] sm:min-h-[120px] border rounded-lg p-1 sm:p-2 flex flex-col gap-1.5 transition-colors ${
+                  key={`${i}-${j}`}
+                  className={`min-h-[90px] sm:min-h-[100px] border rounded-lg p-1.5 flex flex-col gap-1 transition-colors ${
                     isPast
-                      ? "bg-neutral-900 border-neutral-700"
-                      : isUdureBooked
-                      ? "bg-red-950/30 border-red-800"
-                      : "bg-neutral-800 border-neutral-700 hover:border-blue-600"
+                      ? "bg-neutral-950 border-neutral-900"
+                      : isToday
+                      ? "bg-neutral-900 border-white/20"
+                      : "bg-neutral-900/50 border-neutral-800 hover:border-neutral-700"
                   }`}
                 >
                   <div
-                    className={`text-xs sm:text-sm font-semibold mb-0.5 ${
+                    className={`text-xs font-semibold mb-0.5 ${
                       isPast
-                        ? "text-neutral-500"
-                        : isUdureBooked
-                        ? "text-red-400"
-                        : "text-white"
+                        ? "text-neutral-600"
+                        : isToday
+                        ? "text-white"
+                        : "text-neutral-300"
                     }`}
                   >
                     {day}
+                    {isToday && (
+                      <span className="ml-1 text-[9px] text-neutral-500">
+                        Өнөөдөр
+                      </span>
+                    )}
                   </div>
                   <TimeBox type="am" day={day} />
                   <TimeBox type="pm" day={day} />
@@ -227,8 +279,9 @@ export default function BookingCalendar({
       </div>
 
       {/* DateForm Section */}
-      <div className="w-full lg:w-1/3">
+      <div className="w-full lg:w-80">
         <DateForm
+          eventHallData={eventHallData}
           selected={selected}
           setSelected={setSelected}
           hallId={hallId}
@@ -237,3 +290,5 @@ export default function BookingCalendar({
     </div>
   );
 }
+
+export default BookingCalendar;
