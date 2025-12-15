@@ -7,8 +7,8 @@ import prisma from "@/lib/prisma";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, phone, email, password } = body;
-    console.log(name, phone, email, password);
+    const { name, phone, email, password, role } = body;
+    console.log(name, phone, email, password, role);
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -16,6 +16,10 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // Validate role - only allow customer, hallowner, or admin
+    const allowedRoles = ["customer", "hallowner", "admin"];
+    const userRole = role && allowedRoles.includes(role) ? role : "customer";
 
     const existingUser = await prisma.mruser.findUnique({
       where: { email },
@@ -37,7 +41,7 @@ export async function POST(request: Request) {
         phone,
         email,
         password: hashedPassword,
-        role: "customer",
+        role: userRole,
       },
     });
 
