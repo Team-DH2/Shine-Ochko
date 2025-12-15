@@ -36,6 +36,7 @@ export default function EventHalls() {
   const [sortBy, setSortBy] = useState("");
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [timeFilter, setTimeFilter] = useState<string>("");
+  const [checktoken, setChecktoken] = useState(false);
 
   const router = useRouter();
 
@@ -64,6 +65,8 @@ export default function EventHalls() {
   // -----------------------------
   useEffect(() => {
     const fetchBookings = async () => {
+      const token = localStorage.getItem("token");
+      if (token) setChecktoken(true);
       try {
         const res = await fetch("/api/booking-all");
         const data = await res.json();
@@ -146,7 +149,7 @@ export default function EventHalls() {
     }
     setFilteredHalls(sorted);
   }, [sortBy]);
-  const token = localStorage.getItem("token");
+
   console.log({ filteredHalls });
   console.log({ bookings });
   console.log({ date });
@@ -203,7 +206,7 @@ export default function EventHalls() {
               originalData={originalHalls}
               onFilterChange={setFilteredHalls}
             />
-            {token && <OrderEventHall />}
+            {checktoken && <OrderEventHall />}
           </div>
         </div>
 
