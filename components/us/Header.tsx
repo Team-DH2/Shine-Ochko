@@ -85,24 +85,24 @@ export const Header = () => {
       <div className="hidden lg:flex text-white w-full h-20 items-center justify-between bg-black/50 backdrop-blur-sm px-10">
         <div className="flex-1 flex justify-start">
           <Logo />
+
+          <div className="flex items-center gap-10 font-bold ml-10">
+            <ButtonOfNav href="/home" text="Home" />
+            <ButtonOfNav href="/event-halls" text="Event Halls" />
+            <ButtonOfNav href="/performers" text="Performers" />
+            <ButtonOfNav href="/host" text="Hosts" />
+            {isLoggedIn && user?.role === "admin" ? (
+              <ButtonOfNav href="/adminpanel" text="Admin Panel" />
+            ) : isLoggedIn && user?.role === "hallowner" ? (
+              <ButtonOfNav href="/hallowner-dashboard" text="Танхим засах" />
+            ) : isLoggedIn ? (
+              <ButtonOfNav href="/dashboard" text="Dashboard" />
+            ) : null}
+          </div>
         </div>
 
-        <div className="flex items-center gap-10 font-bold ">
-          <ButtonOfNav href="/home" text="Home" />
-          <ButtonOfNav href="/event-halls" text="Event Halls" />
-          <ButtonOfNav href="/performers" text="Performers" />
-          <ButtonOfNav href="/host" text="Hosts" />
-          {isLoggedIn && user?.role === "admin" ? (
-            <ButtonOfNav href="/adminpanel" text="Admin Panel" />
-          ) : isLoggedIn && user?.role === "hallowner" ? (
-            <ButtonOfNav href="/hallowner-dashboard" text="Танхим засах" />
-          ) : isLoggedIn ? (
-            <ButtonOfNav href="/dashboard" text="Dashboard" />
-          ) : null}
-        </div>
-
-        <div className="flex-1 flex justify-end items-center">
-          <div className="flex items-center w-full max-w-[220px]">
+        <div className="flex-1 flex justify-end items-center max-w-100">
+          <div className="flex items-center w-fit">
             <Search className="mr-[-36] w-5 z-10 text-neutral-500" />
             <SearchFunction styleDesktop={styleDesktop} />
           </div>

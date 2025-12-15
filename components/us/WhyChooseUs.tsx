@@ -77,7 +77,7 @@ export const WhyChooseUs = () => {
   return (
     <section
       ref={ref}
-      className="relative text-white min-h-screen flex flex-col justify-center overflow-hidden snap-start py-12 bg-cover bg-center bg-fixed"
+      className="relative text-white min-h-screen flex flex-col justify-center overflow-hidden  py-12 bg-cover bg-center bg-fixed"
       style={{
         backgroundImage:
           "url('https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2070&auto=format&fit=crop')",
