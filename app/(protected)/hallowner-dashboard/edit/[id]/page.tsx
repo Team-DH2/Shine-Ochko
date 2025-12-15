@@ -120,7 +120,7 @@ export default function EditHallPage() {
             <ArrowLeft className="w-5 h-5" />
             Буцах
           </button>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Танхим засах
           </h1>
         </div>
