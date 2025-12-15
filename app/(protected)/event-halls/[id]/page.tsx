@@ -27,7 +27,6 @@ interface EventHall {
   informations_about_hall: string[];
   advantages: string[];
   localtion_link?: string;
-  rating?: number;
 }
 
 export default function SelectedEventHall() {
