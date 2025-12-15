@@ -5,12 +5,14 @@ import { useState, useEffect } from "react";
 import { ButtonOfNav } from "./ButtonOfNav";
 
 import {
+  Bell,
   Building,
   ChevronDown,
   Home,
   LayoutDashboard,
   Music,
   Search,
+  Sparkles,
   UserIcon,
   Users,
   X,
@@ -28,6 +30,8 @@ import {
 import SearchFunction from "./Searchbar";
 import { Separator } from "../ui/separator";
 import { useRouter } from "next/navigation";
+import { Input } from "../ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export const Header = () => {
   const [isPhoneSearchOpen, setIsPhoneSearchOpen] = useState(false);
@@ -85,24 +89,37 @@ export const Header = () => {
       <div className="hidden lg:flex text-white w-full h-20 items-center justify-between bg-black/50 backdrop-blur-sm px-10">
         <div className="flex-1 flex justify-start">
           <Logo />
-
-          <div className="flex items-center gap-10 font-bold ml-10">
-            <ButtonOfNav href="/home" text="Home" />
-            <ButtonOfNav href="/event-halls" text="Event Halls" />
-            <ButtonOfNav href="/performers" text="Performers" />
-            <ButtonOfNav href="/host" text="Hosts" />
+          <div className=" ml-3 flex items-center justify-between font-bold 2xl:hidden">
+            <ButtonOfNav href="/home" text="Нүүр" />
+            <ButtonOfNav href="/event-halls" text="Танхим" />
+            <ButtonOfNav href="/performers" text="Дуучин" />
+            <ButtonOfNav href="/host" text="Хөтлөгч" />
             {isLoggedIn && user?.role === "admin" ? (
-              <ButtonOfNav href="/adminpanel" text="Admin Panel" />
+              <ButtonOfNav href="/adminpanel" text="Админ панель" />
             ) : isLoggedIn && user?.role === "hallowner" ? (
               <ButtonOfNav href="/hallowner-dashboard" text="Танхим засах" />
             ) : isLoggedIn ? (
-              <ButtonOfNav href="/dashboard" text="Dashboard" />
+              <ButtonOfNav href="/dashboard" text="Захиалга" />
             ) : null}
           </div>
         </div>
 
-        <div className="flex-1 flex justify-end items-center max-w-100">
-          <div className="flex items-center w-fit">
+        <div className="items-center gap-10 font-bold hidden 2xl:flex">
+          <ButtonOfNav href="/home" text="Нүүр" />
+          <ButtonOfNav href="/event-halls" text="Танхим" />
+          <ButtonOfNav href="/performers" text="Дуучин" />
+          <ButtonOfNav href="/host" text="Хөтлөгч" />
+          {isLoggedIn && user?.role === "admin" ? (
+            <ButtonOfNav href="/adminpanel" text="Админ панель" />
+          ) : isLoggedIn && user?.role === "hallowner" ? (
+            <ButtonOfNav href="/hallowner-dashboard" text="Танхим засах" />
+          ) : isLoggedIn ? (
+            <ButtonOfNav href="/dashboard" text="Захиалга" />
+          ) : null}
+        </div>
+
+        <div className="flex-1 flex justify-end items-center">
+          <div className="flex items-center max-w-200">
             <Search className="mr-[-36] w-5 z-10 text-neutral-500" />
             <SearchFunction styleDesktop={styleDesktop} />
           </div>
@@ -111,18 +128,20 @@ export const Header = () => {
               {isLoggedIn ? (
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="p-2 rounded-full bg-neutral-900 transition-colors h-10 px-4 flex items-center gap-2 w-40">
-                      <UserIcon className="h-4 text-neutral-400" />
-                      <span className="font-medium text-sm truncate">
-                        {user?.name || "User"}
-                      </span>
-                      <ChevronDown className="h-4 text-neutral-500" />
+                    <button className="flex ml-4 items-center gap-2 rounded-3xl border bg-neutral-900 border-white/10 p-1.5 pr-3 transition-all hover:border-blue-500/30 hover:bg-neutral-800">
+                      <Avatar className="h-7 w-7">
+                        <AvatarImage src="/professional-mongolian-male-host.jpg" />
+                        <AvatarFallback>
+                          {user?.name?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <ChevronDown className="h-4 w-4 text-white/60" />
                     </button>
                   </PopoverTrigger>
                   <PopoverContent
                     align="end"
                     className="w-60 bg-neutral-900/95 backdrop-blur-xl border border-neutral-800 
-             text-white rounded-xl shadow-2xl p-2"
+             text-white rounded-xl shadow-2xl p-2 z-1001"
                   >
                     {/* User Section */}
                     {user?.name && (
@@ -226,8 +245,14 @@ export const Header = () => {
                 {isLoggedIn ? (
                   <Popover>
                     <PopoverTrigger asChild>
-                      <button className="p-2 rounded-full hover:bg-neutral-800 transition-colors">
-                        <UserIcon className="w-5 h-5" />
+                      <button className="flex ml-4 items-center gap-2 rounded-3xl border bg-neutral-900 border-white/10 p-1.5 pr-3 transition-all hover:border-neutral-500/30 hover:bg-neutral-800">
+                        <Avatar className="h-7 w-7 bg-neutral-700">
+                          <AvatarImage src="/professional-mongolian-male-host.jpg" />
+                          <AvatarFallback>
+                            {user?.name?.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <ChevronDown className="h-4 w-4 text-white/60" />
                       </button>
                     </PopoverTrigger>
                     <PopoverContent
@@ -319,22 +344,22 @@ export const Header = () => {
       <div className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around bg-black/50 backdrop-blur-sm lg:hidden">
         <BottomNavButton
           href="/home"
-          label="Home"
+          label="Нүүр"
           icon={<Home className="w-5 h-5" />}
         />
         <BottomNavButton
           href="/event-halls"
-          label="Halls"
+          label="Танхим"
           icon={<Building className="w-5 h-5" />}
         />
         <BottomNavButton
           href="/performers"
-          label="Performers"
+          label="Дуучин"
           icon={<Music className="w-5 h-5" />}
         />
         <BottomNavButton
           href="/host"
-          label="Hosts"
+          label="Хөтлөгч"
           icon={<Users className="w-5 h-5" />}
         />
         {isLoggedIn && user?.role === "admin" ? (
@@ -352,7 +377,7 @@ export const Header = () => {
         ) : isLoggedIn ? (
           <BottomNavButton
             href="/dashboard"
-            label="Dashboard"
+            label="Захиалга"
             icon={<LayoutDashboard className="w-5 h-5" />}
           />
         ) : null}
