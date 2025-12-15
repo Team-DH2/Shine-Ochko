@@ -40,9 +40,6 @@ export default function EventHalls() {
 
   const router = useRouter();
 
-  // -----------------------------
-  // Load event halls
-  // -----------------------------
   useEffect(() => {
     const fetchHalls = async () => {
       try {
@@ -60,9 +57,6 @@ export default function EventHalls() {
     fetchHalls();
   }, []);
 
-  // -----------------------------
-  // Load all bookings
-  // -----------------------------
   useEffect(() => {
     const fetchBookings = async () => {
       const token = localStorage.getItem("token");

@@ -5,10 +5,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import generateCalendar from "@/lib/generate-calendar";
 import DateForm from "./DateForm";
 import { publicFetcher } from "@/lib/fetcherpublic";
 import useSWR from "swr";
+import generateCalendar from "@/lib/generatecalendar";
 
 interface TimeSlotBooking {
   date: string;
