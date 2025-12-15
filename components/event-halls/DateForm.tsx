@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import type React from "react";
+
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { X, Calendar, Clock } from "lucide-react";
 
 interface DateFormProps {
   selected: { date: string; type: "am" | "pm" | "udur" }[];
@@ -11,119 +12,84 @@ interface DateFormProps {
     React.SetStateAction<{ date: string; type: "am" | "pm" | "udur" }[]>
   >;
   hallId: number | string;
+  eventHallData: any;
 }
 
 export default function DateForm({
   selected,
-  hallId,
   setSelected,
+  hallId,
+  eventHallData,
 }: DateFormProps) {
-  const [prices, setPrices] = useState<{
-    am: number;
-    pm: number;
-    udur: number;
-  }>({
-    am: 0,
-    pm: 0,
-    udur: 0,
-  });
-
-  useEffect(() => {
-    if (!hallId) return;
-    const getPrices = async () => {
-      try {
-        const res = await fetch(`/api/event-halls/prices?hallId=${hallId}`);
-        const data = await res.json();
-        setPrices({
-          am: data.price?.[0] ?? 0,
-          pm: data.price?.[1] ?? 0,
-          udur: data.price?.[2] ?? 0,
-        });
-      } catch (err) {
-        console.error("Error fetching prices:", err);
-      }
-    };
-    getPrices();
-  }, [hallId]);
-
-  const calculateTotalPrice = () =>
-    selected.reduce((total, sel) => total + prices[sel.type], 0);
-
-  const handleSubmit = async () => {
-    if (selected.length === 0) return toast.error("Өдөр сонгоно уу");
-
-    const token = localStorage.getItem("token");
-    if (!token) return toast.error("Захиалга хийхийн тулд нэвтэрнэ үү");
-
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ hallId, bookings: selected }),
-      });
-
-      if (res.ok) {
-        toast.success("Захиалга амжилттай илгээгдлээ");
-      } else {
-        const errData = await res.json();
-        toast.error("Алдаа гарлаа: " + (errData.error || "Серверийн алдаа"));
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Серверийн алдаа гарлаа");
-    }
+  const typeLabels = {
+    am: "Өглөө (08:00-12:00)",
+    pm: "Орой (18:00-22:00)",
+    udur: "Өдөр (09:00-18:00)",
+  };
+  const slotPrices = {
+    am: eventHallData.price[0],
+    pm: eventHallData.price[1],
+    udur: eventHallData.price[2],
   };
 
-  const timeLabels = {
-    am: "Өглөө 08:00 - 12:00",
-    pm: "Орой 18:00 - 22:00",
-    udur: "Өдөр 09:00 - 18:00",
+  const totalPrice = selected.reduce(
+    (sum, sel) => sum + slotPrices[sel.type],
+    0
+  );
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("mn-MN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const removeSelection = (date: string, type: "am" | "pm" | "udur") => {
+    setSelected((prev) =>
+      prev.filter((s) => !(s.date === date && s.type === type))
+    );
+  };
+
+  const handleSubmit = () => {
+    console.log("Booking submitted:", { hallId, selected });
+    // Handle booking submission
   };
 
   return (
-    <Card className="w-full md:w-2/3 p-6 px-3 h-fit sticky top-6 bg-neutral-900 border-neutral-700 shadow-lg justify-center items-center">
-      <h3 className="text-xl font-bold mb-4 text-white">Сонгосон цагууд</h3>
+    <div className="border border-neutral-800 rounded-xl p-4 lg:p-6 bg-black h-fit sticky top-6">
+      <h3 className="text-base font-semibold text-white mb-4 flex items-center gap-2">
+        <Calendar className="h-4 w-4" />
+        Сонгосон цагууд
+      </h3>
 
       {selected.length === 0 ? (
-        <p className="text-gray-400 text-sm">Цаг сонгоогүй байна</p>
+        <div className="text-center py-8 text-neutral-500 text-sm">
+          <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+          <p>Цаг сонгоогүй байна</p>
+          <p className="text-xs mt-1">Календараас цагаа сонгоно уу</p>
+        </div>
       ) : (
-        <div className="space-y-3 mb-1 w-full">
-          {selected.map((item, index) => (
+        <div className="space-y-2 mb-4 max-h-64 overflow-y-auto">
+          {selected.map((sel, idx) => (
             <div
-              key={index}
-              className="p-3 bg-neutral-800 rounded-lg border border-neutral-700 flex w-full justify-between items-start"
+              key={idx}
+              className="flex items-center justify-between bg-neutral-900 border border-neutral-800 rounded-lg p-3"
             >
               <div>
-                <div className="font-semibold text-white">
-                  {new Date(item.date).toLocaleDateString("mn-MN", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </div>
-                <div className="text-gray-400 text-sm mt-1">
-                  {timeLabels[item.type]}
-                </div>
-                <div className="text-green-400 font-semibold mt-1">
-                  {prices[item.type].toLocaleString()}₮
-                </div>
+                <p className="text-sm font-medium text-white">
+                  {formatDate(sel.date)}
+                </p>
+                <p className="text-xs text-neutral-400">
+                  {typeLabels[sel.type]}
+                </p>
               </div>
-              {/* Delete Button */}
               <button
-                onClick={() =>
-                  setSelected((prev) =>
-                    prev.filter(
-                      (s) => !(s.date === item.date && s.type === item.type)
-                    )
-                  )
-                }
-                className="ml-2 text-red-500 hover:text-red-700 font-bold text-xl"
-                title="Устгах"
+                onClick={() => removeSelection(sel.date, sel.type)}
+                className="p-1 hover:bg-neutral-800 rounded-md transition-colors"
               >
-                ×
+                <X className="h-4 w-4 text-neutral-500 hover:text-white" />
               </button>
             </div>
           ))}
@@ -131,19 +97,30 @@ export default function DateForm({
       )}
 
       {selected.length > 0 && (
-        <div className="space-y-2 flex flex-col items-center">
-          <div className="text-lg font-bold text-white mb-2 justify-center">
-            Нийт үнэ: {calculateTotalPrice().toLocaleString()}₮
+        <>
+          <div className="border-t border-neutral-800 pt-4 mb-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-neutral-400">Нийт сонголт</span>
+              <span className="text-white font-medium">
+                {selected.length} цаг
+              </span>
+            </div>
+
+            {/* Total Price */}
+            <div className="flex justify-between text-sm mt-2">
+              <span className="text-neutral-400">Нийт үнэ</span>
+              <span className="text-white font-semibold">{totalPrice}₮</span>
+            </div>
           </div>
+
           <Button
             onClick={handleSubmit}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            size="lg"
+            className="w-full bg-white text-black hover:bg-neutral-200 font-medium"
           >
-            Захиалга батлах ({selected.length})
+            Захиалга баталгаажуулах
           </Button>
-        </div>
+        </>
       )}
-    </Card>
+    </div>
   );
 }
