@@ -48,22 +48,24 @@ export default function DateForm({
     (sum, sel) => sum + slotPrices[sel.type],
     0
   );
+
   const getPrices = async () => {
     try {
-      const res = await fetch(`/api/event-halls/prices?hallId=${hallId}`);
+      const res = await fetch(
+        `/api/event-halls/prices?hallId=${hallId}&date=${selected}`
+      );
       const data = await res.json();
 
-      const mapped = {
-        am: data.price?.[0] ?? 0,
-        pm: data.price?.[1] ?? 0,
-        udur: data.price?.[2] ?? 0,
-      };
-
-      setPrices(mapped);
+      setPrices({
+        am: data.am ?? 0,
+        pm: data.pm ?? 0,
+        udur: data.udur ?? 0,
+      });
     } catch (err) {
       console.error("Error fetching prices:", err);
     }
   };
+
   useEffect(() => {
     if (!hallId) return;
     getPrices();
