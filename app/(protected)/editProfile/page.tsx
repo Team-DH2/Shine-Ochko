@@ -3,16 +3,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Bell,
-  CheckCircle,
-  ChevronDown,
-  Search,
-  Sparkles,
-  XCircle,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
+import { CheckCircle, XCircle } from "lucide-react";
 
 interface User {
   id: number;
