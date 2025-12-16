@@ -75,9 +75,9 @@ export function BookingCalendar({
     )}-${String(day).padStart(2, "0")}`;
 
     const labelMap = {
-      am: "08:00-12:00",
-      pm: "18:00-22:00",
-      udur: "09:00-18:00",
+      am: "Өглөө",
+      pm: "Орой",
+      udur: "Өдөрөөр нь",
     };
     const label = labelMap[type];
 
@@ -115,17 +115,17 @@ export function BookingCalendar({
     const handleSelect = () => {
       if (!isAvailable || isPast) return;
       setSelected((prev) => {
-        const exists = prev.find((s) => s.date === dateStr && s.type === type);
-        if (exists) {
-          return prev.filter((s) => !(s.date === dateStr && s.type === type));
-        }
-        return [...prev, { date: dateStr, type }];
+        const exists = prev.find((s) => s.date === newDate && s.type === type);
+        if (exists)
+          return prev.filter((s) => !(s.date === newDate && s.type === type));
+        const newSelected = prev.filter((s) => !(s.date === newDate));
+        return [...newSelected, { date: newDate, type }];
       });
     };
 
     return (
       <button
-        onClick={handleSelect}
+        onClick={() => handleSelect(day, type)}
         disabled={!isAvailable || isPast}
         className={`w-full rounded-md border p-1 text-center text-[10px] sm:text-xs font-medium h-7 sm:h-8 flex items-center justify-center transition-all ${
           isSelected

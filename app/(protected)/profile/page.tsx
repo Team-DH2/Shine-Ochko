@@ -74,8 +74,6 @@ export default function AdminDashboard() {
     }
   };
 
-  console.log("userbookings", userBookings);
-
   useEffect(() => {
     getUserBookings();
   }, []);

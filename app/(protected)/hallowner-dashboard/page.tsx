@@ -30,38 +30,31 @@ export default function HallOwnerDashboard() {
 
   // Check if user is hall owner
   useEffect(() => {
-    console.log("🟢 Dashboard mounted");
     const checkHallOwner = async () => {
       const token = localStorage.getItem("token");
-      console.log("🟢 Token exists:", !!token);
+
       if (!token) {
-        console.log("🔴 No token - redirecting to home");
         router.push("/home");
         return;
       }
 
       try {
-        console.log("🟢 Checking auth...");
         const res = await fetch("/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log("🟢 Auth response:", res.status);
         if (!res.ok) {
-          console.log("🔴 Auth failed - redirecting to home");
           router.push("/home");
           return;
         }
 
         const data = await res.json();
-        console.log("🟢 User data:", data.user);
+
         if (data.user.role !== "hallowner") {
-          console.log("🔴 Not hallowner - redirecting to home");
           router.push("/home");
           return;
         }
 
-        console.log("🟢 User is hallowner, fetching halls...");
         setUserInfo(data.user);
         setIsHallOwner(true);
         fetchMyHalls(token);
@@ -76,24 +69,19 @@ export default function HallOwnerDashboard() {
 
   const fetchMyHalls = async (token: string) => {
     try {
-      console.log("🔵 Fetching halls...");
       const res = await fetch("/api/hallowner/my-halls", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("🔵 Response status:", res.status);
       if (res.ok) {
         const data = await res.json();
-        console.log("🔵 Halls data:", data);
-        console.log("🔵 Number of halls:", data.halls?.length);
 
         // Redirect to edit page of first hall if they have any halls
         if (data.halls && data.halls.length > 0) {
-          console.log("🔵 Redirecting to hall:", data.halls[0].id);
           router.push(`/hallowner-dashboard/edit/${data.halls[0].id}`);
           return;
         }
-        console.log("🔴 No halls found - staying on dashboard");
+
         setHalls(data.halls || []);
 
         // Calculate stats
@@ -137,7 +125,7 @@ export default function HallOwnerDashboard() {
       <Header />
       <main className="container mx-auto p-4 md:p-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Танхимын эзний самбар
           </h1>
           <p className="text-gray-400">Сайн байна уу, {userInfo?.name}!</p>
@@ -145,7 +133,7 @@ export default function HallOwnerDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 border border-blue-500/30 rounded-2xl p-6">
+          <div className="bg-linear-to-br from-blue-600/20 to-blue-800/20 border border-blue-500/30 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <Calendar className="w-8 h-8 text-blue-400" />
               <span className="text-2xl font-bold">{stats.totalBookings}</span>
@@ -153,7 +141,7 @@ export default function HallOwnerDashboard() {
             <h3 className="text-gray-300 text-sm">Нийт захиалга</h3>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-800/20 border border-yellow-500/30 rounded-2xl p-6">
+          <div className="bg-linear-to-br from-yellow-600/20 to-yellow-800/20 border border-yellow-500/30 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <Users className="w-8 h-8 text-yellow-400" />
               <span className="text-2xl font-bold">
@@ -163,7 +151,7 @@ export default function HallOwnerDashboard() {
             <h3 className="text-gray-300 text-sm">Хүлээгдэж буй</h3>
           </div>
 
-          <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 border border-green-500/30 rounded-2xl p-6">
+          <div className="bg-linear-to-br from-green-600/20 to-green-800/20 border border-green-500/30 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <DollarSign className="w-8 h-8 text-green-400" />
               <span className="text-2xl font-bold">
@@ -173,7 +161,7 @@ export default function HallOwnerDashboard() {
             <h3 className="text-gray-300 text-sm">Нийт орлого</h3>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 border border-purple-500/30 rounded-2xl p-6">
+          <div className="bg-linear-to-br from-purple-600/20 to-purple-800/20 border border-purple-500/30 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <TrendingUp className="w-8 h-8 text-purple-400" />
               <span className="text-2xl font-bold">
@@ -190,7 +178,7 @@ export default function HallOwnerDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               onClick={() => router.push("/eventhall-form")}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 p-6 rounded-xl text-left transition-all shadow-lg hover:shadow-blue-500/50"
+              className="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 p-6 rounded-xl text-left transition-all shadow-lg hover:shadow-blue-500/50"
             >
               <Building2 className="w-8 h-8 mb-3" />
               <h3 className="text-lg font-semibold mb-1">Танхим нэмэх</h3>
@@ -201,7 +189,7 @@ export default function HallOwnerDashboard() {
 
             <button
               onClick={() => router.push("/booking-response")}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 p-6 rounded-xl text-left transition-all shadow-lg hover:shadow-green-500/50"
+              className="bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 p-6 rounded-xl text-left transition-all shadow-lg hover:shadow-green-500/50"
             >
               <Calendar className="w-8 h-8 mb-3" />
               <h3 className="text-lg font-semibold mb-1">Захиалга харах</h3>
@@ -210,7 +198,7 @@ export default function HallOwnerDashboard() {
 
             <button
               onClick={() => router.push("/profile")}
-              className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 p-6 rounded-xl text-left transition-all shadow-lg hover:shadow-orange-500/50"
+              className="bg-linear-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 p-6 rounded-xl text-left transition-all shadow-lg hover:shadow-orange-500/50"
             >
               <Users className="w-8 h-8 mb-3" />
               <h3 className="text-lg font-semibold mb-1">Профайл</h3>
@@ -249,7 +237,7 @@ export default function HallOwnerDashboard() {
               {halls.map((hall) => (
                 <div
                   key={hall.id}
-                  className="bg-gradient-to-br from-neutral-800 to-neutral-900 border border-neutral-700 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all hover:shadow-lg hover:shadow-blue-500/20"
+                  className="bg-linear-to-br from-neutral-800 to-neutral-900 border border-neutral-700 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all hover:shadow-lg hover:shadow-blue-500/20"
                 >
                   {/* Hall Image */}
                   {hall.images && hall.images.length > 0 ? (
