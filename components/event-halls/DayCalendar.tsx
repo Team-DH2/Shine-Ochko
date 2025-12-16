@@ -244,8 +244,11 @@ export function BookingCalendar({
         ? eventHallData.price[type === "am" ? 0 : type === "pm" ? 1 : 2]
         : 0);
 
+    // Check if this slot has a sale
+    const hasSale = salePrice !== undefined && salePrice > 0;
+
     const handleSelect = () => {
-      if (isOwner || !isAvailable || isPast) return;
+      if (!isAvailable || isPast) return;
       setSelected((prev) => {
         const exists = prev.find((s) => s.date === dateStr && s.type === type);
         if (exists)

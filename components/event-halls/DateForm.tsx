@@ -5,9 +5,6 @@ import type React from "react";
 
 import { Button } from "@/components/ui/button";
 import { X, Calendar, Clock } from "lucide-react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 interface DateFormProps {
   selected: { date: string; type: "am" | "pm" | "udur" }[];
@@ -24,15 +21,6 @@ export default function DateForm({
   hallId,
   eventHallData,
 }: DateFormProps) {
-  const [prices, setPrices] = useState<{
-    am: number;
-    pm: number;
-    udur: number;
-  }>({
-    am: 0,
-    pm: 0,
-    udur: 0,
-  });
   const typeLabels = {
     am: "Өглөө (08:00-12:00)",
     pm: "Орой (18:00-22:00)",
@@ -79,55 +67,16 @@ export default function DateForm({
       day: "numeric",
     });
   };
-  const calculateTotalPrice = () => {
-    return selected.reduce((total, sel) => total + prices[sel.type], 0);
-  };
 
   const removeSelection = (date: string, type: "am" | "pm" | "udur") => {
     setSelected((prev) =>
       prev.filter((s) => !(s.date === date && s.type === type))
     );
   };
-  const router = useRouter();
-  const handleSubmit = async () => {
-    // 1️⃣ Сонгосон өдөр шалгах
-    if (selected.length === 0) return alert("Өдөр сонгоно уу");
 
-    // 2️⃣ Token шалгах
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Захиалга хийхийн тулд эхлээд нэвтэрнэ үү.");
-      return;
-    }
-
-    // 3️⃣ POST хийх өгөгдөл
-    const bookingData = {
-      hallId,
-      bookings: selected,
-      status: "approved",
-    };
-
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // token-г header-д нэмнэ
-        },
-        body: JSON.stringify(bookingData),
-      });
-
-      if (res.ok) {
-        toast.success("Захиалга амжилттай илгээгдлээ");
-        router.push(`/dashboard`);
-      } else {
-        const errData = await res.json();
-        toast.error("Алдаа гарлаа: " + (errData.error || "Серверийн алдаа"));
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Серверийн алдаа гарлаа");
-    }
+  const handleSubmit = () => {
+    console.log("Booking submitted:", { hallId, selected });
+    // Handle booking submission
   };
 
   return (
@@ -182,10 +131,7 @@ export default function DateForm({
             {/* Total Price */}
             <div className="flex justify-between text-sm mt-2">
               <span className="text-neutral-400">Нийт үнэ</span>
-              <span className="text-white font-semibold">
-                {" "}
-                {calculateTotalPrice().toLocaleString()}₮
-              </span>
+              <span className="text-white font-semibold">{totalPrice}₮</span>
             </div>
           </div>
 
