@@ -111,11 +111,9 @@ export function BookingCalendar({
 
     // Check if this slot has a sale
     const hasSale = salePrice !== undefined && salePrice > 0;
-    const handleSelect = (day: number, type: "am" | "pm" | "udur") => {
-      const newDate = `${currentYear}-${String(currentMonth + 1).padStart(
-        2,
-        "0"
-      )}-${String(day).padStart(2, "0")}`;
+
+    const handleSelect = () => {
+      if (!isAvailable || isPast) return;
       setSelected((prev) => {
         const exists = prev.find((s) => s.date === newDate && s.type === type);
         if (exists)
