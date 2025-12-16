@@ -208,6 +208,21 @@ export default function Dashboard() {
                         <span className="rounded-xl px-4 py-1.5 text-xs font-semibold bg-emerald-500/20 text-emerald-400">
                           Баталгаажсан
                         </span>
+                        {/* Танхим засах (Edit Hall) Button */}
+                        {group.hall?.id && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="ml-2 rounded-xl border-white/10 bg-blue-500/10 text-xs text-blue-400 hover:border-blue-500/40 hover:bg-blue-500/20"
+                            onClick={() =>
+                              router.push(
+                                `/hallowner-dashboard/edit/${group.hall.id}`
+                              )
+                            }
+                          >
+                            Танхим засах
+                          </Button>
+                        )}
                       </div>
 
                       <div className="mb-4 space-y-2">
@@ -289,13 +304,25 @@ export default function Dashboard() {
                             {p.status}
                           </span>
 
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full rounded-xl border-white/10 bg-white/5 text-xs text-white hover:border-blue-500/40 hover:bg-blue-500/10"
-                          >
-                            Профайл үзэх
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full rounded-xl border-white/10 bg-white/5 text-xs text-white hover:border-blue-500/40 hover:bg-blue-500/10"
+                              onClick={() =>
+                                router.push(`/performers/${p.performers?.id}`)
+                              }
+                            >
+                              Засах
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full rounded-xl border-white/10 bg-white/5 text-xs text-white hover:border-blue-500/40 hover:bg-blue-500/10"
+                            >
+                              Профайл үзэх
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
