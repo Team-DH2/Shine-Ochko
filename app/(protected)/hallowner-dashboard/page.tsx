@@ -76,7 +76,7 @@ export default function HallOwnerDashboard() {
   const fetchMyHalls = async (token: string) => {
     try {
       console.log("🔵 Fetching halls...");
-      const res = await fetch("/api/hallowner/my-halls", {
+      const res = await fetch("/api/my-halls", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -290,7 +290,9 @@ export default function HallOwnerDashboard() {
                     {/* Actions */}
                     <div className="flex gap-2">
                       <button
-                        onClick={() => router.push(`/event-halls/${hall.id}`)}
+                        onClick={() =>
+                          router.push(`/hallowner-eventhall-edit/${hall.id}`)
+                        }
                         className="flex-1 bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                       >
                         <Eye className="w-4 h-4" />

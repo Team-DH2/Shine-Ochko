@@ -31,6 +31,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { BookingCalendar } from "@/components/event-halls/HallownerDayCalendar";
+import { toast } from "sonner";
 
 interface EventHall {
   id: number;
@@ -73,6 +74,7 @@ export default function SelectedEventHall() {
   useEffect(() => {
     const checkOwnership = async () => {
       const token = localStorage.getItem("token");
+
       if (!token) return;
 
       try {
