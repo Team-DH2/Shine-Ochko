@@ -31,8 +31,6 @@ import { useRouter } from "next/navigation";
 import { Input } from "../ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-
 export const Header = () => {
   const [isPhoneSearchOpen, setIsPhoneSearchOpen] = useState(false);
   const router = useRouter();

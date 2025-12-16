@@ -7,15 +7,20 @@ import { Button } from "@/components/ui/button";
 import { X, Calendar, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 interface DateFormProps {
   selected: { date: string; type: "am" | "pm" | "udur" }[];
   setSelected: React.Dispatch<
     React.SetStateAction<{ date: string; type: "am" | "pm" | "udur" }[]>
   >;
-  hallId: number | string;
   eventHallData: any;
+  hallId: number | string;
+
+  isOwner?: boolean;
+  ownerBookingMode?: boolean;
+
+  onUserBook: () => void;
+  onOwnerBook: () => void;
 }
 
 export default function DateForm({
@@ -23,16 +28,11 @@ export default function DateForm({
   setSelected,
   hallId,
   eventHallData,
+  isOwner,
+  ownerBookingMode,
+  onOwnerBook,
+  onUserBook,
 }: DateFormProps) {
-  const [prices, setPrices] = useState<{
-    am: number;
-    pm: number;
-    udur: number;
-  }>({
-    am: 0,
-    pm: 0,
-    udur: 0,
-  });
   const typeLabels = {
     am: "Өглөө (08:00-12:00)",
     pm: "Орой (18:00-22:00)",
@@ -48,26 +48,6 @@ export default function DateForm({
     (sum, sel) => sum + slotPrices[sel.type],
     0
   );
-  const getPrices = async () => {
-    try {
-      const res = await fetch(`/api/event-halls/prices?hallId=${hallId}`);
-      const data = await res.json();
-
-      const mapped = {
-        am: data.price?.[0] ?? 0,
-        pm: data.price?.[1] ?? 0,
-        udur: data.price?.[2] ?? 0,
-      };
-
-      setPrices(mapped);
-    } catch (err) {
-      console.error("Error fetching prices:", err);
-    }
-  };
-  useEffect(() => {
-    if (!hallId) return;
-    getPrices();
-  }, [hallId]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -77,16 +57,13 @@ export default function DateForm({
       day: "numeric",
     });
   };
-  const calculateTotalPrice = () => {
-    return selected.reduce((total, sel) => total + prices[sel.type], 0);
-  };
+  const router = useRouter();
 
   const removeSelection = (date: string, type: "am" | "pm" | "udur") => {
     setSelected((prev) =>
       prev.filter((s) => !(s.date === date && s.type === type))
     );
   };
-  const router = useRouter();
   const handleSubmit = async () => {
     // 1️⃣ Сонгосон өдөр шалгах
     if (selected.length === 0) return alert("Өдөр сонгоно уу");
@@ -114,6 +91,11 @@ export default function DateForm({
         },
         body: JSON.stringify(bookingData),
       });
+      if (isOwner && res.ok) {
+        toast.success("Захиалгатай болголоо");
+        // handleSubmit();
+        return;
+      }
 
       if (res.ok) {
         toast.success("Захиалга амжилттай илгээгдлээ");
@@ -167,7 +149,7 @@ export default function DateForm({
         </div>
       )}
 
-      {selected.length > 0 && (
+      {!isOwner && selected.length > 0 && (
         <>
           <div className="border-t border-neutral-800 pt-4 mb-4">
             <div className="flex justify-between text-sm">
@@ -180,10 +162,7 @@ export default function DateForm({
             {/* Total Price */}
             <div className="flex justify-between text-sm mt-2">
               <span className="text-neutral-400">Нийт үнэ</span>
-              <span className="text-white font-semibold">
-                {" "}
-                {calculateTotalPrice().toLocaleString()}₮
-              </span>
+              <span className="text-white font-semibold">{totalPrice}₮</span>
             </div>
           </div>
 
@@ -195,7 +174,30 @@ export default function DateForm({
           </Button>
         </>
       )}
+      {isOwner && ownerBookingMode && selected.length > 0 && (
+        <div>
+          <div className="border-t border-neutral-800 pt-4 mb-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-neutral-400">Нийт сонголт</span>
+              <span className="text-white font-medium">
+                {selected.length} цаг
+              </span>
+            </div>
+
+            {/* Total Price */}
+            <div className="flex justify-between text-sm mt-2">
+              <span className="text-neutral-400">Нийт үнэ</span>
+              <span className="text-white font-semibold">{totalPrice}₮</span>
+            </div>
+          </div>
+          <Button
+            className="mt-4 w-full bg-red-600 hover:bg-red-700"
+            onClick={handleSubmit}
+          >
+            Сонгосон цагийг захиалгатай болгох
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
-``;
