@@ -258,7 +258,8 @@ export function BookingCalendar({
     if (
       (type === "am" && (isAmBooked || isUdureBooked || isManuallyBooked)) ||
       (type === "pm" && (isPmBooked || isUdureBooked || isManuallyBooked)) ||
-      (type === "udur" && (isUdureBooked || isAmBooked || isPmBooked || isManuallyBooked))
+      (type === "udur" &&
+        (isUdureBooked || isAmBooked || isPmBooked || isManuallyBooked))
     ) {
       isAvailable = false;
     }
@@ -449,7 +450,10 @@ export function BookingCalendar({
               >
                 Захиалах
               </Button>
-              <Button onClick={handleSavePrice} className="flex-1 sm:flex-initial">
+              <Button
+                onClick={handleSavePrice}
+                className="flex-1 sm:flex-initial"
+              >
                 Хадгалах
               </Button>
             </div>
