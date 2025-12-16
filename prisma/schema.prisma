@@ -97,6 +97,9 @@ model mruser {
   avatar      String?
   booking     booking[]
   event_halls event_halls[]
+  avatar      String?   
+
+
 }
 
 model performers_new {
