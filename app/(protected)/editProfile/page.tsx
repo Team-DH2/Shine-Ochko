@@ -18,6 +18,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -30,14 +31,18 @@ export default function ProfilePage() {
 
       try {
         const res = await fetch("/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
-        if (!res.ok) throw new Error("Хэрэглэгчийн мэдээлэл татаж чадсангүй");
+        if (!res.ok) {
+          throw new Error("Хэрэглэгчийн мэдээлэл татаж чадсангүй");
+        }
 
         const data = await res.json();
         setUser(data.user);
-        setName(data.user.name);
+        setName(data.user.name || "");
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -46,7 +51,7 @@ export default function ProfilePage() {
     };
 
     fetchUser();
-  }, []);
+  }, [router]);
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
@@ -67,7 +72,10 @@ export default function ProfilePage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+
+      if (!res.ok) {
+        throw new Error(data.error || "Алдаа гарлаа");
+      }
 
       setUser(data.user);
       setSuccess("Амжилттай хадгалагдлаа");
@@ -88,8 +96,29 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen w-screen bg-black text-white pt-28 px-4">
-      <div className="max-w-2xl mx-auto bg-neutral-900 border border-neutral-800 rounded-2xl p-8 shadow-xl">
-        <h1 className="text-3xl font-bold mb-8">Миний профайл</h1>
+      <div
+        className="max-w-2xl mx-auto bg-neutral-900/90 backdrop-blur
+                   border border-neutral-800/80
+                   rounded-3xl p-10 shadow-2xl"
+      >
+        {/* PROFILE HEADER */}
+        <div className="flex items-center gap-4 mb-10">
+          <div
+            className="w-14 h-14 rounded-full
+                       bg-gradient-to-br from-blue-500 to-purple-600
+                       flex items-center justify-center
+                       text-xl font-bold"
+          >
+            {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+          </div>
+
+          <div>
+            <h1 className="text-2xl font-bold">Миний профайл</h1>
+            <p className="text-sm text-neutral-400">
+              Хувийн мэдээллээ энд засварлана
+            </p>
+          </div>
+        </div>
 
         <form onSubmit={handleSave} className="space-y-6">
           {/* EMAIL */}
@@ -99,8 +128,9 @@ export default function ProfilePage() {
               type="email"
               value={user?.email || ""}
               disabled
-              className="w-full mt-1 bg-neutral-800 text-neutral-400 px-4 py-3
-                         rounded-lg border border-neutral-700 cursor-not-allowed"
+              className="w-full mt-2 bg-neutral-800/70 text-neutral-400 px-4 py-3
+                         rounded-xl border border-neutral-700
+                         cursor-not-allowed"
             />
           </div>
 
@@ -115,21 +145,34 @@ export default function ProfilePage() {
                 setError(null);
                 setSuccess(null);
               }}
-              className="w-full mt-1 bg-neutral-800 text-white px-4 py-3
-                         rounded-lg border border-neutral-700
-                         focus:border-blue-500 outline-none"
+              className="w-full mt-2 bg-neutral-800/70 text-white px-4 py-3
+                         rounded-xl border border-neutral-700
+                         focus:border-blue-500 focus:ring-2
+                         focus:ring-blue-500/20
+                         outline-none transition"
             />
           </div>
 
-          {/* ALERTS */}
+          {/* ERROR */}
           {error && (
-            <div className="flex items-center gap-2 text-red-400 text-sm">
+            <div
+              className="flex items-center gap-2 bg-red-500/10
+                         border border-red-500/30
+                         text-red-400 text-sm
+                         rounded-xl px-4 py-3"
+            >
               <XCircle size={18} /> {error}
             </div>
           )}
 
+          {/* SUCCESS */}
           {success && (
-            <div className="flex items-center gap-2 text-green-400 text-sm">
+            <div
+              className="flex items-center gap-2 bg-green-500/10
+                         border border-green-500/30
+                         text-green-400 text-sm
+                         rounded-xl px-4 py-3"
+            >
               <CheckCircle size={18} /> {success}
             </div>
           )}
@@ -138,12 +181,12 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={saving || !!success}
-            className={`w-full py-3 rounded-xl font-semibold transition
-              ${
-                success
-                  ? "bg-green-600 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
+            className={
+              "w-full py-3 rounded-2xl font-semibold transition-all " +
+              (success
+                ? "bg-green-600 cursor-not-allowed"
+                : "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 active:scale-[0.99]")
+            }
           >
             {saving
               ? "Хадгалж байна..."
