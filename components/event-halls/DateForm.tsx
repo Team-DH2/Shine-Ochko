@@ -37,6 +37,28 @@ export default function DateForm({
     0
   );
 
+  const getPrices = async () => {
+    try {
+      const res = await fetch(
+        `/api/event-halls/prices?hallId=${hallId}&date=${selected}`
+      );
+      const data = await res.json();
+
+      setPrices({
+        am: data.am ?? 0,
+        pm: data.pm ?? 0,
+        udur: data.udur ?? 0,
+      });
+    } catch (err) {
+      console.error("Error fetching prices:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!hallId) return;
+    getPrices();
+  }, [hallId]);
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("mn-MN", {
