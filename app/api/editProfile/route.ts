@@ -2,35 +2,40 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import prisma from "@/lib/prisma";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 
+/* ================= TOKEN HELPER ================= */
+function getUserId(request: Request) {
+  const authHeader = request.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new Error("Unauthorized");
+  }
+
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+    id: number;
+  };
+
+  if (!decoded?.id) throw new Error("Invalid token");
+  return decoded.id;
+}
+
+/* ================= PATCH: NAME UPDATE ================= */
 export async function PATCH(request: Request) {
   try {
-    // 1. Verify Authentication
-    const authHeader = request.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    const token = authHeader.split(" ")[1];
+    const userId = getUserId(request);
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
-      id: number;
-    };
-    if (!decoded.id) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-
-    // 2. Get new name from request body
     const { name } = await request.json();
     if (!name || typeof name !== "string" || name.length < 2) {
       return NextResponse.json(
-        { error: "Valid name is required" },
+        { error: "Нэр хамгийн багадаа 2 тэмдэгт байна" },
         { status: 400 }
       );
     }
 
-    // 3. Update user in the database
     const updatedUser = await prisma.mruser.update({
-      where: { id: decoded.id },
+      where: { id: userId },
       data: { name },
       select: {
         id: true,
@@ -40,18 +45,49 @@ export async function PATCH(request: Request) {
       },
     });
 
-    // 4. Return the updated user data
     return NextResponse.json({ user: updatedUser });
   } catch (error: any) {
-    if (error.name === "JsonWebTokenError") {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-    if (error.name === "TokenExpiredError") {
-      return NextResponse.json({ error: "Token expired" }, { status: 401 });
-    }
-    console.error("UPDATE PROFILE ERROR:", error);
+    console.error("PATCH ERROR:", error);
     return NextResponse.json(
-      { error: "An internal server error occurred" },
+      { error: "Profile шинэчлэхэд алдаа гарлаа" },
+      { status: 500 }
+    );
+  }
+}
+
+/* ================= POST: AVATAR UPLOAD (DB-гүй) ================= */
+export async function POST(request: Request) {
+  try {
+    // 🔐 auth шалгана (хэрвээ хэрэггүй бол авч болно)
+    getUserId(request);
+
+    const formData = await request.formData();
+    const file = formData.get("avatar") as File;
+
+    if (!file) {
+      return NextResponse.json({ error: "Файл олдсонгүй" }, { status: 400 });
+    }
+
+    // uploads folder байхгүй бол үүсгэнэ
+    const uploadDir = path.join(process.cwd(), "public/uploads");
+    await mkdir(uploadDir, { recursive: true });
+
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    const fileName = `${Date.now()}-${file.name}`;
+    const uploadPath = path.join(uploadDir, fileName);
+
+    await writeFile(uploadPath, buffer);
+
+    // ❗ DB update ХИЙХГҮЙ
+    return NextResponse.json({
+      avatar: `/uploads/${fileName}`,
+    });
+  } catch (error: any) {
+    console.error("UPLOAD ERROR:", error);
+    return NextResponse.json(
+      { error: "Зураг upload хийхэд алдаа гарлаа" },
       { status: 500 }
     );
   }
