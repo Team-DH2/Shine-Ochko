@@ -6,7 +6,7 @@ import { ChangeEvent, useState } from "react";
 import Link from "next/link";
 import { TrashIcon } from "lucide-react";
 
-export default function TEventHallForm() {
+export default function EventHallForm() {
   const [name, setName] = useState<string>("");
   const [hallName, setHallName] = useState<string>("");
   const [suitableEvents, setSuitableEvents] = useState<string>("");

@@ -2,7 +2,6 @@ const ContactPage = () => {
   return (
     <div>
       <Header></Header>
-
       <EventHallForm></EventHallForm>
     </div>
   );
