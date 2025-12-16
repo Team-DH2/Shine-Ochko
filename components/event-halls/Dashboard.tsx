@@ -52,8 +52,6 @@ export default function Dashboard() {
     error,
   } = useSWR("/api/dashboard-backend", fetcher);
 
-  console.log("Dashboard data:", { bookings, isLoading, error });
-
   if (isLoading)
     return <p className="text-white text-4xl">Ачааллаж байна...</p>;
 
@@ -68,7 +66,7 @@ export default function Dashboard() {
       </div>
     );
   }
-  console.log({ bookings });
+
   if (!bookings || bookings.length === 0)
     return (
       <div className="p-10">
@@ -100,8 +98,7 @@ export default function Dashboard() {
 
     return acc;
   }, {});
-  console.log("Grouped bookings:", grouped);
-  console.log("Bookings:", bookings);
+
   // UI START (EVENTLUX HIGH-END DASHBOARD)
 
   return (

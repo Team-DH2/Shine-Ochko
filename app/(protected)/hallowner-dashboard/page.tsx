@@ -30,38 +30,31 @@ export default function HallOwnerDashboard() {
 
   // Check if user is hall owner
   useEffect(() => {
-    console.log("🟢 Dashboard mounted");
     const checkHallOwner = async () => {
       const token = localStorage.getItem("token");
-      console.log("🟢 Token exists:", !!token);
+
       if (!token) {
-        console.log("🔴 No token - redirecting to home");
         router.push("/home");
         return;
       }
 
       try {
-        console.log("🟢 Checking auth...");
         const res = await fetch("/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log("🟢 Auth response:", res.status);
         if (!res.ok) {
-          console.log("🔴 Auth failed - redirecting to home");
           router.push("/home");
           return;
         }
 
         const data = await res.json();
-        console.log("🟢 User data:", data.user);
+
         if (data.user.role !== "hallowner") {
-          console.log("🔴 Not hallowner - redirecting to home");
           router.push("/home");
           return;
         }
 
-        console.log("🟢 User is hallowner, fetching halls...");
         setUserInfo(data.user);
         setIsHallOwner(true);
         fetchMyHalls(token);
@@ -76,24 +69,19 @@ export default function HallOwnerDashboard() {
 
   const fetchMyHalls = async (token: string) => {
     try {
-      console.log("🔵 Fetching halls...");
       const res = await fetch("/api/hallowner/my-halls", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("🔵 Response status:", res.status);
       if (res.ok) {
         const data = await res.json();
-        console.log("🔵 Halls data:", data);
-        console.log("🔵 Number of halls:", data.halls?.length);
 
         // Redirect to edit page of first hall if they have any halls
         if (data.halls && data.halls.length > 0) {
-          console.log("🔵 Redirecting to hall:", data.halls[0].id);
           router.push(`/hallowner-dashboard/edit/${data.halls[0].id}`);
           return;
         }
-        console.log("🔴 No halls found - staying on dashboard");
+
         setHalls(data.halls || []);
 
         // Calculate stats

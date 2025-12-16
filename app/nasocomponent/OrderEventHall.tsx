@@ -26,7 +26,6 @@ export default function OrderEventHall() {
       .then((res) => res.json())
       .then((data) => {
         const bookingsData = data.bookings || [];
-        console.log("RAW BOOKINGS:", bookingsData);
 
         // ----------------------------
         // FILTER: Зөвхөн EVENT HALL bookings авах

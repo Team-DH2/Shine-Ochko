@@ -40,18 +40,12 @@ export function AuthForm({
         throw new Error(data.error || "Login failed");
       }
 
-      console.log("Login response data:", data);
-      console.log("User role:", data.user.role);
-
       // Store the token
       localStorage.setItem("token", data.token);
 
       // Pass user data to the parent component (Header) which will handle redirect
-      console.log("About to call onLoginSuccess with:", data.user);
-      console.log("onLoginSuccess function is:", onLoginSuccess);
-      console.log("Calling onLoginSuccess now...");
+
       onLoginSuccess(data.user);
-      console.log("onLoginSuccess called successfully");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -77,17 +71,12 @@ export function AuthForm({
         throw new Error(data.error || "Signup failed");
       }
 
-      console.log("Signup response data:", data);
-
       // Store the token
       localStorage.setItem("token", data.token);
 
       // Pass user data to the parent component (Header) which will handle redirect
-      console.log("About to call onLoginSuccess with:", data.user);
-      console.log("onLoginSuccess function is:", onLoginSuccess);
-      console.log("Calling onLoginSuccess now...");
+
       onLoginSuccess(data.user);
-      console.log("onLoginSuccess called successfully");
     } catch (err: any) {
       setError(err.message);
     } finally {

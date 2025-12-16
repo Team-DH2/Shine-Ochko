@@ -71,7 +71,7 @@ export default function EventHalls() {
             index ===
             self.findIndex((x) => x.date === b.date && x.hallid === b.hallid)
         );
-        console.log({ uniqueBookings });
+
         setBookings(uniqueBookings);
       } catch (err) {
         console.error(err);
@@ -143,10 +143,6 @@ export default function EventHalls() {
     }
     setFilteredHalls(sorted);
   }, [sortBy]);
-
-  console.log({ filteredHalls });
-  console.log({ bookings });
-  console.log({ date });
 
   return (
     <div className="flex mt-3">

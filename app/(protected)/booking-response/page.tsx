@@ -50,7 +50,6 @@ const BookingResponsePage = ({
   searchParams: Promise<{ bookingId?: string; action?: string }>;
 }) => {
   const params = use(searchParams);
-  console.log("BookingResponsePage params:", params);
 
   const bookingIdParam = params.bookingId;
   const actionParam = params.action;

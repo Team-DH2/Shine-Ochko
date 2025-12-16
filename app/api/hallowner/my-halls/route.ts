@@ -21,13 +21,11 @@ export async function GET(request: NextRequest) {
 
     const decoded = jwt.verify(token, jwtSecret) as any;
     const userId = decoded.id;
-    console.log("DEBUG - User ID from token:", userId, "Type:", typeof userId);
 
     // Verify user is a hallowner
     const user = await prisma.mruser.findUnique({
       where: { id: userId },
     });
-    console.log("DEBUG - User found:", user?.email, "Role:", user?.role);
 
     if (!user || user.role !== "hallowner") {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
@@ -47,15 +45,6 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-
-    console.log("DEBUG - Found halls count:", halls.length);
-    console.log(
-      "DEBUG - First hall (if any):",
-      halls[0]?.id,
-      halls[0]?.name,
-      "owner_id:",
-      halls[0]?.owner_id
-    );
 
     return NextResponse.json({
       success: true,

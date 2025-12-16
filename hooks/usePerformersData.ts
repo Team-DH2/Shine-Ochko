@@ -84,8 +84,6 @@ export function useBookings(bookingIdFromUrl: string | null) {
           }
         );
 
-        console.log("Filtered bookings:", uniqueBookings);
-
         setBookings(uniqueBookings);
         setAllBookings(uniqueBookings);
 
@@ -97,7 +95,6 @@ export function useBookings(bookingIdFromUrl: string | null) {
 
           if (matchingBooking) {
             setSelectedBooking(matchingBooking);
-            console.log("✅ Auto-selected booking from URL:", matchingBooking);
 
             setTimeout(() => {
               if (bookingRefs.current[matchingBooking.id]) {

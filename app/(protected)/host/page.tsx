@@ -80,10 +80,6 @@ const Host = ({
 
           if (matchingBooking) {
             setSelectedBooking(matchingBooking);
-            console.log(
-              "✅ Auto-selected booking for host page:",
-              matchingBooking
-            );
           } else {
             setSelectedBooking(bookingsData[0]);
           }

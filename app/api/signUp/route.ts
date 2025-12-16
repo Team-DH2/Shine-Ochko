@@ -8,7 +8,6 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { name, phone, email, password, role } = body;
-    console.log(name, phone, email, password, role);
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -64,7 +63,6 @@ export async function POST(request: Request) {
     );
 
     const { password: _, ...userWithoutPassword } = user;
-    console.log(_);
 
     return NextResponse.json(
       { user: userWithoutPassword, token },
