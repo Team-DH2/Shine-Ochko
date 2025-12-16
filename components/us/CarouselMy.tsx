@@ -13,7 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"; // named exports
-import { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
 
 interface HallType {
