@@ -92,7 +92,7 @@ export function AuthForm({
       bg-neutral-900/80 backdrop-blur-xl
       animate-in fade-in zoom-in-90 duration-200"
     >
-      <div className="p-8 text-white">
+      <div className="p-8 text-white min-w-80">
         <h2 className="text-3xl font-bold mb-2 text-center">
           {isLoginView ? "Welcome Back" : "Create Account"}
         </h2>

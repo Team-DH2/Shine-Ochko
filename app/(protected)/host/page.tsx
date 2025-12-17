@@ -135,7 +135,7 @@ const Host = ({
       {/* Header */}
       <div className="pt-20 pb-10 sm:pt-24 sm:pb-12 text-center">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
-          Discover Your Ideal Host or MC
+          Хөтлөгч хайх
         </h1>
         <p className="mt-3 text-zinc-400 text-sm sm:text-base max-w-xl mx-auto">
           Манай мэргэжлийн хөтлөгчдөөс сонгон захиалаарай
@@ -225,7 +225,7 @@ const Host = ({
               step="1"
               value={maxRating}
               onChange={(e) => setMaxRating(e.target.value)}
-              className="h-10 w-16 rounded-lg border-zinc-800 bg-zinc-800/50 text-center text-white focus-visible:ring-1 focus-visible:ring-blue-500"
+              className="h-10 w-16 rounded-lg border-zinc-800 bg-zinc-800/50 text-center text-white focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500 "
             />
           </div>
 

@@ -245,7 +245,7 @@ export function BookingCalendar({
         : 0);
 
     // Check if this slot has a sale
-    const hasSale = salePrice !== undefined && salePrice > 0;
+    // const hasSale = salePrice !== undefined && salePrice > 0;
 
     const handleSelect = () => {
       if (!isAvailable || isPast) return;
