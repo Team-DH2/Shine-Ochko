@@ -112,7 +112,7 @@ export default function EventHallsPage({
 
   return (
     <aside className="w-full bg-neutral-900 text-gray-200 rounded-lg mt-10 p-6 shadow-lg">
-      <h2 className="text-2xl font-semibold mb-6">Filter Event Halls</h2>
+      <h2 className="text-2xl font-semibold mb-6">Танхим шүүх</h2>
 
       <div className="space-y-6">
         {/* DISTRICT */}

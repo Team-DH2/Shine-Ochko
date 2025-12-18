@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { ButtonOfNav } from "./ButtonOfNav";
 
 import {
-  Bell,
   Building,
   ChevronDown,
   Home,
@@ -28,8 +27,6 @@ import {
 import SearchFunction from "./Searchbar";
 
 import { useRouter } from "next/navigation";
-import { Input } from "../ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
