@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import BookingsList from "./BookingsList";
 import PerformerFilters from "./PerformerFilters";
