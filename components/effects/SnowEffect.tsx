@@ -46,7 +46,7 @@ export default function SnowEffect() {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-10000">
       {snowflakes.map((flake) => (
         <div
           key={flake.id}

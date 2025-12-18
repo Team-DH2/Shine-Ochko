@@ -134,7 +134,7 @@ export default function SelectedEventHall() {
     }
   };
 
-  const handleOpenEditDialog = (section: string, data: any) => {
+  const handleOpenEditDialog = (section: string, data: unknown) => {
     setEditingSection(section);
     setEditFormData(data);
     setEditDialogOpen(true);

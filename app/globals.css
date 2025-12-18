@@ -221,3 +221,9 @@ input:-webkit-autofill:active {
     }
   }
 }
+/* globals.css эсвэл component css */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none; /* spinner-г арилгах */
+  background-color: red; /* хүссэн өнгө */
+}

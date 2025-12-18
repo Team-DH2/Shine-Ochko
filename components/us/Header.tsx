@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   Music,
   Search,
+  Menu,
   Users,
   X,
 } from "lucide-react";
@@ -27,8 +28,6 @@ import {
 import SearchFunction from "./Searchbar";
 
 import { useRouter } from "next/navigation";
-
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export const Header = () => {
   const [isPhoneSearchOpen, setIsPhoneSearchOpen] = useState(false);
@@ -310,26 +309,36 @@ export const Header = () => {
                     </PopoverContent>
                   </Popover>
                 ) : (
-                  <>
-                    <button
-                      onClick={() => {
-                        setAuthView("login");
-                        setIsAuthModalOpen(true);
-                      }}
-                      className="bg-transparent rounded-md h-9 px-3 text-xs"
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="p-2 rounded-md bg-black hover:bg-neutral-900">
+                        <Menu className="w-5 h-5 text-white" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="end"
+                      className="w-44 bg-neutral-900 text-white border border-neutral-800 p-2 z-1000"
                     >
-                      Нэвтрэх
-                    </button>
-                    <button
-                      onClick={() => {
-                        setAuthView("signup");
-                        setIsAuthModalOpen(true);
-                      }}
-                      className="bg-blue-600 rounded-md px-3 h-9 text-xs"
-                    >
-                      Бүртгүүлэх
-                    </button>
-                  </>
+                      <button
+                        onClick={() => {
+                          setAuthView("login");
+                          setIsAuthModalOpen(true);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-md hover:bg-neutral-800 text-sm"
+                      >
+                        Нэвтрэх
+                      </button>
+                      <button
+                        onClick={() => {
+                          setAuthView("signup");
+                          setIsAuthModalOpen(true);
+                        }}
+                        className="w-full text-left px-3 py-2 mt-2 rounded-md bg-blue-600 hover:bg-blue-700 text-sm"
+                      >
+                        Бүртгүүлэх
+                      </button>
+                    </PopoverContent>
+                  </Popover>
                 )}
               </>
             )}
