@@ -11,6 +11,7 @@ import {
   Building2,
   Music,
   UserCircle,
+  Briefcase,
   X,
   Save,
   CheckCircle2,
@@ -40,7 +41,8 @@ type Tab =
   | "bookings"
   | "event-halls"
   | "performers"
-  | "hosts";
+  | "hosts"
+  | "agents";
 
 export default function AdminDataManagement() {
   const [activeTab, setActiveTab] = useState<Tab>("requests");
@@ -162,6 +164,7 @@ export default function AdminDataManagement() {
       "event-halls": "event-halls",
       performers: "performers",
       hosts: "hosts",
+      agents: "agents",
     };
 
     try {
@@ -263,6 +266,7 @@ export default function AdminDataManagement() {
     { id: "event-halls" as Tab, label: "Үйл явдлын танхим", icon: Building2 },
     { id: "performers" as Tab, label: "Уран бүтээлчид", icon: Music },
     { id: "hosts" as Tab, label: "Хөтлөгч", icon: UserCircle },
+    { id: "agents" as Tab, label: "Агент", icon: Briefcase },
   ];
 
   return (
@@ -339,6 +343,13 @@ export default function AdminDataManagement() {
             <HostsTable
               hosts={data.hosts || []}
               onDelete={(id) => handleDelete("hosts", id)}
+              onEdit={handleEdit}
+            />
+          )}
+          {activeTab === "agents" && (
+            <AgentsTable
+              agents={data.agents || []}
+              onDelete={(id) => handleDelete("agents", id)}
               onEdit={handleEdit}
             />
           )}
@@ -804,6 +815,63 @@ function HostsTable({
                   </button>
                   <button
                     onClick={() => onDelete(host.id)}
+                    className="p-2 hover:bg-neutral-800 rounded"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-400" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Agents Table Component
+function AgentsTable({
+  agents,
+  onDelete,
+  onEdit,
+}: {
+  agents: any[];
+  onDelete: (id: number) => void;
+  onEdit: (item: any) => void;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full">
+        <thead>
+          <tr className="border-b border-neutral-800">
+            <th className="text-left p-3">ID</th>
+            <th className="text-left p-3">Нэр</th>
+            <th className="text-left p-3">И-мэйл</th>
+            <th className="text-left p-3">Утас</th>
+            <th className="text-left p-3">Үнэлгээ</th>
+            <th className="text-left p-3">Үнэ</th>
+            <th className="text-right p-3">Үйлдэл</th>
+          </tr>
+        </thead>
+        <tbody>
+          {agents.map((agent) => (
+            <tr key={agent.id} className="border-b border-neutral-800/50">
+              <td className="p-3">{agent.id}</td>
+              <td className="p-3">{agent.name}</td>
+              <td className="p-3">{agent.email}</td>
+              <td className="p-3">{agent.phone}</td>
+              <td className="p-3">{agent.rating}</td>
+              <td className="p-3">₮{agent.price}</td>
+              <td className="p-3">
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={() => onEdit(agent)}
+                    className="p-2 hover:bg-neutral-800 rounded"
+                  >
+                    <Edit2 className="w-4 h-4 text-blue-400" />
+                  </button>
+                  <button
+                    onClick={() => onDelete(agent.id)}
                     className="p-2 hover:bg-neutral-800 rounded"
                   >
                     <Trash2 className="w-4 h-4 text-red-400" />

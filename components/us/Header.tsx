@@ -6,6 +6,7 @@ import { ButtonOfNav } from "./ButtonOfNav";
 
 import {
   Building,
+  Briefcase,
   ChevronDown,
   Home,
   LayoutDashboard,
@@ -90,6 +91,7 @@ export const Header = () => {
             <ButtonOfNav href="/event-halls" text="Танхим" />
             <ButtonOfNav href="/performers" text="Дуучин" />
             <ButtonOfNav href="/host" text="Хөтлөгч" />
+            <ButtonOfNav href="/agents" text="Агент" />
             {isLoggedIn && user?.role === "admin" ? (
               <ButtonOfNav href="/adminpanel" text="Админ панель" />
             ) : isLoggedIn && user?.role === "hallowner" ? (
@@ -105,6 +107,7 @@ export const Header = () => {
           <ButtonOfNav href="/event-halls" text="Танхим" />
           <ButtonOfNav href="/performers" text="Дуучин" />
           <ButtonOfNav href="/host" text="Хөтлөгч" />
+          <ButtonOfNav href="/agents" text="Агент" />
           {isLoggedIn && user?.role === "admin" ? (
             <ButtonOfNav href="/adminpanel" text="Админ панель" />
           ) : isLoggedIn && user?.role === "hallowner" ? (
@@ -367,6 +370,11 @@ export const Header = () => {
           href="/host"
           label="Хөтлөгч"
           icon={<Users className="w-5 h-5" />}
+        />
+        <BottomNavButton
+          href="/agents"
+          label="Агент"
+          icon={<Briefcase className="w-5 h-5" />}
         />
         {isLoggedIn && user?.role === "admin" ? (
           <BottomNavButton

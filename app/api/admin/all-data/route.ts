@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 // Get all data for admin dashboard
 export async function GET() {
   try {
-    const [eventHalls, performers, hosts, users, bookings] = await Promise.all([
+    const [eventHalls, performers, hosts, agents, users, bookings] = await Promise.all([
       prisma.event_halls.findMany({
         orderBy: { created_at: "desc" },
       }),
@@ -12,6 +12,9 @@ export async function GET() {
         orderBy: { created_at: "desc" },
       }),
       prisma.hosts.findMany({
+        orderBy: { id: "desc" },
+      }),
+      prisma.agents.findMany({
         orderBy: { id: "desc" },
       }),
       prisma.mruser.findMany({
@@ -50,6 +53,11 @@ export async function GET() {
               name: true,
             },
           },
+          agents: {
+            select: {
+              name: true,
+            },
+          },
         },
       }),
     ]);
@@ -60,6 +68,7 @@ export async function GET() {
         eventHalls,
         performers,
         hosts,
+        agents,
         users,
         bookings,
       },
