@@ -13,6 +13,7 @@ model booking {
   hallid                       Int?
   performersid                 Int?
   hostid                       Int?
+  agentid                      Int?
   ordereddate                  DateTime?     @db.Date
   date                         DateTime      @db.Timestamp(6)
   starttime                    String?
@@ -22,6 +23,7 @@ model booking {
   event_halls                  event_halls?  @relation(fields: [hallid], references: [id], onDelete: NoAction, onUpdate: NoAction)
   hosts                        hosts?        @relation("booking_hostid", fields: [hostid], references: [id], onDelete: NoAction, onUpdate: NoAction)
   performers                   performers?   @relation(fields: [performersid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agents                       agents?       @relation(fields: [agentid], references: [id], onDelete: NoAction, onUpdate: NoAction)
   User                         mruser        @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
   hosts_hosts_bookingTobooking hosts[]       @relation("hosts_bookingTobooking")
 }
@@ -139,6 +141,24 @@ model Form {
   booking         String?
   capacity        Int?
   phonenumber     String?
+}
+
+model agents {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(255)
+  email      String?   @db.VarChar(255)
+  phone      String?   @db.VarChar(50)
+  title      String?
+  image      String?
+  tags       String[]
+  rating     Float?    @db.Real
+  status     String?
+  price      Int?      @default(0)
+  intro      String?
+  experience String?
+  specialty  String?   @db.VarChar(255)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  booking    booking[]
 }
 
 enum bookingstatus {
