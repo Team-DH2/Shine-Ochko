@@ -19,8 +19,8 @@ import { use, useEffect, useState } from "react";
 type AgentDB = {
   id: number;
   name: string;
-  contact_email: string | null;
-  contact_phone: string | null;
+  email: string | null;
+  phone: string | null;
   title: string;
   image: string;
   tags: string[];
